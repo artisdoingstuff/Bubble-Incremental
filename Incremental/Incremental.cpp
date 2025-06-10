@@ -11,14 +11,56 @@
 
 #include <SFML/System/Clock.hpp>
 
-#include <iostream>
-#include <iomanip>
-#include <sstream>
 #include <chrono>
-#include <thread>
 #include <cmath>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <thread>
 
 using namespace std;
+
+void saveGame(int currency, float baseCurrencyPerClick, float currencyPerSecond)
+{
+    ofstream saveFile("save_file.txt");
+    
+    if (saveFile.is_open())
+    {
+        saveFile << currency << endl;
+        saveFile << baseCurrencyPerClick << endl;
+        saveFile << currencyPerSecond << endl;
+
+        saveFile.close();
+		cout << "Game saved successfully." << endl;
+    }
+    else
+    {
+        cerr << "Unable to open save file.";
+    }
+}
+
+void loadGame(int &currency, float &baseCurrencyPerClick, float &currencyPerSecond)
+{
+    ifstream saveFile("save_file.txt");
+    
+    if (saveFile.is_open())
+    {
+        saveFile >> currency;
+        saveFile >> baseCurrencyPerClick;
+        saveFile >> currencyPerSecond;
+
+        saveFile.close();
+        cout << "Game loaded successfully." << endl;
+    }
+    else
+    {
+        cerr << "Unable to open save file. Starting a new game.";
+        currency = 0;
+        baseCurrencyPerClick = 1.0f;
+        currencyPerSecond = 0.0f;
+    }
+}
 
 int main()
 {
@@ -30,13 +72,14 @@ int main()
     bool is_button_pressed = false;
 
     int currency = 0;
-	float displayCurrency = 0.0f;
-	float baseCurrencyPerClick = 1.0f;
-    float currencyPerSecond = 1000.0f;
+    float displayCurrency = 0.0f;
+    float baseCurrencyPerClick = 1.0f;
+    float currencyPerSecond = 0.0f;
 
-	stringstream currencyPerSecondStream;
+    loadGame(currency, baseCurrencyPerClick, currencyPerSecond);
+    displayCurrency = currency;
 
-	currencyPerSecondStream << fixed << setprecision(2) << currencyPerSecond;
+    const float shop_inflation_multiplier = 1.3f;
 
 	sf::Clock secondClock;
 	sf::Clock deltaClock;
@@ -64,11 +107,15 @@ int main()
         while (const optional event = window.pollEvent())
         {
             if (event->is<sf::Event::Closed>())
+            {
+                saveGame(currency, baseCurrencyPerClick, currencyPerSecond);
                 window.close();
+
+            }
         }
 
         float deltaTime = deltaClock.restart().asSeconds();
-        float smoothingFactor = 3.0f;
+        float smoothingFactor = 5.0f;
 
         bool is_currently_pressed = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
 
@@ -76,7 +123,10 @@ int main()
         sf::Vector2f mousePositionF(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
 
         stringstream displayCurrencyStream;
+        stringstream currencyPerSecondStream;
+
         displayCurrencyStream << fixed << setprecision(0) << displayCurrency;
+        currencyPerSecondStream << fixed << setprecision(2) << currencyPerSecond;
 
         if (secondClock.getElapsedTime().asSeconds() >= 1.0f)
         {
