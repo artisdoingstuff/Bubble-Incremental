@@ -1,5 +1,9 @@
 ﻿#include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Text.hpp>
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Rect.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
 
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Mouse.hpp>
@@ -18,7 +22,7 @@ int main()
     sf::RenderWindow window(sf::VideoMode({ 1600, 900 }), "Idle Game Attempt");
     const sf::Font font("arial.ttf");
     
-    bool button_pressed = false;
+    bool is_button_pressed = false;
 
     int currency = 0;
 	float currencyPerSecond = 1.0f;
@@ -31,6 +35,14 @@ int main()
 
 	currencyText.setFillColor(sf::Color::Black);
 
+    sf::FloatRect clickArea({ 300, 250 }, { 200, 200 });
+
+    sf::RectangleShape clickAreaShape;
+    clickAreaShape.setSize(sf::Vector2f(200, 200));
+    clickAreaShape.setOutlineColor(sf::Color::Red);
+	clickAreaShape.setOutlineThickness(5);
+    clickAreaShape.setPosition(sf::Vector2f({ 300, 250 }));
+
     while (window.isOpen())
     {
         while (const std::optional event = window.pollEvent())
@@ -38,28 +50,24 @@ int main()
             if (event->is<sf::Event::Closed>())
                 window.close();
 
-            if (sf::Mouse::isButtonPressed)
+            sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+            sf::Vector2f mousePositionF(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
+
+			bool is_currently_pressed = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
+
+            if (is_currently_pressed && !is_button_pressed && clickArea.contains(mousePositionF))
             {
-                if (!button_pressed && sf::Mouse::isButtonPressed (sf::Mouse::Button::Left)) {
-                    button_pressed = true;
+                currency += 1;
+            }
 
-					this_thread::sleep_for(chrono::milliseconds(100));
-
-                    currency += 1;
-                }
-
-                else {
-					button_pressed = false;
-			    }
-
-				cout << "Mouse clicked at: " << sf::Mouse::getPosition(window).x << ", " << sf::Mouse::getPosition(window).y << endl;
-			}
+            is_button_pressed = is_currently_pressed;
         }
 
         currencyText.setString("Currency: " + to_string(currency));
 
         window.clear(sf::Color::White);
 		window.draw(currencyText);
+        window.draw(clickAreaShape);
         window.display();
     }
 }
