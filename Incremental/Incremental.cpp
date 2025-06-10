@@ -23,18 +23,23 @@ using namespace std;
 int main()
 {
     sf::RenderWindow window(sf::VideoMode({ 1600, 900 }), "Idle Game Attempt");
+	window.setFramerateLimit(60);
+
     const sf::Font font("arial.ttf");
     
     bool is_button_pressed = false;
 
     int currency = 0;
-    float currencyPerSecond = 1.0f;
+	float displayCurrency = 0.0f;
+	float baseCurrencyPerClick = 1.0f;
+    float currencyPerSecond = 1000.0f;
 
 	stringstream currencyPerSecondStream;
 
 	currencyPerSecondStream << fixed << setprecision(2) << currencyPerSecond;
 
-	sf::Clock clock;
+	sf::Clock secondClock;
+	sf::Clock deltaClock;
 
 	sf::Text currencyText(font);
     currencyText.setPosition({ 300, 50 });
@@ -60,21 +65,36 @@ int main()
         {
             if (event->is<sf::Event::Closed>())
                 window.close();
-
-            sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
-            sf::Vector2f mousePositionF(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
-
-			bool is_currently_pressed = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
-
-            if (is_currently_pressed && !is_button_pressed && clickArea.contains(mousePositionF))
-            {
-                currency += 1;
-            }
-
-            is_button_pressed = is_currently_pressed;
         }
 
-        currencyText.setString(to_string(currency) + " Bubbles Formed");
+        float deltaTime = deltaClock.restart().asSeconds();
+        float smoothingFactor = 3.0f;
+
+        bool is_currently_pressed = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
+
+        sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+        sf::Vector2f mousePositionF(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
+
+        stringstream displayCurrencyStream;
+        displayCurrencyStream << fixed << setprecision(0) << displayCurrency;
+
+        if (secondClock.getElapsedTime().asSeconds() >= 1.0f)
+        {
+            currency += currencyPerSecond;
+            secondClock.restart();
+        }
+
+        displayCurrency += (currency - displayCurrency) * smoothingFactor * deltaTime;
+
+        if (is_currently_pressed && !is_button_pressed && clickArea.contains(mousePositionF))
+        {
+            currency += 1;
+            cout << "Click registered!" << endl;
+        }
+
+        is_button_pressed = is_currently_pressed;
+
+        currencyText.setString(displayCurrencyStream.str() + " Bubbles Formed");
 		currencyPerSecondText.setString(currencyPerSecondStream.str() + " Bubbles Per Second");
 
         window.clear(sf::Color::White);
