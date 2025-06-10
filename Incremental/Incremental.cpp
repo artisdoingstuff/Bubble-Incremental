@@ -12,8 +12,11 @@
 #include <SFML/System/Clock.hpp>
 
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 #include <chrono>
 #include <thread>
+#include <cmath>
 
 using namespace std;
 
@@ -25,27 +28,35 @@ int main()
     bool is_button_pressed = false;
 
     int currency = 0;
-	float currencyPerSecond = 1.0f;
+    float currencyPerSecond = 1.0f;
+
+	stringstream currencyPerSecondStream;
+
+	currencyPerSecondStream << fixed << setprecision(2) << currencyPerSecond;
 
 	sf::Clock clock;
 
 	sf::Text currencyText(font);
-    currencyText.setPosition({ 800, 50 });
+    currencyText.setPosition({ 300, 50 });
     currencyText.setCharacterSize(24);
-
 	currencyText.setFillColor(sf::Color::Black);
 
-    sf::FloatRect clickArea({ 300, 250 }, { 200, 200 });
+    sf::Text currencyPerSecondText(font);
+    currencyPerSecondText.setPosition({ 320, 80 });
+    currencyPerSecondText.setCharacterSize(14);
+    currencyPerSecondText.setFillColor(sf::Color::Black);
+
+    sf::FloatRect clickArea({ 300, 125 }, { 200, 150 });
 
     sf::RectangleShape clickAreaShape;
-    clickAreaShape.setSize(sf::Vector2f(200, 200));
+    clickAreaShape.setSize(sf::Vector2f(200, 150));
     clickAreaShape.setOutlineColor(sf::Color::Red);
-	clickAreaShape.setOutlineThickness(5);
-    clickAreaShape.setPosition(sf::Vector2f({ 300, 250 }));
+    clickAreaShape.setOutlineThickness(5);
+    clickAreaShape.setPosition(sf::Vector2f({ 300, 125 }));
 
     while (window.isOpen())
     {
-        while (const std::optional event = window.pollEvent())
+        while (const optional event = window.pollEvent())
         {
             if (event->is<sf::Event::Closed>())
                 window.close();
@@ -63,10 +74,12 @@ int main()
             is_button_pressed = is_currently_pressed;
         }
 
-        currencyText.setString("Currency: " + to_string(currency));
+        currencyText.setString(to_string(currency) + " Bubbles Formed");
+		currencyPerSecondText.setString(currencyPerSecondStream.str() + " Bubbles Per Second");
 
         window.clear(sf::Color::White);
 		window.draw(currencyText);
+		window.draw(currencyPerSecondText);
         window.draw(clickAreaShape);
         window.display();
     }
