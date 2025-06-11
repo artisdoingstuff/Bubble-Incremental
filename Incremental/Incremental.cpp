@@ -72,14 +72,16 @@ void currentObjectCost(float &currentCost, float baseCost, int objectCount, floa
 void upgradeHandler(float &currency, float &currencyPerSecond, float &currentCost, float baseCost, int &objectCount, float addedCurrencyPerSecond, float shopInflationMultiplier)
 {
     currentObjectCost(currentCost, baseCost, objectCount, shopInflationMultiplier);
+
+    currency -= currentCost;
     
     if (currency < 0)
     {
+		currency += currentCost;
         cout << "Not enough currency to purchase upgrade!" << endl;   
     }
     else
     {
-        currency -= currentCost;
         objectCount++;
         currencyPerSecond += addedCurrencyPerSecond;
         cout << "Upgrade purchased (" + to_string(currentCost) + ")! Current count: " << objectCount << endl;
@@ -97,6 +99,7 @@ int main()
 
 	// Currency variables here
     float currency = 0.0f;
+	float allTimeCurrency = 0.0f;
     float displayCurrency = 0.0f;
     float baseCurrencyPerClick = 1.0f;
     float currencyPerSecond = 0.0f;
@@ -111,6 +114,19 @@ int main()
     float baseSoapPerSecond = 0.1f;
     float soapCost = 10.0f;
 	float soapBaseCost = 10.0f;
+	float soapUnlockThreshold = 10.0f;
+
+    int handWashCount = 0;
+	float baseHandWashPerSecond = 0.5f;
+	float handWashCost = 100.0f;
+	float handWashBaseCost = 100.0f;
+	float handWashUnlockThreshold = 100.0f;
+
+	int shampooCount = 0;
+	float baseShampooPerSecond = 1.0f;
+	float shampooCost = 500.0f;
+	float shampooBaseCost = 500.0f;
+	float shampooUnlockThreshold = 550.0f;
 
 	// Initialize clocks for timing
 	sf::Clock secondClock;
@@ -129,7 +145,7 @@ int main()
 
 	// Objects for clicking areas
     sf::FloatRect clickArea({ 300, 125 }, { 200, 150 });
-	sf::FloatRect upgradeArea1({ 600, 125 }, { 200, 150 });
+	sf::FloatRect upgradeArea1({ 1200, 125 }, { 200, 150 });
 
     sf::RectangleShape clickAreaShape;
     clickAreaShape.setSize(sf::Vector2f(200, 150));
@@ -141,7 +157,7 @@ int main()
 	upgradeArea1Shape.setSize(sf::Vector2f(200, 150));
 	upgradeArea1Shape.setOutlineColor(sf::Color::Green);
 	upgradeArea1Shape.setOutlineThickness(5);
-	upgradeArea1Shape.setPosition(sf::Vector2f({ 600, 125 }));
+	upgradeArea1Shape.setPosition(sf::Vector2f({ 1200, 125 }));
 
     while (window.isOpen())
     {
@@ -155,13 +171,15 @@ int main()
             }
         }
 
-        float deltaTime = deltaClock.restart().asSeconds();
-        float smoothingFactor = 5.0f;
-
         bool is_currently_pressed = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
 
+		// Get the mouse position relative to the window
         sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
         sf::Vector2f mousePositionF(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
+
+		// Display currency and currency per second, along with other time logic
+        float deltaTime = deltaClock.restart().asSeconds();
+        float smoothingFactor = 5.0f;
 
         stringstream displayCurrencyStream;
         stringstream currencyPerSecondStream;
@@ -169,9 +187,11 @@ int main()
         displayCurrencyStream << fixed << setprecision(0) << displayCurrency;
         currencyPerSecondStream << fixed << setprecision(2) << currencyPerSecond;
 
+		// Update currency based on time elapsed
         if (secondClock.getElapsedTime().asSeconds() >= 1.0f)
         {
             currency += currencyPerSecond;
+			allTimeCurrency += currencyPerSecond;
             secondClock.restart();
         }
 
@@ -186,7 +206,8 @@ int main()
         // Clicking logic
         if (is_currently_pressed && !is_button_pressed && clickArea.contains(mousePositionF))
         {
-            currency += 1;
+            currency += baseCurrencyPerClick + baseCurrencyPerClick * (currencyPerSecond * 0.25);
+			allTimeCurrency += baseCurrencyPerClick + baseCurrencyPerClick * (currencyPerSecond * 0.25);
             cout << "Click registered!" << endl;
         }
 
