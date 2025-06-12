@@ -1,4 +1,8 @@
-﻿#include "Incremental.h"
+﻿#include "BubblesFormat.h"
+#include "ClickingBubbles.h"
+#include "GameFileState.h"
+#include "OfflineBubbles.h"
+#include "Upgrades.h"
 
 int main()
 {
@@ -18,6 +22,16 @@ int main()
     long double baseBubblesPerClick = 1.0L;
     long double allTimeBubblesPerClick = 0.0L;
     long double bubblesPerSecond = 0.0L;
+
+    // Buffs variables here
+    bool isBubbleBuffActive = false;
+    bool showBubbleBuffHitbox = false;
+
+    float bubbleBuffDuration = 10.0f;
+    float bubbleBuffMultiplier = 2.0f;
+    float bubbleBuffSpawnInterval = 180.0f;
+
+    srand(static_cast<unsigned>(time(0)));
 
 	// Shop/Upgrade variables here
     const long double shopInflationMultiplier = 1.15f;
@@ -50,6 +64,9 @@ int main()
 	sf::Clock secondClock;
 	sf::Clock deltaClock;
 
+    sf::Clock bubbleBuffClock;
+    sf::Clock bubbleBuffSpawnIntervalClock;
+
 	// Initialize text objects for displaying bubbles and bubbles per second
 	sf::Text bubblesText(font);
     bubblesText.setPosition({ 300, 50 });
@@ -61,7 +78,13 @@ int main()
     bubblesPerSecondText.setCharacterSize(14);
     bubblesPerSecondText.setFillColor(sf::Color::Black);
 
-	// Objects for clicking areas
+    // Objects for buffs
+    sf::RectangleShape bubbleBuffHitbox;
+    bubbleBuffHitbox.setSize(sf::Vector2f(50, 50));
+    bubbleBuffHitbox.setFillColor(sf::Color::Blue);
+    bubbleBuffHitbox.setPosition({ -100, -100 });
+
+	// Objects for clicking/upgrading areas
     sf::FloatRect clickArea({ 300, 350 }, { 200, 150 });
 
     sf::FloatRect upgradeArea1({ 1200, 120 }, { 200, 50 });
@@ -111,6 +134,14 @@ int main()
         sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
         sf::Vector2f mousePositionF(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
 
+        // Bubbles per second buff not showing on display fix
+        long double realBubblesPerSecond = bubblesPerSecond;
+
+        if (isBubbleBuffActive)
+        {
+            realBubblesPerSecond *= bubbleBuffMultiplier;
+        }
+
 		// Display bubbles and bubbles per second, along with other time logic
         float deltaTime = deltaClock.restart().asSeconds();
         float smoothingFactor = 0.5f;
@@ -118,26 +149,53 @@ int main()
         stringstream displayBubblesStream;
         stringstream bubblesPerSecondStream;
 
-        if (bubblesPerSecond < 10.0f)
+        if (realBubblesPerSecond < 10.0f)
         {
-            bubblesPerSecondStream << fixed << setprecision(2) << bubblesPerSecond;
+            bubblesPerSecondStream << fixed << setprecision(2) << realBubblesPerSecond;
         }
 
-        else if (bubblesPerSecond < 100.0f)
+        else if (realBubblesPerSecond < 100.0f)
         {
-            bubblesPerSecondStream << fixed << setprecision(1) << bubblesPerSecond;
+            bubblesPerSecondStream << fixed << setprecision(1) << realBubblesPerSecond;
 		}
 
         else
         {
-            bubblesPerSecondStream << fixed << setprecision(0) << bubblesPerSecond;
+            bubblesPerSecondStream << fixed << setprecision(0) << realBubblesPerSecond;
 		}
+
+        // Buff logic here
+        if (!showBubbleBuffHitbox && bubbleBuffSpawnIntervalClock.getElapsedTime().asSeconds() > bubbleBuffSpawnInterval)
+        {
+            float x = static_cast<float>(rand() % window.getSize().x);
+            float y = static_cast<float>(rand() % window.getSize().y);
+
+            bubbleBuffHitbox.setPosition({ x, y });
+
+            showBubbleBuffHitbox = true;
+            bubbleBuffSpawnIntervalClock.restart();
+            bubbleBuffSpawnInterval = static_cast<float>(rand() % 120 + 180);
+        }
+
+        if (is_currently_pressed && !is_button_pressed && bubbleBuffHitbox.getGlobalBounds().contains(mousePositionF))
+        {
+            isBubbleBuffActive = true;
+            bubbleBuffClock.restart();
+            showBubbleBuffHitbox = false;
+
+            bubbleBuffHitbox.setPosition({ -100, -100 });
+        }
+
+        if (isBubbleBuffActive && bubbleBuffClock.getElapsedTime().asSeconds() > bubbleBuffDuration)
+        {
+            isBubbleBuffActive = false;
+        }
 
 		// Update bubbles based on time elapsed
         if (secondClock.getElapsedTime().asSeconds() >= 1.0f)
         {
-            bubbles += bubblesPerSecond;
-			allTimeBubbles += bubblesPerSecond;
+            bubbles += realBubblesPerSecond;
+			allTimeBubbles += realBubblesPerSecond;
             secondClock.restart();
         }
 
@@ -183,6 +241,11 @@ int main()
         window.draw(upgradeArea1Shape);
         window.draw(upgradeArea2Shape);
         window.draw(upgradeArea3Shape);
+
+        if (showBubbleBuffHitbox)
+        {
+            window.draw(bubbleBuffHitbox);
+        }
 
         window.display();
     }
