@@ -1,4 +1,5 @@
 ﻿#include "BubblesFormat.h"
+#include "Buffs.h"
 #include "ClickingBubbles.h"
 #include "GameFileState.h"
 #include "OfflineBubbles.h"
@@ -7,29 +8,49 @@
 int main()
 {
     sf::RenderWindow window(sf::VideoMode({ 1600, 900 }), "Bubble Incremental");
-	window.setFramerateLimit(120);
+	window.setFramerateLimit(60);
 
     const sf::Font font("Fonts/arial.ttf");
     
-    bool is_button_pressed = false;
+    bool isButtonPressed = false;
 
-    time_t timestamp_saved = 0;
+    time_t savedTimestamp = 0;
+
+    // All sound buffers here
+    sf::SoundBuffer rubberDuckQuackBuffer;
+    rubberDuckQuackBuffer.loadFromFile("Audio/rubberDuckQuack.wav");
+
+    sf::Sound rubberDuckQuack(rubberDuckQuackBuffer);
 
 	// Bubbles variables here
     long double bubbles = 0.0L;
     long double displayBubbles = 0.0L;
     long double allTimeBubbles = 0.0L;
+
     long double baseBubblesPerClick = 1.0L;
+    long double baseClickMultiplier = 1.0L;
     long double allTimeBubblesPerClick = 0.0L;
+
     long double bubblesPerSecond = 0.0L;
 
     // Buffs variables here
     bool isBubbleBuffActive = false;
     bool showBubbleBuffHitbox = false;
-
-    float bubbleBuffDuration = 10.0f;
+    float bubbleBuffDuration = 20.0f;
     float bubbleBuffMultiplier = 2.0f;
-    float bubbleBuffSpawnInterval = 180.0f;
+    float bubbleBuffSpawnInterval = 1.0f;
+
+    bool isGoldenBubbleBuffActive = false;
+    bool showGoldenBubbleBuffHitbox = false;
+    float goldenBubbleBuffDuration = 10.0f;
+    float goldenBubbleBuffMultiplier = 5.0f;
+    float goldenBubbleBuffSpawnInterval = 6.0f;
+
+    bool isRubberDuckBuffActive = false;
+    bool showRubberDuckBufHitbox = false;
+    float rubberDuckBuffDuration = 20.0f;
+    float rubberDuckBuffMultiplier = 3.5f;
+    float rubberDuckBuffSpawnInterval = 3.0f;
 
     srand(static_cast<unsigned>(time(0)));
 
@@ -55,10 +76,10 @@ int main()
 	long double shampooUnlockThreshold = 550.0f;
 
     // Loading game file (if it exists)
-    loadFile(timestamp_saved, bubbles, allTimeBubbles, baseBubblesPerClick, bubblesPerSecond, soapCount, handWashCount, shampooCount);
+    loadFile(savedTimestamp, bubbles, allTimeBubbles, baseBubblesPerClick, bubblesPerSecond, soapCount, handWashCount, shampooCount);
     displayBubbles = bubbles;
 
-    offlineBubbles(timestamp_saved, bubbles, allTimeBubbles, bubblesPerSecond);
+    offlineBubbles(savedTimestamp, bubbles, allTimeBubbles, bubblesPerSecond);
 
 	// Initialize clocks for timing
 	sf::Clock secondClock;
@@ -66,6 +87,15 @@ int main()
 
     sf::Clock bubbleBuffClock;
     sf::Clock bubbleBuffSpawnIntervalClock;
+    sf::Clock bubbleBuffLifetimeClock;
+
+	sf::Clock goldenBubbleBuffClock;
+	sf::Clock goldenBubbleBuffSpawnIntervalClock;
+    sf::Clock goldenBubbleBuffLifetimeClock;
+
+    sf::Clock rubberDuckBuffClock;
+	sf::Clock rubberDuckBuffSpawnIntervalClock;
+    sf::Clock rubberDuckBuffLifetimeClock;
 
 	// Initialize text objects for displaying bubbles and bubbles per second
 	sf::Text bubblesText(font);
@@ -80,9 +110,19 @@ int main()
 
     // Objects for buffs
     sf::RectangleShape bubbleBuffHitbox;
-    bubbleBuffHitbox.setSize(sf::Vector2f(50, 50));
+    bubbleBuffHitbox.setSize(sf::Vector2f(100, 100));
     bubbleBuffHitbox.setFillColor(sf::Color::Blue);
     bubbleBuffHitbox.setPosition({ -100, -100 });
+
+	sf::RectangleShape goldenBubbleBuffHitbox;
+    goldenBubbleBuffHitbox.setSize(sf::Vector2f(100, 100));
+    goldenBubbleBuffHitbox.setFillColor(sf::Color::Yellow);
+	goldenBubbleBuffHitbox.setPosition({ -100, -100 });
+
+    sf::RectangleShape rubberDuckBuffHitbox;
+    rubberDuckBuffHitbox.setSize(sf::Vector2f(100, 100));
+    rubberDuckBuffHitbox.setFillColor(sf::Color::Red);
+	rubberDuckBuffHitbox.setPosition({ -100, -100 });
 
 	// Objects for clicking/upgrading areas
     sf::FloatRect clickArea({ 300, 350 }, { 200, 150 });
@@ -121,14 +161,14 @@ int main()
         {
             if (event->is<sf::Event::Closed>())
             {
-                time_t timestamp_current = time(nullptr);
-                saveFile(timestamp_current, bubbles, allTimeBubbles, baseBubblesPerClick, bubblesPerSecond, soapCount, handWashCount, shampooCount);
+                time_t currentTimestamp = time(nullptr);
+                saveFile(currentTimestamp, bubbles, allTimeBubbles, baseBubblesPerClick, bubblesPerSecond, soapCount, handWashCount, shampooCount);
                 window.close();
             }
         }
 
         // Clicking stuff
-        bool is_currently_pressed = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
+        bool isCurrentlyPressed = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
 
 		// Get the mouse position relative to the window
         sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
@@ -138,9 +178,25 @@ int main()
         long double realBubblesPerSecond = bubblesPerSecond;
 
         if (isBubbleBuffActive)
-        {
             realBubblesPerSecond *= bubbleBuffMultiplier;
-        }
+
+        if (isGoldenBubbleBuffActive)
+            realBubblesPerSecond *= goldenBubbleBuffMultiplier;
+
+        if (isRubberDuckBuffActive)
+            realBubblesPerSecond *= rubberDuckBuffMultiplier;
+
+        // Clicking buffs
+        long double clickMultiplier = baseClickMultiplier;
+
+        if (isBubbleBuffActive)
+            clickMultiplier *= bubbleBuffMultiplier;
+
+        if (isGoldenBubbleBuffActive)
+            clickMultiplier *= goldenBubbleBuffMultiplier;
+
+        if (isRubberDuckBuffActive)
+            clickMultiplier *= rubberDuckBuffMultiplier;
 
 		// Display bubbles and bubbles per second, along with other time logic
         float deltaTime = deltaClock.restart().asSeconds();
@@ -165,68 +221,114 @@ int main()
 		}
 
         // Buff logic here
-        if (!showBubbleBuffHitbox && bubbleBuffSpawnIntervalClock.getElapsedTime().asSeconds() > bubbleBuffSpawnInterval)
+        bool bubbleBuffClicked = buffHandler(
+            mousePositionF,
+            window,
+
+            bubbleBuffHitbox,
+
+            bubbleBuffClock,
+            bubbleBuffSpawnIntervalClock,
+            bubbleBuffLifetimeClock,
+
+            isBubbleBuffActive,
+            showBubbleBuffHitbox,
+
+            bubbleBuffSpawnInterval,
+            bubbleBuffDuration,
+            180.0f, 300.0f,
+
+            isCurrentlyPressed,
+            isButtonPressed
+        );
+
+        bool goldenBubbleBuffClicked = buffHandler(
+            mousePositionF,
+            window,
+
+            goldenBubbleBuffHitbox,
+
+            goldenBubbleBuffClock,
+            goldenBubbleBuffSpawnIntervalClock,
+            goldenBubbleBuffLifetimeClock,
+
+            isGoldenBubbleBuffActive,
+            showGoldenBubbleBuffHitbox,
+
+            goldenBubbleBuffSpawnInterval,
+            goldenBubbleBuffDuration,
+            600.0f, 900.0f,
+
+            isCurrentlyPressed,
+            isButtonPressed
+		);
+
+        bool rubberDuckBuffClicked = buffHandler(
+            mousePositionF,
+            window,
+
+            rubberDuckBuffHitbox,
+
+            rubberDuckBuffClock,
+            rubberDuckBuffSpawnIntervalClock,
+            rubberDuckBuffLifetimeClock,
+
+            isRubberDuckBuffActive,
+            showRubberDuckBufHitbox,
+
+            rubberDuckBuffSpawnInterval,
+            rubberDuckBuffDuration,
+            300.0f, 450.0f,
+
+            isCurrentlyPressed,
+            isButtonPressed
+		);
+
+        if (rubberDuckBuffClicked)
         {
-            float x = static_cast<float>(rand() % window.getSize().x);
-            float y = static_cast<float>(rand() % window.getSize().y);
-
-            bubbleBuffHitbox.setPosition({ x, y });
-
-            showBubbleBuffHitbox = true;
-            bubbleBuffSpawnIntervalClock.restart();
-            bubbleBuffSpawnInterval = static_cast<float>(rand() % 120 + 180);
+            rubberDuckQuack.play();
         }
 
-        if (is_currently_pressed && !is_button_pressed && bubbleBuffHitbox.getGlobalBounds().contains(mousePositionF))
-        {
-            isBubbleBuffActive = true;
-            bubbleBuffClock.restart();
-            showBubbleBuffHitbox = false;
-
-            bubbleBuffHitbox.setPosition({ -100, -100 });
-        }
-
-        if (isBubbleBuffActive && bubbleBuffClock.getElapsedTime().asSeconds() > bubbleBuffDuration)
-        {
-            isBubbleBuffActive = false;
-        }
-
-		// Update bubbles based on time elapsed
+        // Update bubbles based on time elapsed
         if (secondClock.getElapsedTime().asSeconds() >= 1.0f)
         {
             bubbles += realBubblesPerSecond;
-			allTimeBubbles += realBubblesPerSecond;
+            allTimeBubbles += realBubblesPerSecond;
             secondClock.restart();
         }
 
         displayBubbles += (bubbles - displayBubbles) * smoothingFactor * deltaTime;
 
         // Shop/Upgrade logic here
-        if (is_currently_pressed && !is_button_pressed && upgradeArea1.contains(mousePositionF) && allTimeBubbles >= soapUnlockThreshold)
+        if (isCurrentlyPressed && !isButtonPressed && upgradeArea1.contains(mousePositionF) && allTimeBubbles >= soapUnlockThreshold)
         {
             upgradeHandler(bubbles, bubblesPerSecond, soapCost, soapBaseCost, soapCount, baseSoapPerSecond, shopInflationMultiplier);
         }
 
-        if (is_currently_pressed && !is_button_pressed && upgradeArea2.contains(mousePositionF) && allTimeBubbles >= handWashUnlockThreshold)
+        if (isCurrentlyPressed && !isButtonPressed && upgradeArea2.contains(mousePositionF) && allTimeBubbles >= handWashUnlockThreshold)
         {
             upgradeHandler(bubbles, bubblesPerSecond, handWashCost, handWashBaseCost, handWashCount, baseHandWashPerSecond, shopInflationMultiplier);
         }
 
-        if (is_currently_pressed && !is_button_pressed && upgradeArea3.contains(mousePositionF) && allTimeBubbles >= shampooUnlockThreshold)
+        if (isCurrentlyPressed && !isButtonPressed && upgradeArea3.contains(mousePositionF) && allTimeBubbles >= shampooUnlockThreshold)
         {
             upgradeHandler(bubbles, bubblesPerSecond, shampooCost, shampooBaseCost, shampooCount, baseShampooPerSecond, shopInflationMultiplier);
         }
 
         // Clicking logic
-        if (is_currently_pressed && !is_button_pressed && clickArea.contains(mousePositionF))
+        if (isCurrentlyPressed && !isButtonPressed && clickArea.contains(mousePositionF))
         {
-			long double clickValue = clickHandler(bubbles, baseBubblesPerClick, bubblesPerSecond);
-
-			allTimeBubbles += baseBubblesPerClick + baseBubblesPerClick * (bubblesPerSecond * 0.05);
-			allTimeBubblesPerClick += baseBubblesPerClick + baseBubblesPerClick * (bubblesPerSecond * 0.05);
+            clickHandler(
+                bubbles,
+                allTimeBubbles,
+                allTimeBubblesPerClick,
+                baseBubblesPerClick, 
+                bubblesPerSecond,
+                clickMultiplier
+            );
         }
 
-        is_button_pressed = is_currently_pressed;
+        isButtonPressed = isCurrentlyPressed;
 
         bubblesText.setString(formatDisplayBubbles(displayBubbles) + " Bubbles Formed");
 		bubblesPerSecondText.setString(bubblesPerSecondStream.str() + " Bubbles Per Second");
@@ -245,6 +347,16 @@ int main()
         if (showBubbleBuffHitbox)
         {
             window.draw(bubbleBuffHitbox);
+        }
+
+        if (showGoldenBubbleBuffHitbox)
+        {
+            window.draw(goldenBubbleBuffHitbox);
+		}
+
+        if (showRubberDuckBufHitbox)
+        {
+            window.draw(rubberDuckBuffHitbox);
         }
 
         window.display();

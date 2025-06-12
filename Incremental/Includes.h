@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SFML/Audio.hpp>
+
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Font.hpp>
@@ -11,7 +13,9 @@
 #include <SFML/Window/Mouse.hpp>
 #include <SFML/Window/Window.hpp>
 
+#include <SFML/System.hpp>
 #include <SFML/System/Clock.hpp>
+#include <SFML/System/Export.hpp>
 
 #include <chrono>
 #include <cmath>
