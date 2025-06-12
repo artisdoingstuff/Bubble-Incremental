@@ -9,13 +9,15 @@ int main()
     
     bool is_button_pressed = false;
 
-	// Currency variables here
-    long double currency = 0.0L;
-    long double displayCurrency = 0.0L;
-    long double allTimeCurrency = 0.0L;
-    long double baseCurrencyPerClick = 1.0L;
-    long double allTimeCurrencyPerClick = 0.0L;
-    long double currencyPerSecond = 0.0L;
+    time_t timestamp_saved = 0;
+
+	// Bubbles variables here
+    long double bubbles = 0.0L;
+    long double displayBubbles = 0.0L;
+    long double allTimeBubbles = 0.0L;
+    long double baseBubblesPerClick = 1.0L;
+    long double allTimeBubblesPerClick = 0.0L;
+    long double bubblesPerSecond = 0.0L;
 
 	// Shop/Upgrade variables here
     const long double shopInflationMultiplier = 1.15f;
@@ -39,23 +41,25 @@ int main()
 	long double shampooUnlockThreshold = 550.0f;
 
     // Loading game file (if it exists)
-    loadGame(currency, allTimeCurrency, baseCurrencyPerClick, currencyPerSecond, soapCount, handWashCount, shampooCount);
-    displayCurrency = currency;
+    loadFile(timestamp_saved, bubbles, allTimeBubbles, baseBubblesPerClick, bubblesPerSecond, soapCount, handWashCount, shampooCount);
+    displayBubbles = bubbles;
+
+    offlineBubbles(timestamp_saved, bubbles, allTimeBubbles, bubblesPerSecond);
 
 	// Initialize clocks for timing
 	sf::Clock secondClock;
 	sf::Clock deltaClock;
 
-	// Initialize text objects for displaying currency and currency per second
-	sf::Text currencyText(font);
-    currencyText.setPosition({ 300, 50 });
-    currencyText.setCharacterSize(24);
-	currencyText.setFillColor(sf::Color::Black);
+	// Initialize text objects for displaying bubbles and bubbles per second
+	sf::Text bubblesText(font);
+    bubblesText.setPosition({ 300, 50 });
+    bubblesText.setCharacterSize(24);
+	bubblesText.setFillColor(sf::Color::Black);
 
-    sf::Text currencyPerSecondText(font);
-    currencyPerSecondText.setPosition({ 320, 80 });
-    currencyPerSecondText.setCharacterSize(14);
-    currencyPerSecondText.setFillColor(sf::Color::Black);
+    sf::Text bubblesPerSecondText(font);
+    bubblesPerSecondText.setPosition({ 320, 80 });
+    bubblesPerSecondText.setCharacterSize(14);
+    bubblesPerSecondText.setFillColor(sf::Color::Black);
 
 	// Objects for clicking areas
     sf::FloatRect clickArea({ 300, 350 }, { 200, 150 });
@@ -94,9 +98,9 @@ int main()
         {
             if (event->is<sf::Event::Closed>())
             {
-                saveGame(currency, allTimeCurrency, baseCurrencyPerClick, currencyPerSecond, soapCount, handWashCount, shampooCount);
+                time_t timestamp_current = time(nullptr);
+                saveFile(timestamp_current, bubbles, allTimeBubbles, baseBubblesPerClick, bubblesPerSecond, soapCount, handWashCount, shampooCount);
                 window.close();
-
             }
         }
 
@@ -107,79 +111,72 @@ int main()
         sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
         sf::Vector2f mousePositionF(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
 
-		// Display currency and currency per second, along with other time logic
-        int logCurrency = floor(log10(displayCurrency));
-        int moduloRemainder = logCurrency % 3;
-
-        float mantissaValue = (displayCurrency / pow(10, logCurrency))* pow(10, moduloRemainder);
-
+		// Display bubbles and bubbles per second, along with other time logic
         float deltaTime = deltaClock.restart().asSeconds();
-        float smoothingFactor = 5.0f;
+        float smoothingFactor = 0.5f;
 
-        stringstream displayCurrencyStream;
-        stringstream currencyPerSecondStream;
+        stringstream displayBubblesStream;
+        stringstream bubblesPerSecondStream;
 
-        displayCurrencyStream << fixed << setprecision(2) << mantissaValue;
-
-        if (currencyPerSecond < 10.0f)
+        if (bubblesPerSecond < 10.0f)
         {
-            currencyPerSecondStream << fixed << setprecision(2) << currencyPerSecond;
+            bubblesPerSecondStream << fixed << setprecision(2) << bubblesPerSecond;
         }
 
-        else if (currencyPerSecond < 100.0f)
+        else if (bubblesPerSecond < 100.0f)
         {
-            currencyPerSecondStream << fixed << setprecision(1) << currencyPerSecond;
+            bubblesPerSecondStream << fixed << setprecision(1) << bubblesPerSecond;
 		}
 
         else
         {
-            currencyPerSecondStream << fixed << setprecision(0) << currencyPerSecond;
+            bubblesPerSecondStream << fixed << setprecision(0) << bubblesPerSecond;
 		}
 
-		// Update currency based on time elapsed
+		// Update bubbles based on time elapsed
         if (secondClock.getElapsedTime().asSeconds() >= 1.0f)
         {
-            currency += currencyPerSecond;
-			allTimeCurrency += currencyPerSecond;
+            bubbles += bubblesPerSecond;
+			allTimeBubbles += bubblesPerSecond;
             secondClock.restart();
         }
 
-        displayCurrency += (currency - displayCurrency) * smoothingFactor * deltaTime;
+        displayBubbles += (bubbles - displayBubbles) * smoothingFactor * deltaTime;
 
         // Shop/Upgrade logic here
-        if (is_currently_pressed && !is_button_pressed && upgradeArea1.contains(mousePositionF) && allTimeCurrency >= soapUnlockThreshold)
+        if (is_currently_pressed && !is_button_pressed && upgradeArea1.contains(mousePositionF) && allTimeBubbles >= soapUnlockThreshold)
         {
-            upgradeHandler(currency, currencyPerSecond, soapCost, soapBaseCost, soapCount, baseSoapPerSecond, shopInflationMultiplier);
+            upgradeHandler(bubbles, bubblesPerSecond, soapCost, soapBaseCost, soapCount, baseSoapPerSecond, shopInflationMultiplier);
         }
 
-        if (is_currently_pressed && !is_button_pressed && upgradeArea2.contains(mousePositionF) && allTimeCurrency >= handWashUnlockThreshold)
+        if (is_currently_pressed && !is_button_pressed && upgradeArea2.contains(mousePositionF) && allTimeBubbles >= handWashUnlockThreshold)
         {
-            upgradeHandler(currency, currencyPerSecond, handWashCost, handWashBaseCost, handWashCount, baseHandWashPerSecond, shopInflationMultiplier);
+            upgradeHandler(bubbles, bubblesPerSecond, handWashCost, handWashBaseCost, handWashCount, baseHandWashPerSecond, shopInflationMultiplier);
         }
 
-        if (is_currently_pressed && !is_button_pressed && upgradeArea3.contains(mousePositionF) && allTimeCurrency >= shampooUnlockThreshold)
+        if (is_currently_pressed && !is_button_pressed && upgradeArea3.contains(mousePositionF) && allTimeBubbles >= shampooUnlockThreshold)
         {
-            upgradeHandler(currency, currencyPerSecond, shampooCost, shampooBaseCost, shampooCount, baseShampooPerSecond, shopInflationMultiplier);
+            upgradeHandler(bubbles, bubblesPerSecond, shampooCost, shampooBaseCost, shampooCount, baseShampooPerSecond, shopInflationMultiplier);
         }
 
         // Clicking logic
         if (is_currently_pressed && !is_button_pressed && clickArea.contains(mousePositionF))
         {
-			long double clickValue = clickHandler(currency, baseCurrencyPerClick, currencyPerSecond);
+			long double clickValue = clickHandler(bubbles, baseBubblesPerClick, bubblesPerSecond);
 
-			allTimeCurrency += baseCurrencyPerClick + baseCurrencyPerClick * (currencyPerSecond * 0.05);
-			allTimeCurrencyPerClick += baseCurrencyPerClick + baseCurrencyPerClick * (currencyPerSecond * 0.05);
+			allTimeBubbles += baseBubblesPerClick + baseBubblesPerClick * (bubblesPerSecond * 0.05);
+			allTimeBubblesPerClick += baseBubblesPerClick + baseBubblesPerClick * (bubblesPerSecond * 0.05);
         }
 
         is_button_pressed = is_currently_pressed;
 
-        currencyText.setString(displayCurrencyStream.str() + " Bubbles Formed");
-		currencyPerSecondText.setString(currencyPerSecondStream.str() + " Bubbles Per Second");
+        bubblesText.setString(formatDisplayBubbles(displayBubbles) + " Bubbles Formed");
+		bubblesPerSecondText.setString(bubblesPerSecondStream.str() + " Bubbles Per Second");
 
         window.clear(sf::Color::White);
 
-		window.draw(currencyText);
-		window.draw(currencyPerSecondText);
+		window.draw(bubblesText);
+		window.draw(bubblesPerSecondText);
 
         window.draw(clickAreaShape);
 
