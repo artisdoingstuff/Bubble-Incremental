@@ -22,7 +22,7 @@
 using namespace std;
 
 // Function to save the game state to a file
-void saveGame(float currency, float allTimeCurrency, float baseCurrencyPerClick, float currencyPerSecond, int soapCount, int handWashCount, int shampooCount)
+void saveGame(long double currency, long double allTimeCurrency, long double baseCurrencyPerClick, long double currencyPerSecond, int soapCount, int handWashCount, int shampooCount)
 {
     ofstream saveFile("save_file.txt");
     
@@ -48,7 +48,7 @@ void saveGame(float currency, float allTimeCurrency, float baseCurrencyPerClick,
 }
 
 // Function to load the game state from a file
-void loadGame(float &currency, float &allTimeCurrency, float &baseCurrencyPerClick, float &currencyPerSecond, int &soapCount, int &handWashCount, int &shampooCount)
+void loadGame(long double &currency, long double &allTimeCurrency, long double &baseCurrencyPerClick, long double &currencyPerSecond, int &soapCount, int &handWashCount, int &shampooCount)
 {
     ifstream saveFile("save_file.txt");
     
@@ -82,13 +82,13 @@ void loadGame(float &currency, float &allTimeCurrency, float &baseCurrencyPerCli
 }
 
 // Current cost of an object (building)
-void currentObjectCost(float &currentCost, float baseCost, int objectCount, float shopInflationMultiplier)
+void currentObjectCost(long double &currentCost, long double baseCost, int objectCount, long double shopInflationMultiplier)
 {
     currentCost = round(baseCost * pow(shopInflationMultiplier, objectCount));
 }
 
-// Upgrade logic so I do spaghettify this file
-void upgradeHandler(float &currency, float &currencyPerSecond, float &currentCost, float baseCost, int &objectCount, float addedCurrencyPerSecond, float shopInflationMultiplier)
+// Upgrade logic so I don't spaghettify this file
+void upgradeHandler(long double &currency, long double &currencyPerSecond, long double &currentCost, long double baseCost, int &objectCount, long double addedCurrencyPerSecond, long double shopInflationMultiplier)
 {
     currentObjectCost(currentCost, baseCost, objectCount, shopInflationMultiplier);
 
@@ -108,6 +108,16 @@ void upgradeHandler(float &currency, float &currencyPerSecond, float &currentCos
     }
 }
 
+long double clickHandler(long double &currency, long double baseCurrencyPerClick, long double currencyPerSecond)
+{
+    long double clickValue = baseCurrencyPerClick + (currencyPerSecond * 0.05);
+
+    currency += clickValue;
+    cout << "Click registered! Current currency: " << currency << endl;
+
+	return clickValue;
+}
+
 int main()
 {
     sf::RenderWindow window(sf::VideoMode({ 1600, 900 }), "Bubble Incremental");
@@ -118,32 +128,33 @@ int main()
     bool is_button_pressed = false;
 
 	// Currency variables here
-    float currency = 0.0f;
-	float allTimeCurrency = 0.0f;
-    float displayCurrency = 0.0f;
-    float baseCurrencyPerClick = 1.0f;
-    float currencyPerSecond = 0.0f;
+    long double currency = 0.0L;
+    long double displayCurrency = 0.0L;
+    long double allTimeCurrency = 0.0L;
+    long double  baseCurrencyPerClick = 1.0L;
+    long double allTimeCurrencyPerClick = 0.0L;
+    long double currencyPerSecond = 0.0L;
 
 	// Shop/Upgrade variables here
-    const float shopInflationMultiplier = 1.15f;
+    const long double shopInflationMultiplier = 1.15f;
 
     int soapCount = 0;
-    float baseSoapPerSecond = 0.1f;
-    float soapCost = 10.0f;
-	float soapBaseCost = 10.0f;
-	float soapUnlockThreshold = 10.0f;
+    long double baseSoapPerSecond = 0.1f;
+    long double soapCost = 10.0f;
+	long double soapBaseCost = 10.0f;
+	long double soapUnlockThreshold = 10.0f;
 
     int handWashCount = 0;
-	float baseHandWashPerSecond = 0.5f;
-	float handWashCost = 100.0f;
-	float handWashBaseCost = 100.0f;
-	float handWashUnlockThreshold = 100.0f;
+	long double baseHandWashPerSecond = 0.5f;
+	long double handWashCost = 100.0f;
+	long double handWashBaseCost = 100.0f;
+	long double handWashUnlockThreshold = 100.0f;
 
 	int shampooCount = 0;
-	float baseShampooPerSecond = 1.0f;
-	float shampooCost = 500.0f;
-	float shampooBaseCost = 500.0f;
-	float shampooUnlockThreshold = 550.0f;
+	long double baseShampooPerSecond = 1.0f;
+	long double shampooCost = 500.0f;
+	long double shampooBaseCost = 500.0f;
+	long double shampooUnlockThreshold = 550.0f;
 
     // Loading game file (if it exists)
     loadGame(currency, allTimeCurrency, baseCurrencyPerClick, currencyPerSecond, soapCount, handWashCount, shampooCount);
@@ -207,21 +218,36 @@ int main()
             }
         }
 
+        // Clicking stuff
         bool is_currently_pressed = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
 
 		// Get the mouse position relative to the window
         sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
-        sf::Vector2f mousePositionF(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
+        sf::Vector2f mousePositionF(static_cast<long double>(mousePosition.x), static_cast<long double>(mousePosition.y));
 
 		// Display currency and currency per second, along with other time logic
-        float deltaTime = deltaClock.restart().asSeconds();
-        float smoothingFactor = 5.0f;
+        long double deltaTime = deltaClock.restart().asSeconds();
+        long double smoothingFactor = 5.0f;
 
         stringstream displayCurrencyStream;
         stringstream currencyPerSecondStream;
 
         displayCurrencyStream << fixed << setprecision(0) << displayCurrency;
-        currencyPerSecondStream << fixed << setprecision(2) << currencyPerSecond;
+
+        if (currencyPerSecond < 10.0f)
+        {
+            currencyPerSecondStream << fixed << setprecision(2) << currencyPerSecond;
+        }
+
+        else if (currencyPerSecond < 100.0f)
+        {
+            currencyPerSecondStream << fixed << setprecision(1) << currencyPerSecond;
+		}
+
+        else
+        {
+            currencyPerSecondStream << fixed << setprecision(0) << currencyPerSecond;
+		}
 
 		// Update currency based on time elapsed
         if (secondClock.getElapsedTime().asSeconds() >= 1.0f)
@@ -252,9 +278,10 @@ int main()
         // Clicking logic
         if (is_currently_pressed && !is_button_pressed && clickArea.contains(mousePositionF))
         {
-            currency += baseCurrencyPerClick + baseCurrencyPerClick * (currencyPerSecond * 0.05);
+			long double clickValue = clickHandler(currency, baseCurrencyPerClick, currencyPerSecond);
+
 			allTimeCurrency += baseCurrencyPerClick + baseCurrencyPerClick * (currencyPerSecond * 0.05);
-            cout << "Click registered!" << endl;
+			allTimeCurrencyPerClick += baseCurrencyPerClick + baseCurrencyPerClick * (currencyPerSecond * 0.05);
         }
 
         is_button_pressed = is_currently_pressed;
