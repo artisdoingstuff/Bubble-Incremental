@@ -1,122 +1,4 @@
-﻿#include <SFML/Graphics.hpp>
-#include <SFML/Graphics/Text.hpp>
-#include <SFML/Graphics/Font.hpp>
-#include <SFML/Graphics/Color.hpp>
-#include <SFML/Graphics/Rect.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
-
-#include <SFML/Window/Event.hpp>
-#include <SFML/Window/Mouse.hpp>
-#include <SFML/Window/Window.hpp>
-
-#include <SFML/System/Clock.hpp>
-
-#include <chrono>
-#include <cmath>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <thread>
-
-using namespace std;
-
-// Function to save the game state to a file
-void saveGame(long double currency, long double allTimeCurrency, long double baseCurrencyPerClick, long double currencyPerSecond, int soapCount, int handWashCount, int shampooCount)
-{
-    ofstream saveFile("save_file.txt");
-    
-    if (saveFile.is_open())
-    {
-        saveFile << currency << endl;
-        saveFile << allTimeCurrency << endl;
-        saveFile << baseCurrencyPerClick << endl;
-        saveFile << currencyPerSecond << endl;
-
-        saveFile << soapCount << endl;
-        saveFile << handWashCount << endl;
-        saveFile << shampooCount << endl;
-
-        saveFile.close();
-		cout << "Game saved successfully." << endl;
-    }
-
-    else
-    {
-        cerr << "Unable to open save file." << endl;
-    }
-}
-
-// Function to load the game state from a file
-void loadGame(long double &currency, long double &allTimeCurrency, long double &baseCurrencyPerClick, long double &currencyPerSecond, int &soapCount, int &handWashCount, int &shampooCount)
-{
-    ifstream saveFile("save_file.txt");
-    
-    if (saveFile.is_open())
-    {
-        saveFile >> currency;
-        saveFile >> allTimeCurrency;
-        saveFile >> baseCurrencyPerClick;
-        saveFile >> currencyPerSecond;
-
-        saveFile >> soapCount;
-        saveFile >> handWashCount;
-        saveFile >> shampooCount;
-
-        saveFile.close();
-        cout << "Game loaded successfully." << endl;
-    }
-
-    else
-    {
-        cerr << "Unable to open save file. Starting a new game." << endl;
-        currency = 0;
-        allTimeCurrency = 0;
-        baseCurrencyPerClick = 1.0f;
-        currencyPerSecond = 0.0f;
-
-        soapCount = 0;
-        handWashCount = 0;
-        shampooCount = 0;
-    }
-}
-
-// Current cost of an object (building)
-void currentObjectCost(long double &currentCost, long double baseCost, int objectCount, long double shopInflationMultiplier)
-{
-    currentCost = round(baseCost * pow(shopInflationMultiplier, objectCount));
-}
-
-// Upgrade logic so I don't spaghettify this file
-void upgradeHandler(long double &currency, long double &currencyPerSecond, long double &currentCost, long double baseCost, int &objectCount, long double addedCurrencyPerSecond, long double shopInflationMultiplier)
-{
-    currentObjectCost(currentCost, baseCost, objectCount, shopInflationMultiplier);
-
-    currency -= currentCost;
-    
-    if (currency < 0)
-    {
-		currency += currentCost;
-        cout << "Not enough currency to purchase upgrade!" << endl;   
-    }
-
-    else
-    {
-        objectCount++;
-        currencyPerSecond += addedCurrencyPerSecond;
-        cout << "Upgrade purchased (" + to_string(currentCost) + ")! Current count: " << objectCount << endl;
-    }
-}
-
-long double clickHandler(long double &currency, long double baseCurrencyPerClick, long double currencyPerSecond)
-{
-    long double clickValue = baseCurrencyPerClick + (currencyPerSecond * 0.05);
-
-    currency += clickValue;
-    cout << "Click registered! Current currency: " << currency << endl;
-
-	return clickValue;
-}
+﻿#include "Incremental.h"
 
 int main()
 {
@@ -131,7 +13,7 @@ int main()
     long double currency = 0.0L;
     long double displayCurrency = 0.0L;
     long double allTimeCurrency = 0.0L;
-    long double  baseCurrencyPerClick = 1.0L;
+    long double baseCurrencyPerClick = 1.0L;
     long double allTimeCurrencyPerClick = 0.0L;
     long double currencyPerSecond = 0.0L;
 
@@ -141,7 +23,7 @@ int main()
     int soapCount = 0;
     long double baseSoapPerSecond = 0.1f;
     long double soapCost = 10.0f;
-	long double soapBaseCost = 10.0f;
+    long double soapBaseCost = 10.0f;
 	long double soapUnlockThreshold = 10.0f;
 
     int handWashCount = 0;
@@ -223,16 +105,21 @@ int main()
 
 		// Get the mouse position relative to the window
         sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
-        sf::Vector2f mousePositionF(static_cast<long double>(mousePosition.x), static_cast<long double>(mousePosition.y));
+        sf::Vector2f mousePositionF(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
 
 		// Display currency and currency per second, along with other time logic
-        long double deltaTime = deltaClock.restart().asSeconds();
-        long double smoothingFactor = 5.0f;
+        int logCurrency = floor(log10(displayCurrency));
+        int moduloRemainder = logCurrency % 3;
+
+        float mantissaValue = (displayCurrency / pow(10, logCurrency))* pow(10, moduloRemainder);
+
+        float deltaTime = deltaClock.restart().asSeconds();
+        float smoothingFactor = 5.0f;
 
         stringstream displayCurrencyStream;
         stringstream currencyPerSecondStream;
 
-        displayCurrencyStream << fixed << setprecision(0) << displayCurrency;
+        displayCurrencyStream << fixed << setprecision(2) << mantissaValue;
 
         if (currencyPerSecond < 10.0f)
         {
