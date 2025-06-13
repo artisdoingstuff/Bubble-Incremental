@@ -20,8 +20,11 @@ int main()
     // All sounds here
     sf::SoundBuffer rubberDuckQuackBuffer;
     rubberDuckQuackBuffer.loadFromFile("Audio/rubberDuckQuack.wav");
-
     sf::Sound rubberDuckQuack(rubberDuckQuackBuffer);
+
+    sf::SoundBuffer bubblePoppingBuffer;
+	bubblePoppingBuffer.loadFromFile("Audio/bubblePopping.wav");
+	sf::Sound bubblePopping(bubblePoppingBuffer);
 
 	// Bubbles variables here
     long double bubbles = 0.0L;
@@ -53,7 +56,7 @@ int main()
     bool showRubberDuckBufHitbox = false;
     float rubberDuckBuffDuration = 0.0f;
     float rubberDuckBuffMultiplier = 1.0f;
-    float rubberDuckBuffSpawnInterval = 3.0f;
+    float rubberDuckBuffSpawnInterval = 300.0f;
 
     srand(static_cast<unsigned>(time(0)));
 
@@ -86,6 +89,7 @@ int main()
         
         bubbles,
         allTimeBubbles,
+		allTimeBubblesPerClick,
         
         baseBubblesPerClick,
         baseClickMultiplier,
@@ -143,12 +147,8 @@ int main()
     rubberDuckBuffHitbox.setFillColor(sf::Color::Red);
 	rubberDuckBuffHitbox.setPosition({ -100, -100 });
 
-	// Objects for clicking/upgrading areas
+	// Objects for clicking
     sf::FloatRect clickArea({ 300, 350 }, { 200, 150 });
-
-    sf::FloatRect upgradeArea1({ 1200, 120 }, { 200, 50 });
-    sf::FloatRect upgradeArea2({ 1200, 185 }, { 200, 50 });
-    sf::FloatRect upgradeArea3({ 1200, 250 }, { 200, 50 });
 
     sf::RectangleShape clickAreaShape;
     clickAreaShape.setSize(sf::Vector2f(200, 150));
@@ -156,23 +156,31 @@ int main()
     clickAreaShape.setOutlineThickness(5);
     clickAreaShape.setPosition(sf::Vector2f({ 300, 350 }));
 
-    sf::RectangleShape upgradeArea1Shape;
-    upgradeArea1Shape.setSize(sf::Vector2f(200, 50));
-    upgradeArea1Shape.setOutlineColor(sf::Color::Green);
-    upgradeArea1Shape.setOutlineThickness(5);
-    upgradeArea1Shape.setPosition(sf::Vector2f({ 1200, 120 }));
+	// Objects for upgrades
+	sf::FloatRect upgradeArea1({ 1200, 50 }, { 200, 50 });
 
-    sf::RectangleShape upgradeArea2Shape;
-    upgradeArea2Shape.setSize(sf::Vector2f(200, 50));
-    upgradeArea2Shape.setOutlineColor(sf::Color::Green);
-    upgradeArea2Shape.setOutlineThickness(5);
-    upgradeArea2Shape.setPosition(sf::Vector2f({ 1200, 185 }));
+	// Objects for object upgrades
+    sf::FloatRect upgradeObjectArea1({ 1200, 120 }, { 200, 50 });
+    sf::FloatRect upgradeObjectArea2({ 1200, 185 }, { 200, 50 });
+    sf::FloatRect upgradeObjectArea3({ 1200, 250 }, { 200, 50 });
 
-    sf::RectangleShape upgradeArea3Shape;
-    upgradeArea3Shape.setSize(sf::Vector2f(200, 50));
-    upgradeArea3Shape.setOutlineColor(sf::Color::Green);
-    upgradeArea3Shape.setOutlineThickness(5);
-    upgradeArea3Shape.setPosition(sf::Vector2f({ 1200, 250 }));
+    sf::RectangleShape upgradeObjectArea1Shape;
+    upgradeObjectArea1Shape.setSize(sf::Vector2f(200, 50));
+    upgradeObjectArea1Shape.setOutlineColor(sf::Color::Green);
+    upgradeObjectArea1Shape.setOutlineThickness(5);
+    upgradeObjectArea1Shape.setPosition(sf::Vector2f({ 1200, 120 }));
+
+    sf::RectangleShape upgradeObjectArea2Shape;
+    upgradeObjectArea2Shape.setSize(sf::Vector2f(200, 50));
+    upgradeObjectArea2Shape.setOutlineColor(sf::Color::Green);
+    upgradeObjectArea2Shape.setOutlineThickness(5);
+    upgradeObjectArea2Shape.setPosition(sf::Vector2f({ 1200, 185 }));
+
+    sf::RectangleShape upgradeObjectArea3Shape;
+    upgradeObjectArea3Shape.setSize(sf::Vector2f(200, 50));
+    upgradeObjectArea3Shape.setOutlineColor(sf::Color::Green);
+    upgradeObjectArea3Shape.setOutlineThickness(5);
+    upgradeObjectArea3Shape.setPosition(sf::Vector2f({ 1200, 250 }));
 
     while (window.isOpen())
     {
@@ -188,6 +196,7 @@ int main()
 
                     bubbles,
                     allTimeBubbles,
+					allTimeBubblesPerClick,
 
                     baseBubblesPerClick,
                     baseClickMultiplier,
@@ -211,6 +220,7 @@ int main()
 
         // Bubbles per second buff not showing on display fix
         long double realBubblesPerSecond = bubblesPerSecond;
+        long double realBubbles = bubbles;
 
         if (isBubbleBuffActive)
             realBubblesPerSecond *= bubbleBuffMultiplier;
@@ -278,6 +288,11 @@ int main()
             isButtonPressed
         );
 
+        if (bubbleBuffClicked)
+        {
+            bubblePopping.play();
+        }
+
         bool goldenBubbleBuffClicked = buffHandler(
             mousePositionF,
             window,
@@ -299,6 +314,11 @@ int main()
             isCurrentlyPressed,
             isButtonPressed
 		);
+
+        if (goldenBubbleBuffClicked)
+        {
+            bubblePopping.play();
+        }
 
         duckBuffVariant currentDuckType;
 
@@ -337,6 +357,11 @@ int main()
                 {
 					bubbles += bubblesPerSecond * 60;
                 }
+
+                else if (type == buffVariantType::rubberDuckBuff && currentDuckType.duckType == duckVariantType::Uncommon)
+                {
+                    bubbles += realBubbles * 0.05f;
+                }
             }
 		);
 
@@ -358,17 +383,17 @@ int main()
         displayBubbles += (bubbles - displayBubbles) * smoothingFactor * deltaTime;
 
         // Shop/Upgrade logic here
-        if (isCurrentlyPressed && !isButtonPressed && upgradeArea1.contains(mousePositionF) && allTimeBubbles >= soapUnlockThreshold)
+        if (isCurrentlyPressed && !isButtonPressed && upgradeObjectArea1.contains(mousePositionF) && allTimeBubbles >= soapUnlockThreshold)
         {
             upgradeHandler(bubbles, bubblesPerSecond, soapCost, soapBaseCost, soapCount, baseSoapPerSecond, shopInflationMultiplier);
         }
 
-        if (isCurrentlyPressed && !isButtonPressed && upgradeArea2.contains(mousePositionF) && allTimeBubbles >= handWashUnlockThreshold)
+        if (isCurrentlyPressed && !isButtonPressed && upgradeObjectArea2.contains(mousePositionF) && allTimeBubbles >= handWashUnlockThreshold)
         {
             upgradeHandler(bubbles, bubblesPerSecond, handWashCost, handWashBaseCost, handWashCount, baseHandWashPerSecond, shopInflationMultiplier);
         }
 
-        if (isCurrentlyPressed && !isButtonPressed && upgradeArea3.contains(mousePositionF) && allTimeBubbles >= shampooUnlockThreshold)
+        if (isCurrentlyPressed && !isButtonPressed && upgradeObjectArea3.contains(mousePositionF) && allTimeBubbles >= shampooUnlockThreshold)
         {
             upgradeHandler(bubbles, bubblesPerSecond, shampooCost, shampooBaseCost, shampooCount, baseShampooPerSecond, shopInflationMultiplier);
         }
@@ -398,9 +423,9 @@ int main()
 
         window.draw(clickAreaShape);
 
-        window.draw(upgradeArea1Shape);
-        window.draw(upgradeArea2Shape);
-        window.draw(upgradeArea3Shape);
+        window.draw(upgradeObjectArea1Shape);
+        window.draw(upgradeObjectArea2Shape);
+        window.draw(upgradeObjectArea3Shape);
 
         if (showBubbleBuffHitbox)
         {

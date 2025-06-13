@@ -10,6 +10,7 @@ void saveFile(
 
     long double bubbles,
     long double allTimeBubbles,
+	long double allTimeBubblesPerClick,
 
     long double baseBubblesPerClick,
     long double baseClickMultiplier,
@@ -18,7 +19,8 @@ void saveFile(
 
     int soapCount,
     int handWashCount,
-    int shampooCount)
+    int shampooCount
+)
 {
     ofstream saveFile("save_file.txt");
 
@@ -30,6 +32,7 @@ void saveFile(
 
         saveFile << fixed << setprecision(0) << bubbles << endl;
         saveFile << fixed << setprecision(2) << allTimeBubbles << endl;
+		saveFile << fixed << setprecision(2) << allTimeBubblesPerClick << endl;
 
         saveFile << fixed << setprecision(2) << baseBubblesPerClick << endl;
         saveFile << fixed << setprecision(2) << baseClickMultiplier << endl;
@@ -58,6 +61,7 @@ void loadFile(
 
     long double &bubbles,
     long double &allTimeBubbles,
+	long double& allTimeBubblesPerClick,
 
     long double &baseBubblesPerClick,
     long double &baseClickMultiplier,
@@ -79,6 +83,7 @@ void loadFile(
 
         saveFile >> bubbles;
         saveFile >> allTimeBubbles;
+		saveFile >> allTimeBubblesPerClick;
 
         saveFile >> baseBubblesPerClick;
         saveFile >> baseClickMultiplier;
@@ -102,6 +107,7 @@ void loadFile(
 
         bubbles = 0;
         allTimeBubbles = 0;
+		allTimeBubblesPerClick = 0.0f;
 
         baseBubblesPerClick = 1.0f;
         baseClickMultiplier = 1.0f;

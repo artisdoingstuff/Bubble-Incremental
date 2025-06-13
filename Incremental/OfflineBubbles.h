@@ -2,7 +2,7 @@
 
 #include "Includes.h"
 
-// Offline earnings
+// Offline bubbles
 void offlineBubbles(time_t timestamp, long double& bubbles, long double& allTimeBubbles, long double bubblesPerSecond)
 {
     time_t currentTime = time(nullptr);
