@@ -300,6 +300,8 @@ int main()
             isButtonPressed
 		);
 
+        duckBuffVariant currentDuckType;
+
         bool rubberDuckBuffClicked = buffHandler(
             mousePositionF,
             window,
@@ -322,7 +324,20 @@ int main()
             isButtonPressed,
 
             true,
-            selectDuckVariant
+            
+            [&](sf::RectangleShape& buffHitbox, float& buffMultiplier, float& buffDuration, buffVariantType& buffType)
+            {
+                auto variant = selectDuckVariant(buffHitbox, buffMultiplier, buffDuration);
+                buffType = variant.buffType;
+                currentDuckType = variant;
+            },
+            [&](buffVariantType type)
+            {
+                if (type == buffVariantType::rubberDuckBuff && currentDuckType.duckType == duckVariantType::Common)
+                {
+					bubbles += bubblesPerSecond * 60;
+                }
+            }
 		);
 
         if (rubberDuckBuffClicked)

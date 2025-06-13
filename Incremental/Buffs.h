@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Includes.h"
+#include "BuffTypes.h"
+#include "DuckVariants.h"
 
 bool buffHandler(
     const sf::Vector2f& mousePos,
@@ -25,9 +27,12 @@ bool buffHandler(
     bool isButtonPressed,
 
     bool isVariant = false,
-    function<void(float&, float&, sf::RectangleShape&)> variantSelector = nullptr
+    function<void(sf::RectangleShape&, float&, float&, buffVariantType&)> variantSelector = nullptr,
+    function<void(buffVariantType)> onBuffClick = nullptr
 )
 {
+	buffVariantType variantType = buffVariantType::none;
+
     float elapsedBuffLifetime = buffLifetimeClock.getElapsedTime().asSeconds();
 
     if (!showBuffHitbox && buffSpawnIntervalClock.getElapsedTime().asSeconds() > buffSpawnInterval)
@@ -44,7 +49,12 @@ bool buffHandler(
 
         if (isVariant && variantSelector)
         {
-            variantSelector(buffMultiplier, buffDuration, buffHitbox);
+            variantSelector(
+                buffHitbox,
+                buffMultiplier,
+                buffDuration,
+                variantType
+            );
         }
 
         sf::Color color = buffHitbox.getFillColor();
@@ -55,20 +65,18 @@ bool buffHandler(
     if (showBuffHitbox && !isBuffActive && elapsedBuffLifetime <= 1.0f)
     {
         float fadeInAlpha = elapsedBuffLifetime / 1.0f * 255.0f;
-        fadeInAlpha = std::min(fadeInAlpha, 255.0f);
 
         sf::Color color = buffHitbox.getFillColor();
-        color.a = static_cast<int>(fadeInAlpha);
+        color.a = static_cast<int>(min(fadeInAlpha, 255.0f));
         buffHitbox.setFillColor(color);
     }
 
     if (showBuffHitbox && !isBuffActive && elapsedBuffLifetime > 8.0f)
     {
         float fadeOutAlpha = (1.0f - (elapsedBuffLifetime - 8.0f)) * 255.0f;
-        fadeOutAlpha = std::max(0.0f, min(fadeOutAlpha, 255.0f));
 
         sf::Color color = buffHitbox.getFillColor();
-        color.a = static_cast<int>(fadeOutAlpha);
+        color.a = static_cast<int>(max(0.0f, min(fadeOutAlpha, 255.0f)));
         buffHitbox.setFillColor(color);
 
         if (showBuffHitbox && elapsedBuffLifetime >= 10.0f)
@@ -85,6 +93,11 @@ bool buffHandler(
         buffDurationClock.restart();
         buffLifetimeClock.restart();
         showBuffHitbox = false;
+
+        if (onBuffClick)
+        {
+            onBuffClick(variantType);
+        }
 
         buffHitbox.setPosition({ -100, -100 });
 

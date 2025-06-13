@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Includes.h"
+#include "BuffTypes.h"
 
 enum class duckVariantType
 {
@@ -10,27 +11,41 @@ enum class duckVariantType
 	Omnipotent, Transcendent, Infinite, Eternal
 };
 
-struct duckVariant
+struct duckBuffVariant
 {
-	float duckMultiplier = 0.0f;
-	float duckDuration = 0.0f;
+	float duckMultiplier;
+	float duckDuration;
 	sf::Color color;
 	float duckRarity;
-	duckVariantType type;
-	
+	buffVariantType buffType = buffVariantType::rubberDuckBuff;
+	duckVariantType duckType = duckVariantType::Common;
 };
 
-inline vector<duckVariant> duckVariants = {
-	{ 1.0f, 0.0f, sf::Color::Red, 70.0f, duckVariantType::Common},
-	{ 1.5f, 5.0f, sf::Color::Green, 25.0f, duckVariantType::Uncommon},
-	{ 2.0f, 10.0f, sf::Color::Cyan, 5.0f, duckVariantType::Rare}
+inline vector<duckBuffVariant> duckVariants = {
+	{
+		1.0f, 0.0f,
+		sf::Color::Red,
+		70.0f,
+		buffVariantType::rubberDuckBuff,
+		duckVariantType::Common
+	},
+	{
+		1.5f, 5.0f,
+		sf::Color::Green,
+		25.0f,
+		buffVariantType::rubberDuckBuff,
+		duckVariantType::Uncommon
+	},
+	{
+		2.0f, 10.0f,
+		sf::Color::Cyan,
+		5.0f,
+		buffVariantType::rubberDuckBuff,
+		duckVariantType::Rare
+	}
 };
 
-inline duckVariant selectDuckVariant(
-	float& duckMultiplier,
-	float& duckDuration,
-	sf::RectangleShape& hitbox
-)
+inline duckBuffVariant selectDuckVariant(sf::RectangleShape& hitbox, float& duckMultiplier, float& duckDuration)
 {
 	float weightedRarity = 0.0f;
 	for (const auto& variant : duckVariants)
