@@ -55,8 +55,6 @@ int main()
     float rubberDuckBuffMultiplier = 1.0f;
     float rubberDuckBuffSpawnInterval = 3.0f;
 
-
-
     srand(static_cast<unsigned>(time(0)));
 
 	// Shop/Upgrade variables here
