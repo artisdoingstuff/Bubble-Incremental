@@ -4,24 +4,28 @@
 
 bool buffHandler(
     const sf::Vector2f& mousePos,
-    sf::RenderWindow &window,
+    sf::RenderWindow& window,
 
-    sf::RectangleShape &buffHitbox,
+    sf::RectangleShape& buffHitbox,
 
-    sf::Clock &buffDurationClock,
-    sf::Clock &buffSpawnIntervalClock,
-    sf::Clock &buffLifetimeClock,
+    sf::Clock& buffDurationClock,
+    sf::Clock& buffSpawnIntervalClock,
+    sf::Clock& buffLifetimeClock,
 
-    bool &isBuffActive,
-    bool &showBuffHitbox,
+    bool& isBuffActive,
+    bool& showBuffHitbox,
 
-    float &buffSpawnInterval,
-    float buffDuration,
+    float& buffSpawnInterval,
+    float& buffMultiplier,
+    float& buffDuration,
     float minSpawnInterval,
     float maxSpawnInterval,
 
     bool isCurrentlyPressed,
-    bool isButtonPressed
+    bool isButtonPressed,
+
+    bool isVariant = false,
+    function<void(float&, float&, sf::RectangleShape&)> variantSelector = nullptr
 )
 {
     float elapsedBuffLifetime = buffLifetimeClock.getElapsedTime().asSeconds();
@@ -37,6 +41,11 @@ bool buffHandler(
         buffSpawnIntervalClock.restart();
         buffLifetimeClock.restart();
         buffSpawnInterval = static_cast<float>(rand() % static_cast<int>(maxSpawnInterval - minSpawnInterval + 1) + minSpawnInterval);
+
+        if (isVariant && variantSelector)
+        {
+            variantSelector(buffMultiplier, buffDuration, buffHitbox);
+        }
 
         sf::Color color = buffHitbox.getFillColor();
         color.a = 0;

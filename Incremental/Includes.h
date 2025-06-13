@@ -27,6 +27,8 @@
 #include <sstream>
 #include <string>
 #include <thread>
+#include <typeindex>
 #include <utility>
+#include <vector>
 
 using namespace std;

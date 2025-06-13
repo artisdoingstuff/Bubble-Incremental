@@ -3,22 +3,42 @@
 #include "Includes.h"
 
 // Function to save the game state to a file
-void saveFile(time_t timestamp, long double bubbles, long double allTimeBubbles, long double baseBubblesPerClick, long double bubblesPerSecond, int soapCount, int handWashCount, int shampooCount)
+void saveFile(
+    time_t timestamp,
+
+    long double duckCounter,
+
+    long double bubbles,
+    long double allTimeBubbles,
+
+    long double baseBubblesPerClick,
+    long double baseClickMultiplier,
+
+    long double bubblesPerSecond,
+
+    int soapCount,
+    int handWashCount,
+    int shampooCount)
 {
     ofstream saveFile("save_file.txt");
 
     if (saveFile.is_open())
     {
-        saveFile << bubbles << endl;
-        saveFile << allTimeBubbles << endl;
-        saveFile << baseBubblesPerClick << endl;
-        saveFile << bubblesPerSecond << endl;
+        saveFile << fixed << setprecision(0) << timestamp << endl;
 
-        saveFile << soapCount << endl;
-        saveFile << handWashCount << endl;
-        saveFile << shampooCount << endl;
+        saveFile << fixed << setprecision(0) << duckCounter << endl;
 
-        saveFile << timestamp << endl;
+        saveFile << fixed << setprecision(0) << bubbles << endl;
+        saveFile << fixed << setprecision(2) << allTimeBubbles << endl;
+
+        saveFile << fixed << setprecision(2) << baseBubblesPerClick << endl;
+        saveFile << fixed << setprecision(2) << baseClickMultiplier << endl;
+
+        saveFile << fixed << setprecision(2) << bubblesPerSecond << endl;
+
+        saveFile << fixed << setprecision(0) << soapCount << endl;
+        saveFile << fixed << setprecision(0) << handWashCount << endl;
+        saveFile << fixed << setprecision(0) << shampooCount << endl;
 
         saveFile.close();
         cout << "Game saved successfully." << endl;
@@ -31,22 +51,43 @@ void saveFile(time_t timestamp, long double bubbles, long double allTimeBubbles,
 }
 
 // Function to load the game state from a file
-void loadFile(time_t &timestamp, long double& bubbles, long double& allTimeBubbles, long double& baseBubblesPerClick, long double& bubblesPerSecond, int& soapCount, int& handWashCount, int& shampooCount)
+void loadFile(
+    time_t &timestamp,
+
+    long double &duckCounter,
+
+    long double &bubbles,
+    long double &allTimeBubbles,
+
+    long double &baseBubblesPerClick,
+    long double &baseClickMultiplier,
+
+    long double &bubblesPerSecond,
+    
+    int &soapCount,
+    int &handWashCount,
+    int &shampooCount
+)
 {
     ifstream saveFile("save_file.txt");
 
     if (saveFile.is_open())
     {
+        saveFile >> timestamp;
+
+        saveFile >> duckCounter;
+
         saveFile >> bubbles;
         saveFile >> allTimeBubbles;
+
         saveFile >> baseBubblesPerClick;
+        saveFile >> baseClickMultiplier;
+
         saveFile >> bubblesPerSecond;
 
         saveFile >> soapCount;
         saveFile >> handWashCount;
         saveFile >> shampooCount;
-
-        saveFile >> timestamp;
 
         saveFile.close();
         cout << "Game loaded successfully." << endl;
@@ -55,15 +96,20 @@ void loadFile(time_t &timestamp, long double& bubbles, long double& allTimeBubbl
     else
     {
         cerr << "Unable to open save file. Starting a new game." << endl;
+        timestamp = time(nullptr);
+
+        duckCounter = 0.0f;
+
         bubbles = 0;
         allTimeBubbles = 0;
+
         baseBubblesPerClick = 1.0f;
+        baseClickMultiplier = 1.0f;
+
         bubblesPerSecond = 0.0f;
 
         soapCount = 0;
         handWashCount = 0;
         shampooCount = 0;
-
-        timestamp = time(nullptr);
     }
 }

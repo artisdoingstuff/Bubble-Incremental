@@ -1,6 +1,7 @@
 ﻿#include "BubblesFormat.h"
 #include "Buffs.h"
 #include "ClickingBubbles.h"
+#include "DuckVariants.h"
 #include "GameFileState.h"
 #include "OfflineBubbles.h"
 #include "Upgrades.h"
@@ -16,7 +17,7 @@ int main()
 
     time_t savedTimestamp = 0;
 
-    // All sound buffers here
+    // All sounds here
     sf::SoundBuffer rubberDuckQuackBuffer;
     rubberDuckQuackBuffer.loadFromFile("Audio/rubberDuckQuack.wav");
 
@@ -33,24 +34,28 @@ int main()
 
     long double bubblesPerSecond = 0.0L;
 
+    long double duckCounter = 0.0L;
+
     // Buffs variables here
     bool isBubbleBuffActive = false;
     bool showBubbleBuffHitbox = false;
     float bubbleBuffDuration = 20.0f;
     float bubbleBuffMultiplier = 2.0f;
-    float bubbleBuffSpawnInterval = 1.0f;
+    float bubbleBuffSpawnInterval = 180.0f;
 
     bool isGoldenBubbleBuffActive = false;
     bool showGoldenBubbleBuffHitbox = false;
     float goldenBubbleBuffDuration = 10.0f;
     float goldenBubbleBuffMultiplier = 5.0f;
-    float goldenBubbleBuffSpawnInterval = 6.0f;
+    float goldenBubbleBuffSpawnInterval = 600.0f;
 
     bool isRubberDuckBuffActive = false;
     bool showRubberDuckBufHitbox = false;
-    float rubberDuckBuffDuration = 20.0f;
-    float rubberDuckBuffMultiplier = 3.5f;
+    float rubberDuckBuffDuration = 0.0f;
+    float rubberDuckBuffMultiplier = 1.0f;
     float rubberDuckBuffSpawnInterval = 3.0f;
+
+
 
     srand(static_cast<unsigned>(time(0)));
 
@@ -76,7 +81,23 @@ int main()
 	long double shampooUnlockThreshold = 550.0f;
 
     // Loading game file (if it exists)
-    loadFile(savedTimestamp, bubbles, allTimeBubbles, baseBubblesPerClick, bubblesPerSecond, soapCount, handWashCount, shampooCount);
+    loadFile(
+        savedTimestamp,
+
+        duckCounter,
+        
+        bubbles,
+        allTimeBubbles,
+        
+        baseBubblesPerClick,
+        baseClickMultiplier,
+        
+        bubblesPerSecond,
+        
+        soapCount,
+        handWashCount,
+        shampooCount
+    );
     displayBubbles = bubbles;
 
     offlineBubbles(savedTimestamp, bubbles, allTimeBubbles, bubblesPerSecond);
@@ -162,7 +183,23 @@ int main()
             if (event->is<sf::Event::Closed>())
             {
                 time_t currentTimestamp = time(nullptr);
-                saveFile(currentTimestamp, bubbles, allTimeBubbles, baseBubblesPerClick, bubblesPerSecond, soapCount, handWashCount, shampooCount);
+                saveFile(
+                    currentTimestamp,
+
+                    duckCounter,
+
+                    bubbles,
+                    allTimeBubbles,
+
+                    baseBubblesPerClick,
+                    baseClickMultiplier,
+
+                    bubblesPerSecond,
+
+                    soapCount,
+                    handWashCount,
+                    shampooCount
+                );
                 window.close();
             }
         }
@@ -235,6 +272,7 @@ int main()
             showBubbleBuffHitbox,
 
             bubbleBuffSpawnInterval,
+            bubbleBuffMultiplier,
             bubbleBuffDuration,
             180.0f, 300.0f,
 
@@ -256,6 +294,7 @@ int main()
             showGoldenBubbleBuffHitbox,
 
             goldenBubbleBuffSpawnInterval,
+			goldenBubbleBuffMultiplier,
             goldenBubbleBuffDuration,
             600.0f, 900.0f,
 
@@ -277,15 +316,21 @@ int main()
             showRubberDuckBufHitbox,
 
             rubberDuckBuffSpawnInterval,
+			rubberDuckBuffMultiplier,
             rubberDuckBuffDuration,
             300.0f, 450.0f,
 
             isCurrentlyPressed,
-            isButtonPressed
+            isButtonPressed,
+
+            true,
+            selectDuckVariant
 		);
 
         if (rubberDuckBuffClicked)
         {
+            bubbles += bubblesPerSecond * 60;
+            duckCounter++;
             rubberDuckQuack.play();
         }
 
