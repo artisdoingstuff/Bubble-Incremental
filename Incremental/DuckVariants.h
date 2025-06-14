@@ -8,7 +8,7 @@ enum class duckVariantType
 	Common, Uncommon, Rare, Epic,
 	Legendary, Mythical, Divine, Celestial,
 	Supreme, Cosmic, Astral, Ethereal,
-	Omnipotent, Transcendent, Infinite, Rocket, Eternal
+	Omnipotent, Transcendent, Infinite, Rocket, Eternal // Thank you QQ for Rocket
 
 
 	// Immortal, Godlike, Supreme, Ultimate,
@@ -29,7 +29,7 @@ struct duckBuffVariant
 inline vector<duckBuffVariant> duckVariants = {
 	{
 		1.0f, 0.0f,
-		sf::Color::Transparent,
+		sf::Color::Blue,
 		59.9f,
 		buffVariantType::rubberDuckBuff,
 		duckVariantType::Common

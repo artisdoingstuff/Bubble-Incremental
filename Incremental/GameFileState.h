@@ -13,7 +13,7 @@ void saveFile(
 	long double allTimeBubblesPerClick,
 
     long double baseBubblesPerClick,
-    long double baseClickMultiplier,
+    long double clickMultiplier,
 
     long double bubblesPerSecond,
 
@@ -35,7 +35,7 @@ void saveFile(
 		saveFile << fixed << setprecision(2) << allTimeBubblesPerClick << endl;
 
         saveFile << fixed << setprecision(2) << baseBubblesPerClick << endl;
-        saveFile << fixed << setprecision(2) << baseClickMultiplier << endl;
+        saveFile << fixed << setprecision(2) << clickMultiplier << endl;
 
         saveFile << fixed << setprecision(2) << bubblesPerSecond << endl;
 
@@ -64,7 +64,7 @@ void loadFile(
 	long double& allTimeBubblesPerClick,
 
     long double &baseBubblesPerClick,
-    long double &baseClickMultiplier,
+    long double &clickMultiplier,
 
     long double &bubblesPerSecond,
     
@@ -86,7 +86,7 @@ void loadFile(
 		saveFile >> allTimeBubblesPerClick;
 
         saveFile >> baseBubblesPerClick;
-        saveFile >> baseClickMultiplier;
+        saveFile >> clickMultiplier;
 
         saveFile >> bubblesPerSecond;
 
@@ -110,7 +110,7 @@ void loadFile(
 		allTimeBubblesPerClick = 0.0f;
 
         baseBubblesPerClick = 1.0f;
-        baseClickMultiplier = 1.0f;
+        clickMultiplier = 1.0f;
 
         bubblesPerSecond = 0.0f;
 

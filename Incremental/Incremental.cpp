@@ -1,10 +1,12 @@
-﻿#include "BubblesFormat.h"
+﻿#include "BubbleMayhem.h"
+#include "BubblesFormat.h"
 #include "Buffs.h"
 #include "ClickingBubbles.h"
 #include "DuckVariants.h"
 #include "GameFileState.h"
+#include "GoldenBubblesVariants.h"
 #include "OfflineBubbles.h"
-#include "Upgrades.h"
+#include "ObjectUpgrades.h"
 
 int main()
 {
@@ -32,7 +34,7 @@ int main()
     long double allTimeBubbles = 0.0L;
 
     long double baseBubblesPerClick = 1.0L;
-    long double baseClickMultiplier = 1.0L;
+    long double clickMultiplier = 1.0L;
     long double allTimeBubblesPerClick = 0.0L;
 
     long double bubblesPerSecond = 0.0L;
@@ -40,6 +42,12 @@ int main()
     long double duckCounter = 0.0L;
 
     // Buffs variables here
+    vector<BubbleMayhem> activeBubbles;
+	bool isBubbleMayhemActive = false;
+	float bubbleMayhemDuration = 20.0f;
+	float bubbleMayhemBuffMultiplier = 2.0f;
+	float bubbleMayhemSpawnInterval = 0.2f;
+
     bool isBubbleBuffActive = false;
     bool showBubbleBuffHitbox = false;
     float bubbleBuffDuration = 20.0f;
@@ -48,19 +56,45 @@ int main()
 
     bool isGoldenBubbleBuffActive = false;
     bool showGoldenBubbleBuffHitbox = false;
-    float goldenBubbleBuffDuration = 10.0f;
+    float goldenBubbleBuffDuration = 0.0f;
     float goldenBubbleBuffMultiplier = 5.0f;
-    float goldenBubbleBuffSpawnInterval = 600.0f;
+    float goldenBubbleBuffSpawnInterval = 1.0f;
 
     bool isRubberDuckBuffActive = false;
-    bool showRubberDuckBufHitbox = false;
+    bool showRubberDuckBuffHitbox = false;
     float rubberDuckBuffDuration = 0.0f;
     float rubberDuckBuffMultiplier = 1.0f;
-    float rubberDuckBuffSpawnInterval = 300.0f;
+    float rubberDuckBuffSpawnInterval = 1.0f;
 
     srand(static_cast<unsigned>(time(0)));
 
-	// Shop/Upgrade variables here
+    // Upgrade variables here
+    bool hasAllTimeBubblesMilestoneUpgrade1 = false;
+    long double allTimeBubblesMilestoneUpgrade1Multiplier = 1.01f;
+    long double allTimeBubblesMilestoneUpgrade1Cost = 100.0f;
+    long double allTimeBubblesMilestoneUpgrade1UnlockThreshold = 100.0f;
+
+    bool hasAllTimeBubblesMilestoneUpgrade2 = false;
+    long double allTimeBubblesMilestoneUpgrade2Multiplier = 1.01f;
+    long double allTimeBubblesMilestoneUpgrade2Cost = 250.0f;
+    long double allTimeBubblesMilestoneUpgrade2UnlockThreshold = 250.0f;
+
+    bool hasAllTimeBubblesMilestoneUpgrade3 = false;
+    long double allTimeBubblesMilestoneUpgrade3Multiplier = 1.01f;
+    long double allTimeBubblesMilestoneUpgrade3Cost = 500.0f;
+    long double allTimeBubblesMilestoneUpgrade3UnlockThreshold = 500.0f;
+
+    bool hasAllTimeBubblesMilestoneUpgrade4 = false;
+    long double allTimeBubblesMilestoneUpgrade4Multiplier = 1.01f;
+    long double allTimeBubblesMilestoneUpgrade4Cost = 500.0f;
+    long double allTimeBubblesMilestoneUpgrade4UnlockThreshold = 750.0f;
+
+    bool hasAllTimeBubblesMilestoneUpgrade5 = false;
+    long double allTimeBubblesMilestoneUpgrade5Multiplier = 1.02f;
+    long double allTimeBubblesMilestoneUpgrade5Cost = 1000.0f;
+    long double allTimeBubblesMilestoneUpgrade5UnlockThreshold = 750.0f;
+
+	// Object Upgrade variables here
     const long double shopInflationMultiplier = 1.15f;
 
     int soapCount = 0;
@@ -92,7 +126,7 @@ int main()
 		allTimeBubblesPerClick,
         
         baseBubblesPerClick,
-        baseClickMultiplier,
+        clickMultiplier,
         
         bubblesPerSecond,
         
@@ -107,6 +141,9 @@ int main()
 	// Initialize clocks for timing
 	sf::Clock secondClock;
 	sf::Clock deltaClock;
+
+	sf::Clock bubbleMayhemClock;
+	sf::Clock bubbleMayhemSpawnIntervalClock;
 
     sf::Clock bubbleBuffClock;
     sf::Clock bubbleBuffSpawnIntervalClock;
@@ -199,7 +236,7 @@ int main()
 					allTimeBubblesPerClick,
 
                     baseBubblesPerClick,
-                    baseClickMultiplier,
+                    clickMultiplier,
 
                     bubblesPerSecond,
 
@@ -222,6 +259,9 @@ int main()
         long double realBubblesPerSecond = bubblesPerSecond;
         long double realBubbles = bubbles;
 
+        if (isBubbleMayhemActive)
+            realBubblesPerSecond *= bubbleMayhemBuffMultiplier;
+
         if (isBubbleBuffActive)
             realBubblesPerSecond *= bubbleBuffMultiplier;
 
@@ -232,20 +272,20 @@ int main()
             realBubblesPerSecond *= rubberDuckBuffMultiplier;
 
         // Clicking buffs
-        long double clickMultiplier = baseClickMultiplier;
+        long double realClickMultiplier = clickMultiplier;
 
         if (isBubbleBuffActive)
-            clickMultiplier *= bubbleBuffMultiplier;
+            realClickMultiplier *= bubbleBuffMultiplier;
 
         if (isGoldenBubbleBuffActive)
-            clickMultiplier *= goldenBubbleBuffMultiplier;
+            realClickMultiplier *= goldenBubbleBuffMultiplier;
 
         if (isRubberDuckBuffActive)
-            clickMultiplier *= rubberDuckBuffMultiplier;
+            realClickMultiplier *= rubberDuckBuffMultiplier;
 
 		// Display bubbles and bubbles per second, along with other time logic
         float deltaTime = deltaClock.restart().asSeconds();
-        float smoothingFactor = 0.5f;
+        float  smoothingFactor = 0.8f;
 
         stringstream displayBubblesStream;
         stringstream bubblesPerSecondStream;
@@ -293,6 +333,8 @@ int main()
             bubblePopping.play();
         }
 
+        goldenBubbleBuffVariant currentGoldenBubbleType;
+
         bool goldenBubbleBuffClicked = buffHandler(
             mousePositionF,
             window,
@@ -312,7 +354,26 @@ int main()
             600.0f, 900.0f,
 
             isCurrentlyPressed,
-            isButtonPressed
+            isButtonPressed,
+
+            true,
+
+            [&](sf::RectangleShape& buffHitbox, float& buffMultiplier, float& buffDuration, buffVariantType& buffType)
+            {
+                auto variant = selectgoldenBubbleVariant(buffHitbox, buffMultiplier, buffDuration);
+                buffType = variant.buffType;
+                currentGoldenBubbleType = variant;
+            },
+            [&](buffVariantType type)
+            {
+                if (type == buffVariantType::goldenBubbleBuff && currentGoldenBubbleType.goldenBubbleType == goldenBubbleVariantType::BubbleMayhem)
+                {
+                    isBubbleMayhemActive = true;
+					cout << "Bubble Mayhem activated!" << endl;
+                    bubbleMayhemClock.restart();
+                    bubbleMayhemSpawnIntervalClock.restart();
+                }
+            }
 		);
 
         if (goldenBubbleBuffClicked)
@@ -333,7 +394,7 @@ int main()
             rubberDuckBuffLifetimeClock,
 
             isRubberDuckBuffActive,
-            showRubberDuckBufHitbox,
+            showRubberDuckBuffHitbox,
 
             rubberDuckBuffSpawnInterval,
 			rubberDuckBuffMultiplier,
@@ -355,7 +416,8 @@ int main()
             {
                 if (type == buffVariantType::rubberDuckBuff && currentDuckType.duckType == duckVariantType::Common)
                 {
-					bubbles += bubblesPerSecond * 60;
+					bubbles += realBubblesPerSecond * 60;
+					cout << "Common duck buff activated!" << endl;
                 }
 
                 else if (type == buffVariantType::rubberDuckBuff && currentDuckType.duckType == duckVariantType::Uncommon)
@@ -367,10 +429,33 @@ int main()
 
         if (rubberDuckBuffClicked)
         {
-            bubbles += bubblesPerSecond * 60;
             duckCounter++;
             rubberDuckQuack.play();
         }
+
+            if (isBubbleMayhemActive)
+            {
+                if (bubbleMayhemSpawnIntervalClock.getElapsedTime().asSeconds() >= bubbleMayhemSpawnInterval)
+                {
+                    float x = static_cast<float>(rand() % (1600 - 50));
+                    float y = static_cast<float>(rand() % (900 - 50));
+                    activeBubbles.emplace_back(sf::Vector2f(x, y));
+                    cout << "Bubble spawned at: (" << x << ", " << y << ")" << endl;
+                    bubbleMayhemSpawnIntervalClock.restart();
+                }
+
+                activeBubbles.erase(
+                    remove_if(activeBubbles.begin(), activeBubbles.end(),
+                        [](const BubbleMayhem& bubbleMayhem) { return bubbleMayhem.isTimeExpired(); }),
+                    activeBubbles.end()
+                );
+
+                if (bubbleMayhemClock.getElapsedTime().asSeconds() > bubbleMayhemDuration)
+                {
+                    isBubbleMayhemActive = false;
+                    activeBubbles.clear();
+                }
+            }
 
         // Update bubbles based on time elapsed
         if (secondClock.getElapsedTime().asSeconds() >= 1.0f)
@@ -380,41 +465,64 @@ int main()
             secondClock.restart();
         }
 
+        if (isBubbleMayhemActive && bubbleMayhemClock.getElapsedTime().asSeconds() > bubbleMayhemDuration)
+        {
+            isBubbleMayhemActive = false;
+        }
+
         displayBubbles += (bubbles - displayBubbles) * smoothingFactor * deltaTime;
 
         // Shop/Upgrade logic here
         if (isCurrentlyPressed && !isButtonPressed && upgradeObjectArea1.contains(mousePositionF) && allTimeBubbles >= soapUnlockThreshold)
         {
-            upgradeHandler(bubbles, bubblesPerSecond, soapCost, soapBaseCost, soapCount, baseSoapPerSecond, shopInflationMultiplier);
+            objectUpgradeHandler(bubbles, bubblesPerSecond, soapCost, soapBaseCost, soapCount, baseSoapPerSecond, shopInflationMultiplier);
         }
 
         if (isCurrentlyPressed && !isButtonPressed && upgradeObjectArea2.contains(mousePositionF) && allTimeBubbles >= handWashUnlockThreshold)
         {
-            upgradeHandler(bubbles, bubblesPerSecond, handWashCost, handWashBaseCost, handWashCount, baseHandWashPerSecond, shopInflationMultiplier);
+            objectUpgradeHandler(bubbles, bubblesPerSecond, handWashCost, handWashBaseCost, handWashCount, baseHandWashPerSecond, shopInflationMultiplier);
         }
 
         if (isCurrentlyPressed && !isButtonPressed && upgradeObjectArea3.contains(mousePositionF) && allTimeBubbles >= shampooUnlockThreshold)
         {
-            upgradeHandler(bubbles, bubblesPerSecond, shampooCost, shampooBaseCost, shampooCount, baseShampooPerSecond, shopInflationMultiplier);
+            objectUpgradeHandler(bubbles, bubblesPerSecond, shampooCost, shampooBaseCost, shampooCount, baseShampooPerSecond, shopInflationMultiplier);
         }
 
         // Clicking logic
-        if (isCurrentlyPressed && !isButtonPressed && clickArea.contains(mousePositionF))
+        if (isCurrentlyPressed && !isButtonPressed)
         {
-            clickHandler(
-                bubbles,
-                allTimeBubbles,
-                allTimeBubblesPerClick,
-                baseBubblesPerClick, 
-                bubblesPerSecond,
-                clickMultiplier
-            );
+            if (clickArea.contains(mousePositionF))
+            {
+                clickHandler(
+                    bubbles,
+                    allTimeBubbles,
+                    allTimeBubblesPerClick,
+                    baseBubblesPerClick,
+                    bubblesPerSecond,
+                    clickMultiplier
+                );
+            }
+            
+            for (auto bubbleIterator = activeBubbles.begin(); bubbleIterator != activeBubbles.end(); )
+            {
+                if (bubbleIterator->hitbox.getGlobalBounds().contains(mousePositionF))
+                {
+                    bubbles += 10.0L * bubbleMayhemBuffMultiplier;
+					cout << "Bubble popped!" + to_string(10.0L * bubbleMayhemBuffMultiplier) << endl;
+                    bubbleIterator = activeBubbles.erase(bubbleIterator);
+                }
+
+                else
+                {
+                    ++bubbleIterator;
+                }
+            }
         }
 
         isButtonPressed = isCurrentlyPressed;
 
         bubblesText.setString(formatDisplayBubbles(displayBubbles) + " Bubbles Formed");
-		bubblesPerSecondText.setString(bubblesPerSecondStream.str() + " Bubbles Per Second");
+		bubblesPerSecondText.setString(formatDisplayBubbles(realBubblesPerSecond) + " Bubbles Per Second");
 
         window.clear(sf::Color::White);
 
@@ -427,6 +535,11 @@ int main()
         window.draw(upgradeObjectArea2Shape);
         window.draw(upgradeObjectArea3Shape);
 
+        for (const auto& mayhemBubbles : activeBubbles)
+        {
+            window.draw(mayhemBubbles.hitbox);
+        }
+
         if (showBubbleBuffHitbox)
         {
             window.draw(bubbleBuffHitbox);
@@ -437,7 +550,7 @@ int main()
             window.draw(goldenBubbleBuffHitbox);
 		}
 
-        if (showRubberDuckBufHitbox)
+        if (showRubberDuckBuffHitbox)
         {
             window.draw(rubberDuckBuffHitbox);
         }

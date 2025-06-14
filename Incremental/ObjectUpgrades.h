@@ -9,7 +9,7 @@ void currentObjectCost(long double& currentCost, long double baseCost, int objec
 }
 
 // Upgrade logic so I don't spaghettify this file
-void upgradeHandler(long double& bubbles, long double& bubblesPerSecond, long double& currentCost, long double baseCost, int& objectCount, long double addedBubblesPerSecond, long double shopInflationMultiplier)
+void objectUpgradeHandler(long double& bubbles, long double& bubblesPerSecond, long double& currentCost, long double baseCost, int& objectCount, long double addedBubblesPerSecond, long double shopInflationMultiplier)
 {
     currentObjectCost(currentCost, baseCost, objectCount, shopInflationMultiplier);
 

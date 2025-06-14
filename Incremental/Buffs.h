@@ -3,6 +3,7 @@
 #include "Includes.h"
 #include "BuffTypes.h"
 #include "DuckVariants.h"
+#include "GoldenBubblesVariants.h"
 
 bool buffHandler(
     const sf::Vector2f& mousePos,
@@ -31,7 +32,7 @@ bool buffHandler(
     function<void(buffVariantType)> onBuffClick = nullptr
 )
 {
-	buffVariantType variantType = buffVariantType::none;
+    static buffVariantType variantType = buffVariantType::none;
 
     float elapsedBuffLifetime = buffLifetimeClock.getElapsedTime().asSeconds();
 
