@@ -22,27 +22,27 @@ inline vector<goldenBubbleBuffVariant> goldenBubbleVariants = {
 	{
 		5.0f, 10.0f,
 		sf::Color::Red,
-		0.0f,
+		10.0f,
 		buffVariantType::goldenBubbleBuff,
 		goldenBubbleVariantType::Multiplicative
 	},
 	{
 		1.0f, 0.0f,
 		sf::Color::Red,
-		0.0f,
+		10.0f,
 		buffVariantType::goldenBubbleBuff,
 		goldenBubbleVariantType::Additive
 	},
 	{
 		1.0, 20.0f,
 		sf::Color::Yellow,
-		100.0f,
+		80.0f,
 		buffVariantType::goldenBubbleBuff,
 		goldenBubbleVariantType::BubbleMayhem
 	}
 };
 
-inline goldenBubbleBuffVariant selectgoldenBubbleVariant(sf::RectangleShape& hitbox, float& goldenBubbleMultiplier, float& goldenBubbleDuration)
+inline goldenBubbleBuffVariant selectGoldenBubbleVariant(sf::RectangleShape& hitbox, float& goldenBubbleMultiplier, float& goldenBubbleDuration)
 {
 	float weightedRarity = 0.0f;
 	for (const auto& variant : goldenBubbleVariants)
@@ -56,12 +56,18 @@ inline goldenBubbleBuffVariant selectgoldenBubbleVariant(sf::RectangleShape& hit
 	for (const auto& variant : goldenBubbleVariants)
 	{
 		cumulativeRarity += variant.goldenBubbleRarity;
+
+		goldenBubbleBuffVariant currentVariant = variant;
+
 		if (randomValue <= cumulativeRarity)
 		{
-			goldenBubbleMultiplier = variant.goldenBubbleMultiplier;
-			goldenBubbleDuration = variant.goldenBubbleDuration;
-			hitbox.setFillColor(variant.color);
-			return variant;
+			currentVariant.buffType = buffVariantType::goldenBubbleBuff;
+
+			goldenBubbleMultiplier = currentVariant.goldenBubbleMultiplier;
+			goldenBubbleDuration = currentVariant.goldenBubbleDuration;
+			hitbox.setFillColor(currentVariant.color);
+
+			return currentVariant;
 		}
 	}
 

@@ -10,6 +10,9 @@
 
 int main()
 {
+    goldenBubbleBuffVariant currentGoldenBubbleType{};
+    duckBuffVariant currentDuckType{};
+
     sf::RenderWindow window(sf::VideoMode({ 1600, 900 }), "Bubble Incremental");
 	window.setFramerateLimit(60);
 
@@ -333,8 +336,6 @@ int main()
             bubblePopping.play();
         }
 
-        goldenBubbleBuffVariant currentGoldenBubbleType;
-
         bool goldenBubbleBuffClicked = buffHandler(
             mousePositionF,
             window,
@@ -358,15 +359,18 @@ int main()
 
             true,
 
-            [&](sf::RectangleShape& buffHitbox, float& buffMultiplier, float& buffDuration, buffVariantType& buffType)
+            [&](sf::RectangleShape& buffHitbox, float& buffMultiplier, float& buffDuration)
             {
-                auto variant = selectgoldenBubbleVariant(buffHitbox, buffMultiplier, buffDuration);
-                buffType = variant.buffType;
-                currentGoldenBubbleType = variant;
+                auto goldenBubbleVariant = selectGoldenBubbleVariant(buffHitbox, buffMultiplier, buffDuration);
+                currentGoldenBubbleType = goldenBubbleVariant;
+                cout << "[DEBUG] Selected variant type: " << static_cast<int>(currentGoldenBubbleType.goldenBubbleType) << endl;
             },
-            [&](buffVariantType type)
+            [&]()
             {
-                if (type == buffVariantType::goldenBubbleBuff && currentGoldenBubbleType.goldenBubbleType == goldenBubbleVariantType::BubbleMayhem)
+                cout << "[DEBUG] onBuffClick triggered" << endl;
+                cout << "[DEBUG] Clicked type: " << static_cast<int>(currentGoldenBubbleType.goldenBubbleType) << endl;
+
+                if (currentGoldenBubbleType.goldenBubbleType == goldenBubbleVariantType::BubbleMayhem)
                 {
                     isBubbleMayhemActive = true;
 					cout << "Bubble Mayhem activated!" << endl;
@@ -380,8 +384,6 @@ int main()
         {
             bubblePopping.play();
         }
-
-        duckBuffVariant currentDuckType;
 
         bool rubberDuckBuffClicked = buffHandler(
             mousePositionF,
@@ -406,21 +408,19 @@ int main()
 
             true,
             
-            [&](sf::RectangleShape& buffHitbox, float& buffMultiplier, float& buffDuration, buffVariantType& buffType)
+            [&](sf::RectangleShape& buffHitbox, float& buffMultiplier, float& buffDuration)
             {
-                auto variant = selectDuckVariant(buffHitbox, buffMultiplier, buffDuration);
-                buffType = variant.buffType;
-                currentDuckType = variant;
+                selectDuckVariant(buffHitbox, buffMultiplier, buffDuration);
             },
-            [&](buffVariantType type)
+            [&]()
             {
-                if (type == buffVariantType::rubberDuckBuff && currentDuckType.duckType == duckVariantType::Common)
+                if (currentDuckType.duckType == duckVariantType::Common)
                 {
 					bubbles += realBubblesPerSecond * 60;
 					cout << "Common duck buff activated!" << endl;
                 }
 
-                else if (type == buffVariantType::rubberDuckBuff && currentDuckType.duckType == duckVariantType::Uncommon)
+                else if (currentDuckType.duckType == duckVariantType::Uncommon)
                 {
                     bubbles += realBubbles * 0.05f;
                 }
@@ -508,6 +508,7 @@ int main()
                 if (bubbleIterator->hitbox.getGlobalBounds().contains(mousePositionF))
                 {
                     bubbles += 10.0L * bubbleMayhemBuffMultiplier;
+                    bubblePopping.play();
 					cout << "Bubble popped!" + to_string(10.0L * bubbleMayhemBuffMultiplier) << endl;
                     bubbleIterator = activeBubbles.erase(bubbleIterator);
                 }

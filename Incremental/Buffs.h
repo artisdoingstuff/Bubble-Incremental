@@ -28,12 +28,11 @@ bool buffHandler(
     bool isButtonPressed,
 
     bool isVariant = false,
-    function<void(sf::RectangleShape&, float&, float&, buffVariantType&)> variantSelector = nullptr,
-    function<void(buffVariantType)> onBuffClick = nullptr
+    function<void(sf::RectangleShape&, float&, float&)> variantSelector = nullptr,
+    function<void()> onBuffClick = nullptr,
+    void* tempVarVal = nullptr
 )
 {
-    static buffVariantType variantType = buffVariantType::none;
-
     float elapsedBuffLifetime = buffLifetimeClock.getElapsedTime().asSeconds();
 
     if (!showBuffHitbox && buffSpawnIntervalClock.getElapsedTime().asSeconds() > buffSpawnInterval)
@@ -53,8 +52,7 @@ bool buffHandler(
             variantSelector(
                 buffHitbox,
                 buffMultiplier,
-                buffDuration,
-                variantType
+                buffDuration
             );
         }
 
@@ -97,8 +95,8 @@ bool buffHandler(
 
         if (onBuffClick)
         {
-            onBuffClick(variantType);
-        }
+            onBuffClick();
+		}
 
         buffHitbox.setPosition({ -100, -100 });
 
