@@ -8,6 +8,9 @@
 #include "OfflineBubbles.h"
 #include "ObjectUpgrades.h"
 
+// Global Textures
+sf::Texture bubbleTexture;
+
 int main()
 {
     goldenBubbleBuffVariant currentGoldenBubbleType{};
@@ -16,19 +19,23 @@ int main()
     sf::RenderWindow window(sf::VideoMode({ 1600, 900 }), "Bubble Incremental");
 	window.setFramerateLimit(60);
 
-    const sf::Font font("Fonts/arial.ttf");
+    const sf::Font font("Assets/Fonts/arial.ttf");
     
     bool isButtonPressed = false;
 
     time_t savedTimestamp = 0;
 
+	// All textures here
+	bubbleTexture.loadFromFile("Assets/bubble.png");
+    bubbleTexture.setSmooth(true);
+
     // All sounds here
     sf::SoundBuffer rubberDuckQuackBuffer;
-    rubberDuckQuackBuffer.loadFromFile("Audio/rubberDuckQuack.wav");
+    rubberDuckQuackBuffer.loadFromFile("Assets/Audio/rubberDuckQuack.wav");
     sf::Sound rubberDuckQuack(rubberDuckQuackBuffer);
 
     sf::SoundBuffer bubblePoppingBuffer;
-	bubblePoppingBuffer.loadFromFile("Audio/bubblePopping.wav");
+	bubblePoppingBuffer.loadFromFile("Assets/Audio/bubblePopping.wav");
 	sf::Sound bubblePopping(bubblePoppingBuffer);
 
 	// Bubbles variables here
@@ -67,7 +74,7 @@ int main()
     bool showRubberDuckBuffHitbox = false;
     float rubberDuckBuffDuration = 0.0f;
     float rubberDuckBuffMultiplier = 1.0f;
-    float rubberDuckBuffSpawnInterval = 1.0f;
+    float rubberDuckBuffSpawnInterval = 180.0f;
 
     srand(static_cast<unsigned>(time(0)));
 
@@ -417,7 +424,7 @@ int main()
 
                 else if (currentDuckType.duckType == duckVariantType::Uncommon)
                 {
-                    bubbles += realBubbles * 0.05f;
+                    bubbles += realBubbles * 0.005f;
                 }
             }
 		);
@@ -530,9 +537,10 @@ int main()
         window.draw(upgradeObjectArea2Shape);
         window.draw(upgradeObjectArea3Shape);
 
-        for (const auto& mayhemBubbles : activeBubbles)
+        for (auto& mayhemBubbles : activeBubbles)
         {
-            window.draw(mayhemBubbles.hitbox);
+			mayhemBubbles.updateBubbleAlpha();
+            window.draw(mayhemBubbles.bubbleSprite);
         }
 
         if (showBubbleBuffHitbox)
