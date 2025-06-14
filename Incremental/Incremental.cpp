@@ -363,17 +363,12 @@ int main()
             {
                 auto goldenBubbleVariant = selectGoldenBubbleVariant(buffHitbox, buffMultiplier, buffDuration);
                 currentGoldenBubbleType = goldenBubbleVariant;
-                cout << "[DEBUG] Selected variant type: " << static_cast<int>(currentGoldenBubbleType.goldenBubbleType) << endl;
             },
             [&]()
             {
-                cout << "[DEBUG] onBuffClick triggered" << endl;
-                cout << "[DEBUG] Clicked type: " << static_cast<int>(currentGoldenBubbleType.goldenBubbleType) << endl;
-
                 if (currentGoldenBubbleType.goldenBubbleType == goldenBubbleVariantType::BubbleMayhem)
                 {
                     isBubbleMayhemActive = true;
-					cout << "Bubble Mayhem activated!" << endl;
                     bubbleMayhemClock.restart();
                     bubbleMayhemSpawnIntervalClock.restart();
                 }
@@ -506,9 +501,9 @@ int main()
             {
                 if (bubbleIterator->hitbox.getGlobalBounds().contains(mousePositionF))
                 {
-                    bubbles += 10.0L * bubbleMayhemBuffMultiplier;
+                    float randomBubbleMayhemMultiplier = (rand() % 28) + 3;
+					bubbles += realBubblesPerSecond * randomBubbleMayhemMultiplier * bubbleMayhemBuffMultiplier;
                     bubblePopping.play();
-					cout << "Bubble popped!" + to_string(10.0L * bubbleMayhemBuffMultiplier) << endl;
                     bubbleIterator = activeBubbles.erase(bubbleIterator);
                 }
 
