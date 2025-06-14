@@ -7,12 +7,14 @@ struct BubbleMayhem
     sf::Clock bubbleMayhemLifetimeClock;
     float bubbleLifetime;
 
-    BubbleMayhem(sf::Vector2f position, sf::Vector2f size = { 75.0f, 75.0f }, float lifeTimeSec = 5.0f)
+    BubbleMayhem(sf::Vector2f position, float lifetimeSec = 5.0f) : position(position), bubbleLifetime(lifetimeSec)
     {
+        float randomBubbleSize = static_cast<float>((rand() % 41) + 50);
+		sf::Vector2f size(randomBubbleSize, randomBubbleSize);
+
         hitbox.setSize(size);
         hitbox.setPosition(position);
         hitbox.setFillColor(sf::Color::Cyan);
-        bubbleLifetime = lifeTimeSec;
     }
 
     bool isTimeExpired() const

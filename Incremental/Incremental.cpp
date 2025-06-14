@@ -49,7 +49,7 @@ int main()
 	bool isBubbleMayhemActive = false;
 	float bubbleMayhemDuration = 20.0f;
 	float bubbleMayhemBuffMultiplier = 2.0f;
-	float bubbleMayhemSpawnInterval = 0.2f;
+	float bubbleMayhemSpawnInterval = 0.25f;
 
     bool isBubbleBuffActive = false;
     bool showBubbleBuffHitbox = false;
@@ -433,29 +433,28 @@ int main()
             rubberDuckQuack.play();
         }
 
-            if (isBubbleMayhemActive)
+        if (isBubbleMayhemActive)
+        {
+            if (bubbleMayhemSpawnIntervalClock.getElapsedTime().asSeconds() >= bubbleMayhemSpawnInterval)
             {
-                if (bubbleMayhemSpawnIntervalClock.getElapsedTime().asSeconds() >= bubbleMayhemSpawnInterval)
-                {
-                    float x = static_cast<float>(rand() % (1600 - 50));
-                    float y = static_cast<float>(rand() % (900 - 50));
-                    activeBubbles.emplace_back(sf::Vector2f(x, y));
-                    cout << "Bubble spawned at: (" << x << ", " << y << ")" << endl;
-                    bubbleMayhemSpawnIntervalClock.restart();
-                }
-
-                activeBubbles.erase(
-                    remove_if(activeBubbles.begin(), activeBubbles.end(),
-                        [](const BubbleMayhem& bubbleMayhem) { return bubbleMayhem.isTimeExpired(); }),
-                    activeBubbles.end()
-                );
-
-                if (bubbleMayhemClock.getElapsedTime().asSeconds() > bubbleMayhemDuration)
-                {
-                    isBubbleMayhemActive = false;
-                    activeBubbles.clear();
-                }
+                float x = static_cast<float>(rand() % (1600 - 50));
+                float y = static_cast<float>(rand() % (900 - 50));
+                activeBubbles.emplace_back(sf::Vector2f(x, y));
+                cout << "Bubble spawned at: (" << x << ", " << y << ")" << endl;
+                bubbleMayhemSpawnIntervalClock.restart();
             }
+
+            if (bubbleMayhemClock.getElapsedTime().asSeconds() > bubbleMayhemDuration)
+            {
+                isBubbleMayhemActive = false;
+            }
+        }
+
+        activeBubbles.erase(
+            remove_if(activeBubbles.begin(), activeBubbles.end(),
+                [](const BubbleMayhem& bubbleMayhem) { return bubbleMayhem.isTimeExpired(); }),
+            activeBubbles.end()
+        );
 
         // Update bubbles based on time elapsed
         if (secondClock.getElapsedTime().asSeconds() >= 1.0f)
