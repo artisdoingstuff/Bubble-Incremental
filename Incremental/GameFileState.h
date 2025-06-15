@@ -1,121 +1,85 @@
 ﻿#pragma once
 
 #include "Includes.h"
+#include "ObjectUpgrades.h"
 
 // Function to save the game state to a file
-void saveFile(
+void saveFileToJson(
     time_t timestamp,
-
     long double duckCounter,
-
     long double bubbles,
     long double allTimeBubbles,
-	long double allTimeBubblesPerClick,
-
+    long double allTimeBubblesPerClick,
     long double baseBubblesPerClick,
     long double clickMultiplier,
-
     long double bubblesPerSecond,
-
-    int soapCount,
-    int handWashCount,
-    int shampooCount
+    const std::vector<UpgradeItem>& upgrades
 )
 {
-    ofstream saveFile("save_file.txt");
+    json saveData;
 
-    if (saveFile.is_open())
+    auto round2 = [](long double val) -> long double {
+        return round(val * 100.0) / 100.0;
+        };
+
+    saveData["timestamp"] = timestamp;
+    saveData["duckCounter"] = round2(duckCounter);
+    saveData["bubbles"] = round2(bubbles);
+    saveData["allTimeBubbles"] = round2(allTimeBubbles);
+    saveData["allTimeBubblesPerClick"] = round2(allTimeBubblesPerClick);
+    saveData["baseBubblesPerClick"] = round2(baseBubblesPerClick);
+    saveData["clickMultiplier"] = round2(clickMultiplier);
+    saveData["bubblesPerSecond"] = round2(bubblesPerSecond);
+    saveData["upgrades"] = upgrades;  // Uses to_json from UpgradeItem
+
+    ofstream file("save_file.json");
+    if (file.is_open())
     {
-        saveFile << fixed << setprecision(0) << timestamp << endl;
-
-        saveFile << fixed << setprecision(0) << duckCounter << endl;
-
-        saveFile << fixed << setprecision(0) << bubbles << endl;
-        saveFile << fixed << setprecision(2) << allTimeBubbles << endl;
-		saveFile << fixed << setprecision(2) << allTimeBubblesPerClick << endl;
-
-        saveFile << fixed << setprecision(2) << baseBubblesPerClick << endl;
-        saveFile << fixed << setprecision(2) << clickMultiplier << endl;
-
-        saveFile << fixed << setprecision(2) << bubblesPerSecond << endl;
-
-        saveFile << fixed << setprecision(0) << soapCount << endl;
-        saveFile << fixed << setprecision(0) << handWashCount << endl;
-        saveFile << fixed << setprecision(0) << shampooCount << endl;
-
-        saveFile.close();
+        file << std::setw(4) << saveData << endl;
+        file.close();
         cout << "Game saved successfully." << endl;
     }
-
     else
     {
-        cerr << "Unable to open save file." << endl;
+        cerr << "Unable to open save_file.json for writing." << endl;
     }
 }
 
 // Function to load the game state from a file
-void loadFile(
-    time_t &timestamp,
-
-    long double &duckCounter,
-
-    long double &bubbles,
-    long double &allTimeBubbles,
-	long double& allTimeBubblesPerClick,
-
-    long double &baseBubblesPerClick,
-    long double &clickMultiplier,
-
-    long double &bubblesPerSecond,
-    
-    int &soapCount,
-    int &handWashCount,
-    int &shampooCount
+void loadFileFromJson(
+    time_t& timestamp,
+    long double& duckCounter,
+    long double& bubbles,
+    long double& allTimeBubbles,
+    long double& allTimeBubblesPerClick,
+    long double& baseBubblesPerClick,
+    long double& clickMultiplier,
+    long double& bubblesPerSecond,
+    vector<UpgradeItem>& upgrades
 )
 {
-    ifstream saveFile("save_file.txt");
-
-    if (saveFile.is_open())
+    ifstream file("save_file.json");
+    if (!file.is_open())
     {
-        saveFile >> timestamp;
-
-        saveFile >> duckCounter;
-
-        saveFile >> bubbles;
-        saveFile >> allTimeBubbles;
-		saveFile >> allTimeBubblesPerClick;
-
-        saveFile >> baseBubblesPerClick;
-        saveFile >> clickMultiplier;
-
-        saveFile >> bubblesPerSecond;
-
-        saveFile >> soapCount;
-        saveFile >> handWashCount;
-        saveFile >> shampooCount;
-
-        saveFile.close();
-        cout << "Game loaded successfully." << endl;
-    }
-
-    else
-    {
-        cerr << "Unable to open save file. Starting a new game." << endl;
+        cerr << "No save file found. Starting new game." << endl;
         timestamp = time(nullptr);
-
-        duckCounter = 0.0f;
-
-        bubbles = 0;
-        allTimeBubbles = 0;
-		allTimeBubblesPerClick = 0.0f;
-
-        baseBubblesPerClick = 1.0f;
-        clickMultiplier = 1.0f;
-
-        bubblesPerSecond = 0.0f;
-
-        soapCount = 0;
-        handWashCount = 0;
-        shampooCount = 0;
+        return;
     }
+
+    json saveData;
+    file >> saveData;
+
+    timestamp = saveData["timestamp"];
+    duckCounter = saveData["duckCounter"];
+    bubbles = saveData["bubbles"];
+    allTimeBubbles = saveData["allTimeBubbles"];
+    allTimeBubblesPerClick = saveData["allTimeBubblesPerClick"];
+    baseBubblesPerClick = saveData["baseBubblesPerClick"];
+    clickMultiplier = saveData["clickMultiplier"];
+    bubblesPerSecond = saveData["bubblesPerSecond"];
+
+    upgrades = saveData["upgrades"].get<vector<UpgradeItem>>();
+    file.close();
+
+    cout << "Game loaded from save_file.json" << endl;
 }

@@ -2,29 +2,67 @@
 
 #include "Includes.h"
 
-// Current cost of an object (building)
-void currentObjectCost(long double& currentCost, long double baseCost, int objectCount, long double shopInflationMultiplier)
+extern const long double shopInflationMultiplier;
+
+struct UpgradeItem
 {
-    currentCost = round(baseCost * pow(shopInflationMultiplier, objectCount));
+    string name;
+    int count = 0;
+
+    long double baseCost;
+    long double currentCost;
+
+    long double baseProduction; // bubbles per second
+    long double unlockThreshold;
+
+    void updateCost(const long double inflation = shopInflationMultiplier)
+    {
+        currentCost = round(baseCost * pow(inflation, count));
+    }
+
+    long double getProduction() const
+    {
+        return count * baseProduction;
+    }
+
+    bool isUnlocked(long double currentBubbles) const
+    {
+        return currentBubbles >= unlockThreshold;
+    }
+
+    bool canAfford(long double currentBubbles) const
+    {
+        return currentBubbles >= currentCost;
+    }
+
+    void purchase(long double& currentBubbles, const long double inflation = 1.15L)
+    {
+        if (!canAfford(currentBubbles)) return;
+
+        currentBubbles -= currentCost;
+        count++;
+        updateCost(inflation);
+    }
+};
+
+inline void to_json(json& j, const UpgradeItem& u)
+{
+    j = json{
+        {"name", u.name},
+        {"count", u.count},
+        {"baseCost", u.baseCost},
+        {"baseProduction", u.baseProduction},
+        {"unlockThreshold", u.unlockThreshold}
+    };
 }
 
-// Upgrade logic so I don't spaghettify this file
-void objectUpgradeHandler(long double& bubbles, long double& bubblesPerSecond, long double& currentCost, long double baseCost, int& objectCount, long double addedBubblesPerSecond, long double shopInflationMultiplier)
+inline void from_json(const json& j, UpgradeItem& u)
 {
-    currentObjectCost(currentCost, baseCost, objectCount, shopInflationMultiplier);
+    j.at("name").get_to(u.name);
+    j.at("count").get_to(u.count);
+    j.at("baseCost").get_to(u.baseCost);
+    j.at("baseProduction").get_to(u.baseProduction);
+    j.at("unlockThreshold").get_to(u.unlockThreshold);
 
-    bubbles -= currentCost;
-
-    if (bubbles < 0)
-    {
-        bubbles += currentCost;
-        cout << "Not enough bubbles to purchase upgrade!" << endl;
-    }
-
-    else
-    {
-        objectCount++;
-        bubblesPerSecond += addedBubblesPerSecond;
-        cout << "Upgrade purchased (" + to_string(currentCost) + ")! Current count: " << objectCount << endl;
-    }
+    u.updateCost();
 }

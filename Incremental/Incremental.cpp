@@ -14,6 +14,9 @@
 sf::Texture bubbleTexture;
 sf::Texture goldenBubbleTexture;
 
+// Global Variables if needed
+const long double shopInflationMultiplier = 1.15L;
+
 // Bubble combo variables
 bool isBubbleComboActive = false;
 float bubbleComboResetTime = 1.5f;
@@ -240,44 +243,40 @@ int main()
     long double allTimeBubblesMilestoneUpgrade5UnlockThreshold = 750.0f;
 
 	// Object Upgrade variables here
-    const long double shopInflationMultiplier = 1.15f;
+    vector<UpgradeItem> upgrades;
 
-    int soapCount = 0;
-    long double baseSoapPerSecond = 0.1f;
-    long double soapCost = 10.0f;
-    long double soapBaseCost = 10.0f;
-	long double soapUnlockThreshold = 10.0f;
+    upgrades.push_back(
+        {
+            "Soap",
+            0, 10.0, 10.0, 0.1, 10.0
+        }
+    );
 
-    int handWashCount = 0;
-	long double baseHandWashPerSecond = 0.5f;
-	long double handWashCost = 100.0f;
-	long double handWashBaseCost = 100.0f;
-	long double handWashUnlockThreshold = 100.0f;
+    upgrades.push_back(
+        {
+            "Hand Wash",
+            0, 100.0, 100.0, 0.5, 100.0
+        }
+    );
 
-	int shampooCount = 0;
-	long double baseShampooPerSecond = 1.0f;
-	long double shampooCost = 500.0f;
-	long double shampooBaseCost = 500.0f;
-	long double shampooUnlockThreshold = 550.0f;
+    upgrades.push_back(
+        {
+            "Shampoo",
+            0, 500.0, 500.0, 1.0, 550.0
+        }
+    );
 
     // Loading game file (if it exists)
-    loadFile(
+    loadFileFromJson(
         savedTimestamp,
-
         duckCounter,
-        
         bubbles,
         allTimeBubbles,
-		allTimeBubblesPerClick,
-        
+        allTimeBubblesPerClick,
         baseBubblesPerClick,
         clickMultiplier,
-        
         bubblesPerSecond,
-        
-        soapCount,
-        handWashCount,
-        shampooCount
+        upgrades
     );
     displayBubbles = bubbles;
 
@@ -383,23 +382,16 @@ int main()
             if (event->is<sf::Event::Closed>())
             {
                 time_t currentTimestamp = time(nullptr);
-                saveFile(
+                saveFileToJson(
                     currentTimestamp,
-
                     duckCounter,
-
                     bubbles,
                     allTimeBubbles,
-					allTimeBubblesPerClick,
-
+                    allTimeBubblesPerClick,
                     baseBubblesPerClick,
                     clickMultiplier,
-
                     bubblesPerSecond,
-
-                    soapCount,
-                    handWashCount,
-                    shampooCount
+                    upgrades
                 );
                 window.close();
             }
@@ -639,19 +631,30 @@ int main()
         displayBubbles += (bubbles - displayBubbles) * smoothingFactor * deltaTime;
 
         // Shop/Upgrade logic here
-        if (isCurrentlyPressed && !isButtonPressed && upgradeObjectArea1.contains(mousePositionF) && allTimeBubbles >= soapUnlockThreshold)
-        {
-            objectUpgradeHandler(bubbles, bubblesPerSecond, soapCost, soapBaseCost, soapCount, baseSoapPerSecond, shopInflationMultiplier);
-        }
+        vector<sf::FloatRect> upgradeClickAreas = {
+            upgradeObjectArea1,
+            upgradeObjectArea2,
+            upgradeObjectArea3
+        };
 
-        if (isCurrentlyPressed && !isButtonPressed && upgradeObjectArea2.contains(mousePositionF) && allTimeBubbles >= handWashUnlockThreshold)
+        for (size_t i = 0; i < upgrades.size(); ++i)
         {
-            objectUpgradeHandler(bubbles, bubblesPerSecond, handWashCost, handWashBaseCost, handWashCount, baseHandWashPerSecond, shopInflationMultiplier);
-        }
+            if (isCurrentlyPressed && !isButtonPressed
+                && upgradeClickAreas[i].contains(mousePositionF)
+                && allTimeBubbles >= upgrades[i].unlockThreshold)
+            {
+                if (upgrades[i].canAfford(bubbles))
+                {
+                    upgrades[i].purchase(bubbles);
+                    bubblesPerSecond += upgrades[i].baseProduction;
 
-        if (isCurrentlyPressed && !isButtonPressed && upgradeObjectArea3.contains(mousePositionF) && allTimeBubbles >= shampooUnlockThreshold)
-        {
-            objectUpgradeHandler(bubbles, bubblesPerSecond, shampooCost, shampooBaseCost, shampooCount, baseShampooPerSecond, shopInflationMultiplier);
+                    std::cout << "Purchased: " << upgrades[i].name << " | New count: " << upgrades[i].count << endl;
+                }
+                else
+                {
+                    std::cout << "Not enough bubbles to purchase " << upgrades[i].name << endl;
+                }
+            }
         }
 
         // Clicking logic
