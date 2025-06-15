@@ -48,7 +48,7 @@ inline vector<goldenBubbleBuffVariant> goldenBubbleVariants = {
 		goldenBubbleVariantType::Additive
 	},
 	{
-		1.0, 20.0f,
+		0.7, 20.0f,
 		sf::Color::Blue,
 		2.0f,
 		buffVariantType::goldenBubbleBuff,

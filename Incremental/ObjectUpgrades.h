@@ -15,6 +15,10 @@ struct UpgradeItem
     long double baseProduction; // bubbles per second
     long double unlockThreshold;
 
+    bool isMilestone = false;
+    bool unlockedByMilestone = false;
+    long double milestoneTriggerValue = 0.0;
+
     void updateCost(const long double inflation = shopInflationMultiplier)
     {
         currentCost = round(baseCost * pow(inflation, count));
@@ -27,7 +31,7 @@ struct UpgradeItem
 
     bool isUnlocked(long double currentBubbles) const
     {
-        return currentBubbles >= unlockThreshold;
+        return !unlockedByMilestone || isMilestone || currentBubbles >= milestoneTriggerValue;
     }
 
     bool canAfford(long double currentBubbles) const
@@ -52,7 +56,10 @@ inline void to_json(json& j, const UpgradeItem& u)
         {"count", u.count},
         {"baseCost", u.baseCost},
         {"baseProduction", u.baseProduction},
-        {"unlockThreshold", u.unlockThreshold}
+        {"unlockThreshold", u.unlockThreshold},
+        {"isMilestone", u.isMilestone},
+        {"unlockedByMilestone", u.unlockedByMilestone},
+        {"milestoneTriggerValue", u.milestoneTriggerValue}
     };
 }
 
@@ -63,6 +70,9 @@ inline void from_json(const json& j, UpgradeItem& u)
     j.at("baseCost").get_to(u.baseCost);
     j.at("baseProduction").get_to(u.baseProduction);
     j.at("unlockThreshold").get_to(u.unlockThreshold);
+    if (j.contains("isMilestone")) j.at("isMilestone").get_to(u.isMilestone);
+    if (j.contains("unlockedByMilestone")) j.at("unlockedByMilestone").get_to(u.unlockedByMilestone);
+    if (j.contains("milestoneTriggerValue")) j.at("milestoneTriggerValue").get_to(u.milestoneTriggerValue);
 
     u.updateCost();
 }

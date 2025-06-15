@@ -1,9 +1,9 @@
 ﻿#include "BubbleFrenzy.h"
 #include "BubbleChaos.h"
 #include "BubbleMayhem.h"
+#include "Bubbles.h"
 #include "BubblesFormat.h"
 #include "Buffs.h"
-#include "ClickingBubbles.h"
 #include "DuckVariants.h"
 #include "GameFileState.h"
 #include "GoldenBubblesVariants.h"
@@ -16,6 +16,10 @@ sf::Texture goldenBubbleTexture;
 
 // Global Variables if needed
 const long double shopInflationMultiplier = 1.15L;
+
+long double bubbles = 0.0L;
+long double allTimeBubbles = 0.0L;
+long double allTimeBubblesPerClick = 0.0L;
 
 // Bubble combo variables
 bool isBubbleComboActive = false;
@@ -60,7 +64,7 @@ void handleBubbleClick(
             
 			long double bubbleGain = realBubblesPerSecond * randomMultiplier * bubbleMultiplier * bubbleComboMultiplier;
             
-            bubbles += bubbleGain;
+            addBubbles(bubbleGain, bubbles, allTimeBubbles);
 
             bubblePoppingSound.play();
             bubbleIterator->startPoppingBubbles();
@@ -164,13 +168,10 @@ int main()
 	sf::Sound bubblePopping(bubblePoppingBuffer);
 
 	// Bubbles variables here
-    long double bubbles = 0.0L;
     long double displayBubbles = 0.0L;
-    long double allTimeBubbles = 0.0L;
 
     long double baseBubblesPerClick = 1.0L;
     long double clickMultiplier = 1.0L;
-    long double allTimeBubblesPerClick = 0.0L;
 
     long double bubblesPerSecond = 0.0L;
 
@@ -247,8 +248,11 @@ int main()
 
     upgrades.push_back(
         {
-            "Soap",
-            0, 10.0, 10.0, 0.1, 10.0
+            "Soap",     // Reference
+            0,          // Item count
+            10.0, 10.0, // Item costs (base and current, current is automatically calculated)
+            0.1,        // Bubbles per second
+            10.0        // Unlock theshold (all time bubbles)
         }
     );
 
@@ -618,8 +622,7 @@ int main()
         // Update bubbles based on time elapsed
         if (secondClock.getElapsedTime().asSeconds() >= 1.0f)
         {
-            bubbles += realBubblesPerSecond;
-            allTimeBubbles += realBubblesPerSecond;
+            addBubbles(realBubblesPerSecond, bubbles, allTimeBubbles);
             secondClock.restart();
         }
 
@@ -662,14 +665,8 @@ int main()
         {
             if (clickArea.contains(mousePositionF))
             {
-                clickHandler(
-                    bubbles,
-                    allTimeBubbles,
-                    allTimeBubblesPerClick,
-                    baseBubblesPerClick,
-                    bubblesPerSecond,
-                    clickMultiplier
-                );
+                long double clickValue = (baseBubblesPerClick + (bubblesPerSecond * 0.05)) * clickMultiplier;
+                addBubbles(clickValue, bubbles, allTimeBubbles, &allTimeBubblesPerClick, true);
             }
             
             handleBubbleClick(activeChaosBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleChaosBuffMultiplier, bubblePopping);
