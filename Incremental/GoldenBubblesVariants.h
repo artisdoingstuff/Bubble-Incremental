@@ -5,7 +5,7 @@
 
 enum class goldenBubbleVariantType
 {
-	Multiplicative, Additive, BubbleMayhem
+	Multiplicative, Additive, BubbleChaos, BubbleFrenzy, BubbleMayhem
 };
 
 extern sf::Texture goldenBubbleTexture;
@@ -51,6 +51,20 @@ inline vector<goldenBubbleBuffVariant> goldenBubbleVariants = {
 		1.0, 20.0f,
 		sf::Color::Blue,
 		100.0f,
+		buffVariantType::goldenBubbleBuff,
+		goldenBubbleVariantType::BubbleChaos
+	},
+	{
+		1.0, 20.0f,
+		sf::Color::Blue,
+		0.0f,
+		buffVariantType::goldenBubbleBuff,
+		goldenBubbleVariantType::BubbleFrenzy
+	},
+	{
+		1.0, 20.0f,
+		sf::Color::Blue,
+		0.0f,
 		buffVariantType::goldenBubbleBuff,
 		goldenBubbleVariantType::BubbleMayhem
 	}

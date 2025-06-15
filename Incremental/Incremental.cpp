@@ -14,6 +14,72 @@
 sf::Texture bubbleTexture;
 sf::Texture goldenBubbleTexture;
 
+//
+template <typename ActiveBubbleType>
+void handleBubbleClick(
+    vector<ActiveBubbleType>& bubbleList, const sf::Vector2f& mousePositionF,
+    long double& bubbles, float bubbleMultiplier, long double realBubblesPerSecond,
+    sf::Sound& bubblePoppingSound, int minMult = 3, int maxMult = 30)
+{
+    for (auto bubbleIterator = bubbleList.begin(); bubbleIterator != bubbleList.end(); )
+    {
+        if (bubbleIterator->hitbox.getGlobalBounds().contains(mousePositionF) && !bubbleIterator->isBubblePopping)
+        {
+            int randomMultiplier = (rand() % (maxMult - minMult)) + minMult;
+            bubbles += realBubblesPerSecond * randomMultiplier * bubbleMultiplier;
+
+            bubblePoppingSound.play();
+            bubbleIterator->startPoppingBubbles();
+        }
+
+        ++bubbleIterator;
+    }
+}
+
+template <typename SpawnBubbleEvent>
+void updateBubbleBuff(
+    bool& isBuffActive,
+    float buffDuration,
+    float spawnInterval,
+    sf::Clock& buffClock,
+    sf::Clock& spawnClock,
+    vector<SpawnBubbleEvent>& activeBubbleList,
+    int maxX = 1600,
+    int maxY = 900
+)
+{
+    if (!isBuffActive)
+        return;
+
+    if (spawnClock.getElapsedTime().asSeconds() >= spawnInterval)
+    {
+        float x = static_cast<float>(rand() % maxX);
+        float y = static_cast<float>(rand() % maxY);
+        activeBubbleList.emplace_back(sf::Vector2f(x, y));
+        spawnClock.restart();
+    }
+
+    if (buffClock.getElapsedTime().asSeconds() > buffDuration)
+    {
+        isBuffActive = false;
+    }
+}
+
+template <typename ClearBubbleEvent>
+void cleanupExpiredBubbles(vector<ClearBubbleEvent>& bubbles)
+{
+    bubbles.erase(
+        remove_if(
+            bubbles.begin(), bubbles.end(),
+            [](const ClearBubbleEvent& bubble)
+            {
+                return bubble.isTimeExpired() || bubble.isPoppingBubblesComplete();
+            }
+        ),
+        bubbles.end()
+    );
+}
+
 int main()
 {
     goldenBubbleBuffVariant currentGoldenBubbleType{};
@@ -63,13 +129,23 @@ int main()
     long double duckCounter = 0.0L;
 
     // Buffs variables here
-    vector<BubbleMayhem> activeBubbles;
-	bool isBubbleMayhemActive = false;
-	float bubbleMayhemDuration = 20.0f;
-	float bubbleMayhemBuffMultiplier = 1.5f;
-	float bubbleMayhemSpawnInterval = 0.2f;
-    //float bubbleChaosSpawnInterval = 0.001f;
-    //float bubbleFrenzySpawnInterval = 0.5f;
+    vector<BubbleChaos> activeChaosBubbles;
+    bool isBubbleChaosActive = false;
+    float bubbleChaosDuration = 20.0f;
+    float bubbleChaosBuffMultiplier = 1.1f;
+    float bubbleChaosSpawnInterval = 0.001f;
+
+    vector<BubbleFrenzy> activeFrenzyBubbles;
+    bool isBubbleFrenzyActive = false;
+    float bubbleFrenzyDuration = 20.0f;
+    float bubbleFrenzyBuffMultiplier = 5.0f;
+    float bubbleFrenzySpawnInterval = 0.5f;
+
+    vector<BubbleMayhem> activeMayhemBubbles;
+    bool isBubbleMayhemActive = false;
+    float bubbleMayhemDuration = 20.0f;
+    float bubbleMayhemBuffMultiplier = 2.0f;
+    float bubbleMayhemSpawnInterval = 0.125f;
 
     bool isBubbleBuffActive = false;
     bool showBubbleBuffHitbox = false;
@@ -166,8 +242,14 @@ int main()
 	sf::Clock secondClock;
 	sf::Clock deltaClock;
 
-	sf::Clock bubbleMayhemClock;
-	sf::Clock bubbleMayhemSpawnIntervalClock;
+    sf::Clock bubbleChaosClock;
+    sf::Clock bubbleChaosSpawnIntervalClock;
+
+    sf::Clock bubbleFrenzyClock;
+    sf::Clock bubbleFrenzySpawnIntervalClock;
+
+    sf::Clock bubbleMayhemClock;
+    sf::Clock bubbleMayhemSpawnIntervalClock;
 
     sf::Clock bubbleBuffClock;
     sf::Clock bubbleBuffSpawnIntervalClock;
@@ -389,6 +471,22 @@ int main()
             },
             [&]()
             {
+                if (currentGoldenBubbleType.goldenBubbleType == goldenBubbleVariantType::BubbleChaos)
+                {
+                    isBubbleChaosActive = true;
+                    bubbleChaosClock.restart();
+                    bubbleChaosSpawnIntervalClock.restart();
+                    doesGoldenBubbleBuffExist = false;
+                }
+
+                if (currentGoldenBubbleType.goldenBubbleType == goldenBubbleVariantType::BubbleFrenzy)
+                {
+                    isBubbleFrenzyActive = true;
+                    bubbleFrenzyClock.restart();
+                    bubbleFrenzySpawnIntervalClock.restart();
+                    doesGoldenBubbleBuffExist = false;
+                }
+
                 if (currentGoldenBubbleType.goldenBubbleType == goldenBubbleVariantType::BubbleMayhem)
                 {
                     isBubbleMayhemActive = true;
@@ -454,33 +552,16 @@ int main()
             rubberDuckQuack.play();
         }
 
-        if (isBubbleMayhemActive)
-        {
-            if (bubbleMayhemSpawnIntervalClock.getElapsedTime().asSeconds() >= bubbleMayhemSpawnInterval)
-            {
-                float x = static_cast<float>(rand() % (1600 - 0));
-                float y = static_cast<float>(rand() % (900 - 0));
-                activeBubbles.emplace_back(sf::Vector2f(x, y));
-                cout << "Bubble spawned at: (" << x << ", " << y << ")" << endl;
-                bubbleMayhemSpawnIntervalClock.restart();
-            }
+		// Bubble chaos, frenzy, and mayhem logic
+        updateBubbleBuff(isBubbleChaosActive, bubbleChaosDuration, bubbleChaosSpawnInterval, bubbleChaosClock, bubbleChaosSpawnIntervalClock, activeChaosBubbles);
+        updateBubbleBuff(isBubbleFrenzyActive, bubbleFrenzyDuration, bubbleFrenzySpawnInterval, bubbleFrenzyClock, bubbleFrenzySpawnIntervalClock, activeFrenzyBubbles);
+        updateBubbleBuff(isBubbleMayhemActive, bubbleMayhemDuration, bubbleMayhemSpawnInterval, bubbleMayhemClock, bubbleMayhemSpawnIntervalClock, activeMayhemBubbles);
 
-            if (bubbleMayhemClock.getElapsedTime().asSeconds() > bubbleMayhemDuration)
-            {
-                isBubbleMayhemActive = false;
-            }
-        }
 
-        activeBubbles.erase(
-            remove_if(
-                activeBubbles.begin(), activeBubbles.end(),
-                [](const BubbleMayhem& bubbleMayhem)
-                {
-                    return bubbleMayhem.isTimeExpired() || bubbleMayhem.isPoppingBubblesComplete();
-                }
-            ),
-            activeBubbles.end()
-        );
+		// Remove expired chaos, frenzy, and mayhem bubbles
+        cleanupExpiredBubbles(activeChaosBubbles);
+        cleanupExpiredBubbles(activeFrenzyBubbles);
+        cleanupExpiredBubbles(activeMayhemBubbles);
 
         // Update bubbles based on time elapsed
         if (secondClock.getElapsedTime().asSeconds() >= 1.0f)
@@ -528,23 +609,9 @@ int main()
                 );
             }
             
-            for (auto bubbleIterator = activeBubbles.begin(); bubbleIterator != activeBubbles.end(); )
-            {
-                if (bubbleIterator->hitbox.getGlobalBounds().contains(mousePositionF) && !bubbleIterator->isBubblePopping)
-                {
-                    float randomBubbleMayhemMultiplier = (rand() % 28) + 3;
-					bubbles += realBubblesPerSecond * randomBubbleMayhemMultiplier * bubbleMayhemBuffMultiplier;
-                    bubblePopping.play();
-                    
-                    bubbleIterator->startPoppingBubbles();
-                    ++bubbleIterator;
-                }
-
-                else
-                {
-                    ++bubbleIterator;
-                }
-            }
+            handleBubbleClick(activeChaosBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleChaosBuffMultiplier, bubblePopping);
+            handleBubbleClick(activeFrenzyBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleFrenzyBuffMultiplier, bubblePopping);
+            handleBubbleClick(activeMayhemBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleMayhemBuffMultiplier, bubblePopping);
         }
 
         isButtonPressed = isCurrentlyPressed;
@@ -563,19 +630,49 @@ int main()
         window.draw(upgradeObjectArea2Shape);
         window.draw(upgradeObjectArea3Shape);
 
-        for (auto& mayhemBubbles : activeBubbles)
+        for (auto& bubble : activeChaosBubbles)
         {
-            if (mayhemBubbles.isBubblePopping)
+            if (bubble.isBubblePopping)
             {
-                mayhemBubbles.updatePoppingBubblesAnimation();
+                bubble.updatePoppingBubblesAnimation();
             }
 
             else
             {
-                mayhemBubbles.updateBubbleAlpha();
+                bubble.updateBubbleAlpha();
             }
 
-            window.draw(mayhemBubbles.bubbleSprite);
+            window.draw(bubble.bubbleSprite);
+        }
+
+        for (auto& bubble : activeFrenzyBubbles)
+        {
+            if (bubble.isBubblePopping)
+            {
+                bubble.updatePoppingBubblesAnimation();
+            }
+
+            else
+            {
+                bubble.updateBubbleAlpha();
+            }
+
+            window.draw(bubble.bubbleSprite);
+        }
+
+        for (auto& bubble : activeMayhemBubbles)
+        {
+            if (bubble.isBubblePopping)
+            {
+                bubble.updatePoppingBubblesAnimation();
+            }
+
+            else
+            {
+                bubble.updateBubbleAlpha();
+            }
+
+            window.draw(bubble.bubbleSprite);
         }
 
         if (showBubbleBuffHitbox)
