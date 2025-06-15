@@ -4,7 +4,7 @@
 
 extern sf::Texture bubbleTexture;
 
-struct BubbleMayhem
+struct BubbleChaos
 {
     sf::RectangleShape hitbox;
 
@@ -19,21 +19,21 @@ struct BubbleMayhem
     bool isBubblePopping;
     float bubblePoppingDuration;
 
-    BubbleMayhem(sf::Vector2f position)
+    BubbleChaos(sf::Vector2f position)
         : position(position), bubbleLifetime(5.0f), bubbleSprite(bubbleTexture),
-		isBubblePopping(false), bubblePoppingDuration(0.3f)
+        isBubblePopping(false), bubblePoppingDuration(0.3f)
     {
 
         float randomBubbleSize = static_cast<float>((rand() % 41) + 50);
-		sf::Vector2f size(randomBubbleSize, randomBubbleSize);
+        sf::Vector2f size(randomBubbleSize, randomBubbleSize);
 
-		bubbleSprite.setTexture(bubbleTexture);
+        bubbleSprite.setTexture(bubbleTexture);
         bubbleSprite.setPosition(position);
-		bubbleSprite.setScale(sf::Vector2f(size.x / bubbleTexture.getSize().x, size.y / bubbleTexture.getSize().y));
-        
+        bubbleSprite.setScale(sf::Vector2f(size.x / bubbleTexture.getSize().x, size.y / bubbleTexture.getSize().y));
+
         sf::Vector2f textureSize(bubbleTexture.getSize().x, bubbleTexture.getSize().y);
         bubbleSprite.setOrigin(sf::Vector2f(textureSize.x / 2.0f, textureSize.y / 2.0f));
-        
+
         originalBubbleScale = bubbleSprite.getScale();
 
         hitbox.setSize(size);

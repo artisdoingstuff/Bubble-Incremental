@@ -1,15 +1,18 @@
-﻿#include "BubbleMayhem.h"
+﻿#include "BubbleFrenzy.h"
+#include "BubbleChaos.h"
+#include "BubbleMayhem.h"
 #include "BubblesFormat.h"
 #include "Buffs.h"
 #include "ClickingBubbles.h"
 #include "DuckVariants.h"
 #include "GameFileState.h"
 #include "GoldenBubblesVariants.h"
-#include "OfflineBubbles.h"
 #include "ObjectUpgrades.h"
+#include "OfflineBubbles.h"
 
 // Global Textures
 sf::Texture bubbleTexture;
+sf::Texture goldenBubbleTexture;
 
 int main()
 {
@@ -28,6 +31,14 @@ int main()
 	// All textures here
 	bubbleTexture.loadFromFile("Assets/bubble.png");
     bubbleTexture.setSmooth(true);
+
+	goldenBubbleTexture.loadFromFile("Assets/golden_bubble.png");
+    goldenBubbleTexture.setSmooth(true);
+
+    for (auto& variant : goldenBubbleVariants)
+    {
+        variant.goldenBubbleSprite.setTexture(goldenBubbleTexture, true);
+    }
 
     // All sounds here
     sf::SoundBuffer rubberDuckQuackBuffer;
@@ -55,8 +66,10 @@ int main()
     vector<BubbleMayhem> activeBubbles;
 	bool isBubbleMayhemActive = false;
 	float bubbleMayhemDuration = 20.0f;
-	float bubbleMayhemBuffMultiplier = 2.0f;
-	float bubbleMayhemSpawnInterval = 0.25f;
+	float bubbleMayhemBuffMultiplier = 1.5f;
+	float bubbleMayhemSpawnInterval = 0.2f;
+    //float bubbleChaosSpawnInterval = 0.001f;
+    //float bubbleFrenzySpawnInterval = 0.5f;
 
     bool isBubbleBuffActive = false;
     bool showBubbleBuffHitbox = false;
@@ -65,6 +78,7 @@ int main()
     float bubbleBuffSpawnInterval = 180.0f;
 
     bool isGoldenBubbleBuffActive = false;
+    bool doesGoldenBubbleBuffExist = false;
     bool showGoldenBubbleBuffHitbox = false;
     float goldenBubbleBuffDuration = 0.0f;
     float goldenBubbleBuffMultiplier = 5.0f;
@@ -162,6 +176,7 @@ int main()
 	sf::Clock goldenBubbleBuffClock;
 	sf::Clock goldenBubbleBuffSpawnIntervalClock;
     sf::Clock goldenBubbleBuffLifetimeClock;
+    sf::Clock goldenBubblePulseClock;
 
     sf::Clock rubberDuckBuffClock;
 	sf::Clock rubberDuckBuffSpawnIntervalClock;
@@ -186,7 +201,7 @@ int main()
 
 	sf::RectangleShape goldenBubbleBuffHitbox;
     goldenBubbleBuffHitbox.setSize(sf::Vector2f(100, 100));
-    goldenBubbleBuffHitbox.setFillColor(sf::Color::Yellow);
+    goldenBubbleBuffHitbox.setFillColor(sf::Color::Magenta);
 	goldenBubbleBuffHitbox.setPosition({ -100, -100 });
 
     sf::RectangleShape rubberDuckBuffHitbox;
@@ -368,8 +383,9 @@ int main()
 
             [&](sf::RectangleShape& buffHitbox, float& buffMultiplier, float& buffDuration)
             {
-                auto goldenBubbleVariant = selectGoldenBubbleVariant(buffHitbox, buffMultiplier, buffDuration);
-                currentGoldenBubbleType = goldenBubbleVariant;
+                selectGoldenBubbleVariant(currentGoldenBubbleType, buffHitbox, buffMultiplier, buffDuration);
+                currentGoldenBubbleType.goldenBubbleSprite.setTexture(goldenBubbleTexture);
+                doesGoldenBubbleBuffExist = true;
             },
             [&]()
             {
@@ -378,8 +394,11 @@ int main()
                     isBubbleMayhemActive = true;
                     bubbleMayhemClock.restart();
                     bubbleMayhemSpawnIntervalClock.restart();
+                    doesGoldenBubbleBuffExist = false;
                 }
-            }
+            },
+            &currentGoldenBubbleType.goldenBubbleSprite,
+            true
 		);
 
         if (goldenBubbleBuffClicked)
@@ -439,8 +458,8 @@ int main()
         {
             if (bubbleMayhemSpawnIntervalClock.getElapsedTime().asSeconds() >= bubbleMayhemSpawnInterval)
             {
-                float x = static_cast<float>(rand() % (1600 - 50));
-                float y = static_cast<float>(rand() % (900 - 50));
+                float x = static_cast<float>(rand() % (1600 - 0));
+                float y = static_cast<float>(rand() % (900 - 0));
                 activeBubbles.emplace_back(sf::Vector2f(x, y));
                 cout << "Bubble spawned at: (" << x << ", " << y << ")" << endl;
                 bubbleMayhemSpawnIntervalClock.restart();
@@ -453,8 +472,13 @@ int main()
         }
 
         activeBubbles.erase(
-            remove_if(activeBubbles.begin(), activeBubbles.end(),
-                [](const BubbleMayhem& bubbleMayhem) { return bubbleMayhem.isTimeExpired(); }),
+            remove_if(
+                activeBubbles.begin(), activeBubbles.end(),
+                [](const BubbleMayhem& bubbleMayhem)
+                {
+                    return bubbleMayhem.isTimeExpired() || bubbleMayhem.isPoppingBubblesComplete();
+                }
+            ),
             activeBubbles.end()
         );
 
@@ -506,12 +530,14 @@ int main()
             
             for (auto bubbleIterator = activeBubbles.begin(); bubbleIterator != activeBubbles.end(); )
             {
-                if (bubbleIterator->hitbox.getGlobalBounds().contains(mousePositionF))
+                if (bubbleIterator->hitbox.getGlobalBounds().contains(mousePositionF) && !bubbleIterator->isBubblePopping)
                 {
                     float randomBubbleMayhemMultiplier = (rand() % 28) + 3;
 					bubbles += realBubblesPerSecond * randomBubbleMayhemMultiplier * bubbleMayhemBuffMultiplier;
                     bubblePopping.play();
-                    bubbleIterator = activeBubbles.erase(bubbleIterator);
+                    
+                    bubbleIterator->startPoppingBubbles();
+                    ++bubbleIterator;
                 }
 
                 else
@@ -539,7 +565,16 @@ int main()
 
         for (auto& mayhemBubbles : activeBubbles)
         {
-			mayhemBubbles.updateBubbleAlpha();
+            if (mayhemBubbles.isBubblePopping)
+            {
+                mayhemBubbles.updatePoppingBubblesAnimation();
+            }
+
+            else
+            {
+                mayhemBubbles.updateBubbleAlpha();
+            }
+
             window.draw(mayhemBubbles.bubbleSprite);
         }
 
@@ -550,8 +585,33 @@ int main()
 
         if (showGoldenBubbleBuffHitbox)
         {
-            window.draw(goldenBubbleBuffHitbox);
-		}
+            if (doesGoldenBubbleBuffExist)
+            {
+                if (!isGoldenBubbleBuffActive)
+                {
+                    float t = goldenBubblePulseClock.getElapsedTime().asMilliseconds();
+                    float pulse = 1.0f + 0.02f * sinf(t * 0.003f);
+
+                    currentGoldenBubbleType.goldenBubbleSprite.setScale(sf::Vector2f(pulse * 0.8f, pulse * 0.8f));
+
+                    sf::Vector2u textureSize = goldenBubbleTexture.getSize();
+                    currentGoldenBubbleType.goldenBubbleSprite.setOrigin(sf::Vector2f(textureSize.x / 2.0f, textureSize.y / 2.0f));
+
+                    sf::Vector2f hitboxCenter = {
+                        goldenBubbleBuffHitbox.getPosition().x + goldenBubbleBuffHitbox.getSize().x / 2.0f,
+                        goldenBubbleBuffHitbox.getPosition().y + goldenBubbleBuffHitbox.getSize().y / 2.0f
+                    };
+
+                    currentGoldenBubbleType.goldenBubbleSprite.setPosition(hitboxCenter);
+                }
+
+                window.draw(currentGoldenBubbleType.goldenBubbleSprite);
+            }
+            else
+            {
+                window.draw(goldenBubbleBuffHitbox);
+            }
+        }
 
         if (showRubberDuckBuffHitbox)
         {

@@ -6,6 +6,6 @@ include_directories("C:/SFML-3.0.0+32-Bit/include")
 
 link_directories("C:/SFML-3.0.0+32-Bit/lib")
 
-add_executable (Incremental "Incremental.cpp" "GameFileState.h" "OfflineBubbles.h" "Includes.h" "ObjectUpgrades.h" "BubblesFormat.h" "ClickingBubbles.h" "Buffs.h" "DuckVariants.h" "BuffTypes.h" "GoldenBubblesVariants.h" "BubbleMayhem.h")
+add_executable (Incremental "Incremental.cpp" "GameFileState.h" "OfflineBubbles.h" "Includes.h" "ObjectUpgrades.h" "BubblesFormat.h" "ClickingBubbles.h" "Buffs.h" "DuckVariants.h" "BuffTypes.h" "GoldenBubblesVariants.h" "BubbleMayhem.h" "BubbleFrenzy.h" "BubbleChaos.h")
 
 target_link_libraries(Incremental sfml-graphics sfml-window sfml-system sfml-audio sfml-network)

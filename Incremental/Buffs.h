@@ -30,7 +30,9 @@ bool buffHandler(
     bool isVariant = false,
     function<void(sf::RectangleShape&, float&, float&)> variantSelector = nullptr,
     function<void()> onBuffClick = nullptr,
-    void* tempVarVal = nullptr
+
+    sf::Sprite* buffSprite = nullptr,
+    bool useSprite = false
 )
 {
     float elapsedBuffLifetime = buffLifetimeClock.getElapsedTime().asSeconds();
@@ -56,6 +58,14 @@ bool buffHandler(
             );
         }
 
+        if (useSprite && buffSprite)
+        {
+            buffSprite->setPosition(buffHitbox.getPosition());
+            sf::Color spriteColor = buffSprite->getColor();
+            spriteColor.a = 0;
+            buffSprite->setColor(sf::Color(255, 255, 255, 0));
+        }
+
         sf::Color color = buffHitbox.getFillColor();
         color.a = 0;
         buffHitbox.setFillColor(color);
@@ -64,26 +74,54 @@ bool buffHandler(
     if (showBuffHitbox && !isBuffActive && elapsedBuffLifetime <= 1.0f)
     {
         float fadeInAlpha = elapsedBuffLifetime / 1.0f * 255.0f;
+        int alpha = static_cast<int>(min(fadeInAlpha, 255.0f));
 
         sf::Color color = buffHitbox.getFillColor();
-        color.a = static_cast<int>(min(fadeInAlpha, 255.0f));
+        color.a = alpha;
         buffHitbox.setFillColor(color);
+
+        if (useSprite && buffSprite)
+        {
+            sf::Color spriteColor = buffSprite->getColor();
+            spriteColor.a = alpha;
+            buffSprite->setColor(sf::Color(255, 255, 255, alpha));
+        }
     }
 
     if (showBuffHitbox && !isBuffActive && elapsedBuffLifetime > 8.0f)
     {
         float fadeOutAlpha = (1.0f - (elapsedBuffLifetime - 8.0f)) * 255.0f;
+        int alpha = static_cast<int>(max(0.0f, min(fadeOutAlpha, 255.0f)));
 
         sf::Color color = buffHitbox.getFillColor();
-        color.a = static_cast<int>(max(0.0f, min(fadeOutAlpha, 255.0f)));
+        color.a = alpha;
         buffHitbox.setFillColor(color);
+
+        if (useSprite && buffSprite)
+        {
+            sf::Color spriteColor = buffSprite->getColor();
+            spriteColor.a = alpha;
+            buffSprite->setColor(spriteColor);
+        }
 
         if (showBuffHitbox && elapsedBuffLifetime >= 10.0f)
         {
             showBuffHitbox = false;
             buffHitbox.setPosition({ -100.f, -100.f });
             buffHitbox.setFillColor(sf::Color(0, 0, 255, 255));
+
+            if (useSprite && buffSprite)
+            {
+                buffSprite->setPosition({ -100.f, -100.f });
+                sf::Color spriteColor = buffSprite->getColor();
+                buffSprite->setColor(sf::Color(255, 255, 255, spriteColor.a));
+            }
         }
+    }
+
+    if (useSprite && buffSprite && showBuffHitbox)
+    {
+        window.draw(*buffSprite);
     }
 
     if (isCurrentlyPressed && !isButtonPressed && buffHitbox.getGlobalBounds().contains(mousePos))
@@ -96,9 +134,14 @@ bool buffHandler(
         if (onBuffClick)
         {
             onBuffClick();
-		}
+        }
 
         buffHitbox.setPosition({ -100, -100 });
+
+        if (useSprite && buffSprite)
+        {
+            buffSprite->setPosition({ -100, -100 });
+        }
 
         return true;
     }
