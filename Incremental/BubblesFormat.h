@@ -3,11 +3,21 @@
 #include "Includes.h"
 
 // Handles the formatting for bubbles display
-string formatDisplayBubbles(long double bubbles)
+string formatDisplayBubbles(long double bubbles, bool forceDecimals = false)
 {
     if (bubbles < 1000000.0f)
     {
-        return to_string(static_cast<int>(bubbles));
+        if (forceDecimals)
+        {
+            ostringstream bubblesPerSecondStreamFix;
+            bubblesPerSecondStreamFix << fixed << setprecision(2) << bubbles;
+            return bubblesPerSecondStreamFix.str();
+        }
+        
+        else
+        {
+            return to_string(static_cast<int>(bubbles));
+        }
     }
 
     const string bubblesSuffixes[] = {

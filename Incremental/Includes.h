@@ -20,6 +20,7 @@
 #include <SFML/System/Clock.hpp>
 #include <SFML/System/Export.hpp>
 
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <ctime>

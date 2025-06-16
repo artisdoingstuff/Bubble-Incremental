@@ -1,4 +1,5 @@
-﻿#include "BubbleFrenzy.h"
+﻿// #include "Achievements.h"
+#include "BubbleFrenzy.h"
 #include "BubbleChaos.h"
 #include "BubbleMayhem.h"
 #include "Bubbles.h"
@@ -7,19 +8,43 @@
 #include "DuckVariants.h"
 #include "GameFileState.h"
 #include "GoldenBubblesVariants.h"
-#include "ObjectUpgrades.h"
+#include "Upgrades.h"
 #include "OfflineBubbles.h"
+
+// Upgrade shop variables
+namespace UIConstants
+{
+    constexpr float TabWidth = 150.0f;
+    constexpr float TabHeight = 40.0f;
+    constexpr float TabSpacing = 10.0f;
+    constexpr float TabRightMargin = 40.0f;
+    constexpr float TabTopOffset = 50.0f;
+}
+
+float scrollOffset = 0.0f;
+
+enum class UpgradeTab
+{
+    Buildings,
+    Milestones
+};
+
+UpgradeTab currentTab = UpgradeTab::Buildings;
 
 // Global Textures
 sf::Texture bubbleTexture;
 sf::Texture goldenBubbleTexture;
 
 // Global Variables if needed
+const sf::Font font("Assets/Fonts/arial.ttf");
+
 const long double shopInflationMultiplier = 1.15L;
 
 long double bubbles = 0.0L;
 long double allTimeBubbles = 0.0L;
 long double allTimeBubblesPerClick = 0.0L;
+
+long double totalUpgradeCount = 0;
 
 // Bubble combo variables
 bool isBubbleComboActive = false;
@@ -28,7 +53,7 @@ int currentBubbleCombo = 0;
 int highestBubbleCombo = 0;
 sf::Clock bubbleComboTimer;
 
-// Global bubble functions
+// Global functions
 template <typename ActiveBubbleType>
 void handleBubbleClick(
     vector<ActiveBubbleType>& bubbleList, const sf::Vector2f& mousePositionF,
@@ -139,8 +164,6 @@ int main()
 
     sf::RenderWindow window(sf::VideoMode({ 1600, 900 }), "Bubble Incremental");
 	window.setFramerateLimit(60);
-
-    const sf::Font font("Assets/Fonts/arial.ttf");
     
     bool isButtonPressed = false;
 
@@ -217,58 +240,36 @@ int main()
 
     srand(static_cast<unsigned>(time(0)));
 
-    // Upgrade variables here
-    bool hasAllTimeBubblesMilestoneUpgrade1 = false;
-    long double allTimeBubblesMilestoneUpgrade1Multiplier = 1.01f;
-    long double allTimeBubblesMilestoneUpgrade1Cost = 100.0f;
-    long double allTimeBubblesMilestoneUpgrade1UnlockThreshold = 100.0f;
-
-    bool hasAllTimeBubblesMilestoneUpgrade2 = false;
-    long double allTimeBubblesMilestoneUpgrade2Multiplier = 1.01f;
-    long double allTimeBubblesMilestoneUpgrade2Cost = 250.0f;
-    long double allTimeBubblesMilestoneUpgrade2UnlockThreshold = 250.0f;
-
-    bool hasAllTimeBubblesMilestoneUpgrade3 = false;
-    long double allTimeBubblesMilestoneUpgrade3Multiplier = 1.01f;
-    long double allTimeBubblesMilestoneUpgrade3Cost = 500.0f;
-    long double allTimeBubblesMilestoneUpgrade3UnlockThreshold = 500.0f;
-
-    bool hasAllTimeBubblesMilestoneUpgrade4 = false;
-    long double allTimeBubblesMilestoneUpgrade4Multiplier = 1.01f;
-    long double allTimeBubblesMilestoneUpgrade4Cost = 500.0f;
-    long double allTimeBubblesMilestoneUpgrade4UnlockThreshold = 750.0f;
-
-    bool hasAllTimeBubblesMilestoneUpgrade5 = false;
-    long double allTimeBubblesMilestoneUpgrade5Multiplier = 1.02f;
-    long double allTimeBubblesMilestoneUpgrade5Cost = 1000.0f;
-    long double allTimeBubblesMilestoneUpgrade5UnlockThreshold = 750.0f;
-
-	// Object Upgrade variables here
+	// Item Upgrade variables here
     vector<UpgradeItem> upgrades;
 
     upgrades.push_back(
         {
-            "Soap",     // Reference
+            "Soap",     // Reference Name
             0,          // Item count
-            10.0, 10.0, // Item costs (base and current, current is automatically calculated)
-            0.1,        // Bubbles per second
-            10.0        // Unlock theshold (all time bubbles)
+            10.0, 10.0, // Item base/current cost
+            0.1,        // Item production (bubbles per second)
+            10.0        // Unlock threshold
         }
     );
+    upgrades.push_back({ "Hand Wash", 0, 60.0, 60.0, 0.3, 100.0 });
+    upgrades.push_back({ "Shampoo", 0, 250.0, 250.0, 0.8, 350.0 });
+    upgrades.push_back({ "Shaving Foam", 0, 900.0, 900.0, 1.6, 1000.0 });
+    upgrades.push_back({ "Toothpaste", 0, 2800.0, 2800.0, 3.2, 3000.0 });
+    upgrades.push_back({ "Loofah", 0, 7000.0, 7000.0, 6.0, 7500.0 });
+    upgrades.push_back({ "Bubble Bath", 0, 18000.0, 18000.0, 11.0, 20000.0 });
+    upgrades.push_back({ "Bathtub Jet", 0, 40000.0, 40000.0, 20.0, 50000.0 });
+    upgrades.push_back({ "Luxury Spa", 0, 100000.0, 100000.0, 36.0, 100000.0 });
 
-    upgrades.push_back(
-        {
-            "Hand Wash",
-            0, 100.0, 100.0, 0.5, 100.0
-        }
-    );
-
-    upgrades.push_back(
-        {
-            "Shampoo",
-            0, 500.0, 500.0, 1.0, 550.0
-        }
-    );
+    generateMilestoneUpgrades(upgrades, "Soap", 10.0);
+    generateMilestoneUpgrades(upgrades, "Hand Wash", 60.0);
+    generateMilestoneUpgrades(upgrades, "Shampoo", 250.0);
+    generateMilestoneUpgrades(upgrades, "Shaving Foam", 900.0);
+    generateMilestoneUpgrades(upgrades, "Toothpaste", 2800.0);
+    generateMilestoneUpgrades(upgrades, "Loofah", 7000.0);
+    generateMilestoneUpgrades(upgrades, "Bubble Bath", 18000.0);
+    generateMilestoneUpgrades(upgrades, "Bathtub Jet", 40000.0);
+    generateMilestoneUpgrades(upgrades, "Luxury Spa", 100000.0);
 
     // Loading game file (if it exists)
     loadFileFromJson(
@@ -353,32 +354,6 @@ int main()
     clickAreaShape.setOutlineThickness(5);
     clickAreaShape.setPosition(sf::Vector2f({ 300, 350 }));
 
-	// Objects for upgrades
-	sf::FloatRect upgradeArea1({ 1200, 50 }, { 200, 50 });
-
-	// Objects for object upgrades
-    sf::FloatRect upgradeObjectArea1({ 1200, 120 }, { 200, 50 });
-    sf::FloatRect upgradeObjectArea2({ 1200, 185 }, { 200, 50 });
-    sf::FloatRect upgradeObjectArea3({ 1200, 250 }, { 200, 50 });
-
-    sf::RectangleShape upgradeObjectArea1Shape;
-    upgradeObjectArea1Shape.setSize(sf::Vector2f(200, 50));
-    upgradeObjectArea1Shape.setOutlineColor(sf::Color::Green);
-    upgradeObjectArea1Shape.setOutlineThickness(5);
-    upgradeObjectArea1Shape.setPosition(sf::Vector2f({ 1200, 120 }));
-
-    sf::RectangleShape upgradeObjectArea2Shape;
-    upgradeObjectArea2Shape.setSize(sf::Vector2f(200, 50));
-    upgradeObjectArea2Shape.setOutlineColor(sf::Color::Green);
-    upgradeObjectArea2Shape.setOutlineThickness(5);
-    upgradeObjectArea2Shape.setPosition(sf::Vector2f({ 1200, 185 }));
-
-    sf::RectangleShape upgradeObjectArea3Shape;
-    upgradeObjectArea3Shape.setSize(sf::Vector2f(200, 50));
-    upgradeObjectArea3Shape.setOutlineColor(sf::Color::Green);
-    upgradeObjectArea3Shape.setOutlineThickness(5);
-    upgradeObjectArea3Shape.setPosition(sf::Vector2f({ 1200, 250 }));
-
     while (window.isOpen())
     {
         while (const optional event = window.pollEvent())
@@ -409,6 +384,12 @@ int main()
         sf::Vector2f mousePositionF(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
 
         // Bubbles per second buff not showing on display fix
+        bubblesPerSecond = 0.0L;
+        for (const auto& u : upgrades)
+        {
+            bubblesPerSecond += getBuffedProduction(u, upgrades);
+        }
+
         long double realBubblesPerSecond = bubblesPerSecond;
         long double realBubbles = bubbles;
 
@@ -626,43 +607,72 @@ int main()
             secondClock.restart();
         }
 
-        if (isBubbleMayhemActive && bubbleMayhemClock.getElapsedTime().asSeconds() > bubbleMayhemDuration)
-        {
-            isBubbleMayhemActive = false;
-        }
-
         displayBubbles += (bubbles - displayBubbles) * smoothingFactor * deltaTime;
 
         // Shop/Upgrade logic here
-        vector<sf::FloatRect> upgradeClickAreas = {
-            upgradeObjectArea1,
-            upgradeObjectArea2,
-            upgradeObjectArea3
-        };
+        float startX = window.getSize().x - UIConstants::TabWidth - UIConstants::TabRightMargin;
+        float startY = UIConstants::TabTopOffset + UIConstants::TabHeight + 20.0f;
+        float inputY = startY;
 
-        for (size_t i = 0; i < upgrades.size(); ++i)
+        for (auto& upgrade : upgrades)
         {
-            if (isCurrentlyPressed && !isButtonPressed
-                && upgradeClickAreas[i].contains(mousePositionF)
-                && allTimeBubbles >= upgrades[i].unlockThreshold)
-            {
-                if (upgrades[i].canAfford(bubbles))
-                {
-                    upgrades[i].purchase(bubbles);
-                    bubblesPerSecond += upgrades[i].baseProduction;
+            // Skip if not part of active tab
+            if (currentTab == UpgradeTab::Buildings && upgrade.isMilestone)
+                continue;
+            if (currentTab == UpgradeTab::Milestones && (!upgrade.isMilestone || !upgrade.isUnlocked(allTimeBubbles, upgrades)))
+                continue;
+            if (!upgrade.isUnlocked(allTimeBubbles, upgrades))
+                continue;
 
-                    std::cout << "Purchased: " << upgrades[i].name << " | New count: " << upgrades[i].count << endl;
+            // Define clickable area for upgrade
+            sf::FloatRect upgradeClickArea(
+                sf::Vector2f(startX - 520.f, inputY),
+                sf::Vector2f(500.f, 60.f)
+            );
+
+            // Check click
+            if (isCurrentlyPressed && !isButtonPressed && upgradeClickArea.contains(mousePositionF))
+            {
+                if (upgrade.canAfford(bubbles))
+                {
+                    upgrade.purchase(bubbles);
+
+                    cout << "Purchased: " << upgrade.name
+                        << " | New count: " << upgrade.count << endl;
                 }
                 else
                 {
-                    std::cout << "Not enough bubbles to purchase " << upgrades[i].name << endl;
+                    cout << "Not enough bubbles to purchase " << upgrade.name << endl;
                 }
             }
+
+            inputY += 70.f;
         }
 
         // Clicking logic
         if (isCurrentlyPressed && !isButtonPressed)
         {
+            sf::Vector2f tabStartPos(
+                window.getSize().x - UIConstants::TabWidth - UIConstants::TabRightMargin,
+                UIConstants::TabTopOffset
+            );
+
+            sf::FloatRect milestonesTabRect(tabStartPos, { UIConstants::TabWidth, UIConstants::TabHeight });
+            
+            sf::FloatRect buildingsTabRect(
+                sf::Vector2f(
+                    tabStartPos.x - UIConstants::TabWidth - UIConstants::TabSpacing,
+                    tabStartPos.y
+                ),
+                { UIConstants::TabWidth, UIConstants::TabHeight }
+            );
+
+            if (buildingsTabRect.contains(mousePositionF))
+                currentTab = UpgradeTab::Buildings;
+
+            else if (milestonesTabRect.contains(mousePositionF))
+                currentTab = UpgradeTab::Milestones;
+
             if (clickArea.contains(mousePositionF))
             {
                 long double clickValue = (baseBubblesPerClick + (bubblesPerSecond * 0.05)) * clickMultiplier;
@@ -672,12 +682,35 @@ int main()
             handleBubbleClick(activeChaosBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleChaosBuffMultiplier, bubblePopping);
             handleBubbleClick(activeFrenzyBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleFrenzyBuffMultiplier, bubblePopping);
             handleBubbleClick(activeMayhemBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleMayhemBuffMultiplier, bubblePopping);
+
+            for (auto& upgrade : upgrades)
+            {
+                if (currentTab == UpgradeTab::Buildings && upgrade.isMilestone)
+                    continue;
+                if (currentTab == UpgradeTab::Milestones && (!upgrade.isMilestone || !upgrade.isUnlocked(allTimeBubbles, upgrades)))
+                    continue;
+                if (!upgrade.isUnlocked(allTimeBubbles, upgrades))
+                    continue;
+
+                sf::FloatRect boxBounds(
+                    { startX - 520.f, inputY },
+                    {500.0f, 60.0f }
+                );
+
+                if (boxBounds.contains(mousePositionF))
+                {
+                    if (upgrade.canAfford(bubbles))
+                        upgrade.purchase(bubbles);
+                }
+
+                inputY += 70.f;
+            }
         }
 
         isButtonPressed = isCurrentlyPressed;
 
         bubblesText.setString(formatDisplayBubbles(displayBubbles) + " Bubbles Formed");
-		bubblesPerSecondText.setString(formatDisplayBubbles(realBubblesPerSecond) + " Bubbles Per Second");
+		bubblesPerSecondText.setString(formatDisplayBubbles(realBubblesPerSecond, true) + " Bubbles Per Second");
 
         window.clear(sf::Color::White);
 
@@ -685,10 +718,111 @@ int main()
 		window.draw(bubblesPerSecondText);
 
         window.draw(clickAreaShape);
+        
+        float currentY = startY;
 
-        window.draw(upgradeObjectArea1Shape);
-        window.draw(upgradeObjectArea2Shape);
-        window.draw(upgradeObjectArea3Shape);
+        for (const auto& upgrade : upgrades)
+        {
+            // Filter logic
+            if (currentTab == UpgradeTab::Buildings && upgrade.isMilestone)
+                continue;
+            if (currentTab == UpgradeTab::Milestones && (!upgrade.isMilestone || !upgrade.isUnlocked(allTimeBubbles, upgrades)))
+                continue;
+            if (!upgrade.isUnlocked(allTimeBubbles, upgrades))
+                continue;
+
+            // Draw background box
+            constexpr float boxWidth = 350.f;
+            constexpr float boxHeight = 60.f;
+            constexpr float boxSpacing = 70.f;
+
+            sf::RectangleShape upgradeBox(sf::Vector2f(boxWidth, boxHeight));
+            upgradeBox.setPosition({ startX - boxWidth - 20.f, currentY });
+            upgradeBox.setFillColor(upgrade.canAfford(bubbles) ? sf::Color(220, 255, 220) : sf::Color(140, 140, 140));
+            window.draw(upgradeBox);
+
+            // Name
+            sf::Text nameText(font);
+            nameText.setCharacterSize(16);
+            nameText.setString(upgrade.name);
+            nameText.setPosition({ upgradeBox.getPosition().x + 10.f, upgradeBox.getPosition().y + 10.f });
+            nameText.setFillColor(sf::Color::Black);
+            window.draw(nameText);
+
+            // Cost
+            sf::Text costText(font);
+            costText.setCharacterSize(14);
+            costText.setString(formatDisplayBubbles(upgrade.currentCost) + " Bubbles");
+            costText.setPosition({ upgradeBox.getPosition().x + boxWidth - 140.f, upgradeBox.getPosition().y + 10.f });
+            costText.setFillColor(sf::Color::Black);
+            window.draw(costText);
+
+            // Count (for non-milestone upgrades)
+            if (!upgrade.isMilestone)
+            {
+                sf::Text countText(font);
+                countText.setCharacterSize(14);
+                countText.setString("x" + std::to_string(upgrade.count));
+                countText.setPosition({ upgradeBox.getPosition().x + 10.f, upgradeBox.getPosition().y + 30.f });
+                countText.setFillColor(sf::Color::Black);
+                window.draw(countText);
+            }
+
+            currentY += boxSpacing;
+        }
+
+        // Tab position
+        sf::Vector2f tabStartPos(
+            window.getSize().x - UIConstants::TabWidth - UIConstants::TabRightMargin,
+            UIConstants::TabTopOffset
+        );
+
+        // Items (Buildings) Tab
+        sf::RectangleShape buildingsTab(sf::Vector2f(UIConstants::TabWidth, UIConstants::TabHeight));
+        buildingsTab.setPosition(
+            sf::Vector2f(
+                tabStartPos.x - UIConstants::TabWidth - UIConstants::TabSpacing,
+                tabStartPos.y
+            )
+        );
+        buildingsTab.setFillColor(currentTab == UpgradeTab::Buildings ? sf::Color::White : sf::Color(150, 150, 150));
+        window.draw(buildingsTab);
+
+        sf::Text buildingsText(font);
+        buildingsText.setCharacterSize(18);
+        buildingsText.setString("Items");
+        sf::FloatRect buildingsBounds = buildingsText.getLocalBounds();
+        buildingsText.setOrigin({
+            buildingsBounds.position.x + buildingsBounds.size.x / 2.f,
+            buildingsBounds.position.y + buildingsBounds.size.y / 2.f
+            });
+        buildingsText.setPosition({
+            buildingsTab.getPosition().x + UIConstants::TabWidth / 2.f,
+            buildingsTab.getPosition().y + UIConstants::TabHeight / 2.f
+            });
+        buildingsText.setFillColor(sf::Color::Black);
+        window.draw(buildingsText);
+
+        // Upgrades (Milestones) Tab
+        sf::RectangleShape milestonesTab(sf::Vector2f(UIConstants::TabWidth, UIConstants::TabHeight));
+        milestonesTab.setPosition(tabStartPos);
+        milestonesTab.setFillColor(currentTab == UpgradeTab::Milestones ? sf::Color::White : sf::Color(150, 150, 150));
+        window.draw(milestonesTab);
+
+        sf::Text milestonesText(font);
+        milestonesText.setCharacterSize(18);
+        milestonesText.setString("Upgrades");
+        sf::FloatRect milestonesBounds = milestonesText.getLocalBounds();
+        milestonesText.setOrigin({
+            milestonesBounds.position.x + milestonesBounds.size.x / 2.f,
+            milestonesBounds.position.y + milestonesBounds.size.y / 2.f
+            });
+        milestonesText.setPosition({
+            milestonesTab.getPosition().x + UIConstants::TabWidth / 2.f,
+            milestonesTab.getPosition().y + UIConstants::TabHeight / 2.f
+            });
+        milestonesText.setFillColor(sf::Color::Black);
+        window.draw(milestonesText);
 
         updateAndDrawBubbles(activeChaosBubbles, window);
         updateAndDrawBubbles(activeFrenzyBubbles, window);

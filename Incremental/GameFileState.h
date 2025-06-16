@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Includes.h"
-#include "ObjectUpgrades.h"
+#include "Upgrades.h"
 
 // Function to save the game state to a file
 void saveFileToJson(
@@ -13,13 +13,14 @@ void saveFileToJson(
     long double baseBubblesPerClick,
     long double clickMultiplier,
     long double bubblesPerSecond,
-    const std::vector<UpgradeItem>& upgrades
+    const vector<UpgradeItem>& upgrades
 )
 {
     json saveData;
 
-    auto round2 = [](long double val) -> long double {
-        return round(val * 100.0) / 100.0;
+    auto round2 = [](long double val) -> long double
+        {
+            return round(val * 100.0) / 100.0;
         };
 
     saveData["timestamp"] = timestamp;
@@ -30,7 +31,7 @@ void saveFileToJson(
     saveData["baseBubblesPerClick"] = round2(baseBubblesPerClick);
     saveData["clickMultiplier"] = round2(clickMultiplier);
     saveData["bubblesPerSecond"] = round2(bubblesPerSecond);
-    saveData["upgrades"] = upgrades;  // Uses to_json from UpgradeItem
+    saveData["upgrades"] = upgrades;             // Uses to_json for UpgradeItem
 
     ofstream file("save_file.json");
     if (file.is_open())
@@ -79,7 +80,7 @@ void loadFileFromJson(
     bubblesPerSecond = saveData["bubblesPerSecond"];
 
     upgrades = saveData["upgrades"].get<vector<UpgradeItem>>();
-    file.close();
 
+    file.close();
     cout << "Game loaded from save_file.json" << endl;
 }
