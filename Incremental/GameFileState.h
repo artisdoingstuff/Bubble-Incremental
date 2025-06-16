@@ -3,6 +3,8 @@
 #include "Includes.h"
 #include "Upgrades.h"
 
+extern long double totalUpgradeCount;
+
 // Function to save the game state to a file
 void saveFileToJson(
     time_t timestamp,
@@ -18,9 +20,8 @@ void saveFileToJson(
 {
     json saveData;
 
-    auto round2 = [](long double val) -> long double
-        {
-            return round(val * 100.0) / 100.0;
+    auto round2 = [](long double val) -> long double {
+        return round(val * 100.0) / 100.0;
         };
 
     saveData["timestamp"] = timestamp;
@@ -31,7 +32,8 @@ void saveFileToJson(
     saveData["baseBubblesPerClick"] = round2(baseBubblesPerClick);
     saveData["clickMultiplier"] = round2(clickMultiplier);
     saveData["bubblesPerSecond"] = round2(bubblesPerSecond);
-    saveData["upgrades"] = upgrades;             // Uses to_json for UpgradeItem
+    saveData["totalUpgradeCount"] = round2(totalUpgradeCount);
+    saveData["upgrades"] = upgrades;
 
     ofstream file("save_file.json");
     if (file.is_open())
@@ -46,7 +48,6 @@ void saveFileToJson(
     }
 }
 
-// Function to load the game state from a file
 void loadFileFromJson(
     time_t& timestamp,
     long double& duckCounter,
@@ -64,6 +65,7 @@ void loadFileFromJson(
     {
         cerr << "No save file found. Starting new game." << endl;
         timestamp = time(nullptr);
+        totalUpgradeCount = 0;
         return;
     }
 
@@ -78,6 +80,11 @@ void loadFileFromJson(
     baseBubblesPerClick = saveData["baseBubblesPerClick"];
     clickMultiplier = saveData["clickMultiplier"];
     bubblesPerSecond = saveData["bubblesPerSecond"];
+
+    if (saveData.contains("totalUpgradeCount"))
+        totalUpgradeCount = saveData["totalUpgradeCount"];
+    else
+        totalUpgradeCount = 0;
 
     upgrades = saveData["upgrades"].get<vector<UpgradeItem>>();
 

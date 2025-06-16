@@ -36,14 +36,14 @@ inline vector<goldenBubbleBuffVariant> goldenBubbleVariants = {
 	{
 		5.0f, 10.0f,
 		sf::Color::Blue,
-		0.0f,
+		30.0f,
 		buffVariantType::goldenBubbleBuff,
 		goldenBubbleVariantType::Multiplicative
 	},
 	{
 		1.0f, 0.0f,
 		sf::Color::Blue,
-		0.0f,
+		40.0f,
 		buffVariantType::goldenBubbleBuff,
 		goldenBubbleVariantType::Additive
 	},
@@ -57,14 +57,14 @@ inline vector<goldenBubbleBuffVariant> goldenBubbleVariants = {
 	{
 		1.0, 20.0f,
 		sf::Color::Blue,
-		0.0f,
+		20.0f,
 		buffVariantType::goldenBubbleBuff,
 		goldenBubbleVariantType::BubbleFrenzy
 	},
 	{
 		1.0, 20.0f,
 		sf::Color::Blue,
-		0.0f,
+		8.0f,
 		buffVariantType::goldenBubbleBuff,
 		goldenBubbleVariantType::BubbleMayhem
 	}

@@ -5,7 +5,7 @@
 #include "Bubbles.h"
 #include "BubblesFormat.h"
 #include "Buffs.h"
-#include "DuckVariants.h"
+// #include "DuckVariants.h"
 #include "GameFileState.h"
 #include "GoldenBubblesVariants.h"
 #include "Upgrades.h"
@@ -32,10 +32,25 @@ enum class UpgradeTab
 UpgradeTab currentTab = UpgradeTab::Buildings;
 
 // Global Textures
+map<string, sf::Texture> loadUpgradeTextures()
+{
+    map<string, sf::Texture> upgradeTextures;
+
+    upgradeTextures["Soap"].loadFromFile("Assets/soap_upgrade.png");
+    upgradeTextures["Hand Wash"].loadFromFile("Assets/handwash_upgrade.png");
+    upgradeTextures["Shampoo"].loadFromFile("Assets/shampoo_upgrade.png");
+    upgradeTextures["Shaving Foam"].loadFromFile("Assets/shaving_foam_upgrade.png");
+    upgradeTextures["Toothpaste"].loadFromFile("Assets/toothpaste_upgrade.png");
+    upgradeTextures["Loofah"].loadFromFile("Assets/loofah_upgrade.png");
+    return upgradeTextures;
+}
+
 sf::Texture bubbleTexture;
 sf::Texture goldenBubbleTexture;
 
 // Global Variables if needed
+static map<string, sf::Texture> upgradeTextures = loadUpgradeTextures();
+
 const sf::Font font("Assets/Fonts/arial.ttf");
 
 const long double shopInflationMultiplier = 1.15L;
@@ -44,7 +59,7 @@ long double bubbles = 0.0L;
 long double allTimeBubbles = 0.0L;
 long double allTimeBubblesPerClick = 0.0L;
 
-long double totalUpgradeCount = 0;
+long double totalUpgradeCount = 0.0L;
 
 // Bubble combo variables
 bool isBubbleComboActive = false;
@@ -271,6 +286,21 @@ int main()
     generateMilestoneUpgrades(upgrades, "Bathtub Jet", 40000.0);
     generateMilestoneUpgrades(upgrades, "Luxury Spa", 100000.0);
 
+    for (auto& upgrade : upgrades)
+    {
+        auto it = upgradeTextures.find(upgrade.name);
+        if (it != upgradeTextures.end())
+        {
+            upgrade.spriteUpgrade.emplace(it->second);
+
+            if (upgrade.spriteUpgrade.has_value())
+                cout << upgrade.name << " has sprite." << endl;
+        }
+        else
+        {
+            cerr << "No texture found for " << upgrade.name << endl;
+        }
+    }
     // Loading game file (if it exists)
     loadFileFromJson(
         savedTimestamp,
@@ -531,53 +561,7 @@ int main()
             bubblePopping.play();
         }
 
-        bool rubberDuckBuffClicked = buffHandler(
-            mousePositionF,
-            window,
-
-            rubberDuckBuffHitbox,
-
-            rubberDuckBuffClock,
-            rubberDuckBuffSpawnIntervalClock,
-            rubberDuckBuffLifetimeClock,
-
-            isRubberDuckBuffActive,
-            showRubberDuckBuffHitbox,
-
-            rubberDuckBuffSpawnInterval,
-			rubberDuckBuffMultiplier,
-            rubberDuckBuffDuration,
-            300.0f, 450.0f,
-
-            isCurrentlyPressed,
-            isButtonPressed,
-
-            true,
-            
-            [&](sf::RectangleShape& buffHitbox, float& buffMultiplier, float& buffDuration)
-            {
-                selectDuckVariant(buffHitbox, buffMultiplier, buffDuration);
-            },
-            [&]()
-            {
-                if (currentDuckType.duckType == duckVariantType::Common)
-                {
-					bubbles += realBubblesPerSecond * 60;
-					cout << "Common duck buff activated!" << endl;
-                }
-
-                else if (currentDuckType.duckType == duckVariantType::Uncommon)
-                {
-                    bubbles += realBubbles * 0.005f;
-                }
-            }
-		);
-
-        if (rubberDuckBuffClicked)
-        {
-            duckCounter++;
-            rubberDuckQuack.play();
-        }
+        // Rubber ducks removed for now, will be added back during release
 
 		// Update bubble combo logic
         if (isBubbleComboActive && bubbleComboTimer.getElapsedTime().asSeconds() > bubbleComboResetTime)
@@ -593,7 +577,6 @@ int main()
         updateBubbleBuff(isBubbleChaosActive, bubbleChaosDuration, bubbleChaosSpawnInterval, bubbleChaosClock, bubbleChaosSpawnIntervalClock, activeChaosBubbles);
         updateBubbleBuff(isBubbleFrenzyActive, bubbleFrenzyDuration, bubbleFrenzySpawnInterval, bubbleFrenzyClock, bubbleFrenzySpawnIntervalClock, activeFrenzyBubbles);
         updateBubbleBuff(isBubbleMayhemActive, bubbleMayhemDuration, bubbleMayhemSpawnInterval, bubbleMayhemClock, bubbleMayhemSpawnIntervalClock, activeMayhemBubbles);
-
 
 		// Remove expired chaos, frenzy, and mayhem bubbles
         cleanupExpiredBubbles(activeChaosBubbles);
@@ -721,52 +704,127 @@ int main()
         
         float currentY = startY;
 
-        for (const auto& upgrade : upgrades)
+        constexpr float boxWidth = 350.0f;
+        constexpr float boxHeight = 60.0f;
+        constexpr float boxSpacing = 70.0f;
+        constexpr float spriteSize = 36.0f;
+
+        for (auto& upgrade : upgrades)
         {
             // Filter logic
-            if (currentTab == UpgradeTab::Buildings && upgrade.isMilestone)
-                continue;
-            if (currentTab == UpgradeTab::Milestones && (!upgrade.isMilestone || !upgrade.isUnlocked(allTimeBubbles, upgrades)))
-                continue;
-            if (!upgrade.isUnlocked(allTimeBubbles, upgrades))
-                continue;
+            bool isUnlocked = upgrade.isUnlocked(allTimeBubbles, upgrades);
 
-            // Draw background box
-            constexpr float boxWidth = 350.f;
-            constexpr float boxHeight = 60.f;
-            constexpr float boxSpacing = 70.f;
+            if (currentTab == UpgradeTab::Buildings)
+            {
+                if (upgrade.isMilestone || !isUnlocked)
+                    continue;
+            }
+            else if (currentTab == UpgradeTab::Milestones)
+            {
+                if (!upgrade.isMilestone || !isUnlocked || upgrade.count >= 1)
+                    continue;
+            }
 
+            // Milestone rendering
+            if (upgrade.isMilestone)
+            {
+                constexpr float boxSize = 60.f;
+
+                sf::RectangleShape milestoneBox(sf::Vector2f(boxSize, boxSize));
+                milestoneBox.setPosition({ startX - boxSize - 20.f, currentY });
+                milestoneBox.setFillColor(
+                    upgrade.canAfford(bubbles) ? sf::Color(255, 255, 200) : sf::Color(120, 120, 120));
+                window.draw(milestoneBox);
+
+                // Cost
+                sf::Text costText(font);
+                costText.setCharacterSize(10);
+                costText.setString(formatDisplayBubbles(upgrade.currentCost));
+                costText.setFillColor(sf::Color::Black);
+                costText.setPosition({
+                    milestoneBox.getPosition().x + 4.f,
+                    milestoneBox.getPosition().y + 4.f
+                    });
+                window.draw(costText);
+
+                // Name
+                sf::Text nameText(font);
+                nameText.setCharacterSize(12);
+                nameText.setString(upgrade.name);
+                nameText.setFillColor(sf::Color::Black);
+                sf::FloatRect nameBounds = nameText.getLocalBounds();
+                nameText.setOrigin({
+                    nameBounds.position.x + nameBounds.size.x / 2.f,
+                    0.f
+                    });
+                nameText.setPosition({
+                    milestoneBox.getPosition().x + boxSize / 2.f,
+                    milestoneBox.getPosition().y + boxSize + 4.f
+                    });
+                window.draw(nameText);
+
+                currentY += boxSize + 30.f;
+                continue; // skip normal rendering
+            }
+
+            // Regular item rendering
             sf::RectangleShape upgradeBox(sf::Vector2f(boxWidth, boxHeight));
             upgradeBox.setPosition({ startX - boxWidth - 20.f, currentY });
-            upgradeBox.setFillColor(upgrade.canAfford(bubbles) ? sf::Color(220, 255, 220) : sf::Color(140, 140, 140));
+            upgradeBox.setFillColor(
+                upgrade.canAfford(bubbles) ? sf::Color(220, 255, 220) : sf::Color(140, 140, 140));
             window.draw(upgradeBox);
 
-            // Name
-            sf::Text nameText(font);
-            nameText.setCharacterSize(16);
-            nameText.setString(upgrade.name);
-            nameText.setPosition({ upgradeBox.getPosition().x + 10.f, upgradeBox.getPosition().y + 10.f });
-            nameText.setFillColor(sf::Color::Black);
-            window.draw(nameText);
+            float iconOffsetX = upgradeBox.getPosition().x + 10.f;
+            float iconOffsetY = upgradeBox.getPosition().y + 20.f;
 
-            // Cost
-            sf::Text costText(font);
-            costText.setCharacterSize(14);
-            costText.setString(formatDisplayBubbles(upgrade.currentCost) + " Bubbles");
-            costText.setPosition({ upgradeBox.getPosition().x + boxWidth - 140.f, upgradeBox.getPosition().y + 10.f });
-            costText.setFillColor(sf::Color::Black);
-            window.draw(costText);
+            if (upgrade.spriteUpgrade.has_value())
+            {
+                sf::Sprite icon(*upgrade.spriteUpgrade);
+                icon.setTexture(upgrade.spriteUpgrade->getTexture());
 
-            // Count (for non-milestone upgrades)
+                const auto texSize = icon.getTexture().getSize();
+                if (texSize.x > 0 && texSize.y > 0)
+                    icon.setScale({ spriteSize / texSize.x, spriteSize / texSize.y });
+
+                icon.setPosition({ iconOffsetX, iconOffsetY });
+                window.draw(icon);
+            }
+
             if (!upgrade.isMilestone)
             {
                 sf::Text countText(font);
                 countText.setCharacterSize(14);
                 countText.setString("x" + std::to_string(upgrade.count));
-                countText.setPosition({ upgradeBox.getPosition().x + 10.f, upgradeBox.getPosition().y + 30.f });
+
+                float iconCenterX = iconOffsetX + spriteSize / 2.0f;
+                float countTextY = upgradeBox.getPosition().y + (upgrade.spriteUpgrade.has_value() ? 2.0f : 32.0f);
+
+                sf::FloatRect bounds = countText.getLocalBounds();
+                countText.setOrigin({
+                    bounds.position.x + bounds.size.x / 2.f,
+                    0.0f
+                    }
+                );
+                countText.setPosition({ iconCenterX, countTextY });
                 countText.setFillColor(sf::Color::Black);
                 window.draw(countText);
             }
+
+            float nameOffsetX = iconOffsetX + (upgrade.spriteUpgrade.has_value() ? spriteSize + 10.0f : 0.0f);
+
+            sf::Text nameText(font);
+            nameText.setCharacterSize(16);
+            nameText.setString(upgrade.name);
+            nameText.setPosition({ nameOffsetX, upgradeBox.getPosition().y + 10.0f });
+            nameText.setFillColor(sf::Color::Black);
+            window.draw(nameText);
+
+            sf::Text costText(font);
+            costText.setCharacterSize(14);
+            costText.setString(formatDisplayBubbles(upgrade.currentCost) + " Bubbles");
+            costText.setPosition({ upgradeBox.getPosition().x + boxWidth - 140.0f, upgradeBox.getPosition().y + 10.f });
+            costText.setFillColor(sf::Color::Black);
+            window.draw(costText);
 
             currentY += boxSpacing;
         }

@@ -27,6 +27,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <optional>
 #include <random>
 #include <sstream>
 #include <string>

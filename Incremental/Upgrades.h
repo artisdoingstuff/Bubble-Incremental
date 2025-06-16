@@ -20,6 +20,8 @@ struct UpgradeItem
     bool unlockedByMilestone = false;
     long double milestoneTriggerValue = 0.0; // milestone threshold
 
+    optional<sf::Sprite> spriteUpgrade;
+
     void updateCost(const long double inflation = shopInflationMultiplier)
     {
         currentCost = round(baseCost * pow(inflation, count));
@@ -56,7 +58,7 @@ struct UpgradeItem
         return currentBubbles >= currentCost;
     }
 
-    void purchase(long double& currentBubbles, const long double inflation = 1.15L)
+    void purchase(long double& currentBubbles, const long double inflation = shopInflationMultiplier)
     {
         if (!canAfford(currentBubbles)) return;
         if (isMilestone && count >= 1)
