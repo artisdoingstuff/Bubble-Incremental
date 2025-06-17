@@ -5,133 +5,131 @@
 
 enum class goldenBubbleVariantType
 {
-	Multiplicative, Additive, BubbleChaos, BubbleFrenzy, BubbleMayhem
+    Normal, Multiplicative, Additive,
+    BubbleChaos, BubbleFrenzy, BubbleMayhem
 };
-
-extern sf::Texture goldenBubbleTexture;
 
 struct goldenBubbleBuffVariant
 {
-	float goldenBubbleMultiplier;
-	float goldenBubbleDuration;
-	sf::Color color;
-	float goldenBubbleRarity;
-	buffVariantType buffType = buffVariantType::goldenBubbleBuff;
-	goldenBubbleVariantType goldenBubbleType = goldenBubbleVariantType::Multiplicative;
-	sf::Sprite goldenBubbleSprite;
-
-	goldenBubbleBuffVariant()
-		: goldenBubbleSprite(goldenBubbleTexture)
-	{}
-
-	goldenBubbleBuffVariant(float buffMultiplier, float buffDuration, sf::Color color, float rarity,
-		buffVariantType buffType, goldenBubbleVariantType goldenBubbleType)
-		: goldenBubbleMultiplier(buffMultiplier), goldenBubbleDuration(buffDuration),
-		color(color), goldenBubbleRarity(rarity), buffType(buffType), goldenBubbleType(goldenBubbleType),
-		goldenBubbleSprite(goldenBubbleTexture)
-	{}
+    float goldenBubbleMultiplier;
+    float goldenBubbleDuration;
+    sf::Color color;
+    float goldenBubbleRarity;
+    buffVariantType buffType = buffVariantType::goldenBubbleBuff;
+    goldenBubbleVariantType goldenBubbleType = goldenBubbleVariantType::Multiplicative;
+    sf::Texture* texturePtr = nullptr;
 };
 
-inline vector<goldenBubbleBuffVariant> goldenBubbleVariants = {
-	{
-		3.0f, 15.0f,
-		sf::Color::Blue,
-		0.0f,
-		buffVariantType::goldenBubbleBuff,
-		goldenBubbleVariantType::Multiplicative
-	},
-	{
-		1.0f, 0.0f,
-		sf::Color::Blue,
-		0.0f,
-		buffVariantType::goldenBubbleBuff,
-		goldenBubbleVariantType::Additive
-	},
-	{
-		0.4, 20.0f,
-		sf::Color::Blue,
-		2.0f,
-		buffVariantType::goldenBubbleBuff,
-		goldenBubbleVariantType::BubbleChaos
-	},
-	{
-		3.0, 30.0f,
-		sf::Color::Blue,
-		90.0f,
-		buffVariantType::goldenBubbleBuff,
-		goldenBubbleVariantType::BubbleFrenzy
-	},
-	{
-		1.5, 20.0f,
-		sf::Color::Blue,
-		8.0f,
-		buffVariantType::goldenBubbleBuff,
-		goldenBubbleVariantType::BubbleMayhem
-	}
+// Texture references
+extern sf::Texture bubbleTexture;
+extern sf::Texture goldenBubbleTexture;
+
+inline std::vector<goldenBubbleBuffVariant> goldenBubbleVariants = {
+    {
+        2.0f, 30.0f,
+        sf::Color::Blue,
+        60.0f,
+        buffVariantType::goldenBubbleBuff,
+        goldenBubbleVariantType::Normal,
+        &bubbleTexture
+    },
+    {
+        3.0f, 15.0f,
+        sf::Color::Blue,
+        10.0f,
+        buffVariantType::goldenBubbleBuff,
+        goldenBubbleVariantType::Multiplicative,
+        &goldenBubbleTexture
+    },
+    {
+        1.0f, 0.0f, 
+        sf::Color::Blue,
+        20.0f,
+        buffVariantType::goldenBubbleBuff,
+        goldenBubbleVariantType::Additive,
+        & goldenBubbleTexture
+    },
+    {
+        0.4f, 20.0f,
+        sf::Color::Blue,
+        1.0f,
+        buffVariantType::goldenBubbleBuff,
+        goldenBubbleVariantType::BubbleChaos,
+        & goldenBubbleTexture
+    },
+    {
+        3.0f, 30.0f,
+        sf::Color::Blue,
+        6.0f,
+        buffVariantType::goldenBubbleBuff,
+        goldenBubbleVariantType::BubbleFrenzy,
+        & goldenBubbleTexture
+    },
+    {
+        1.5f, 20.0f,
+        sf::Color::Blue,
+        3.0f,
+        buffVariantType::goldenBubbleBuff,
+        goldenBubbleVariantType::BubbleMayhem,
+        & goldenBubbleTexture
+    }
 };
 
 inline void selectGoldenBubbleVariant(
-	goldenBubbleBuffVariant& outVariant,
-	sf::RectangleShape& hitbox,
-	float& goldenBubbleMultiplier,
-	float& goldenBubbleDuration
+    goldenBubbleBuffVariant& outVariant,
+    sf::RectangleShape& hitbox,
+    float& goldenBubbleMultiplier,
+    float& goldenBubbleDuration,
+    sf::Sprite& outSprite
 )
 {
-	float weightedRarity = 0.0f;
-	for (const auto& variant : goldenBubbleVariants)
-	{
-		weightedRarity += variant.goldenBubbleRarity;
-	}
+    float totalRarity = 0.0f;
+    for (const auto& variant : goldenBubbleVariants)
+        totalRarity += variant.goldenBubbleRarity;
 
-	float randomValue = static_cast<float>(rand()) / RAND_MAX * weightedRarity;
-	float cumulativeRarity = 0.0f;
+    float roll = static_cast<float>(rand()) / RAND_MAX * totalRarity;
+    float cumulative = 0.0f;
 
-	for (const auto& variant : goldenBubbleVariants)
-	{
-		cumulativeRarity += variant.goldenBubbleRarity;
+    for (const auto& variant : goldenBubbleVariants)
+    {
+        cumulative += variant.goldenBubbleRarity;
+        if (roll <= cumulative)
+        {
+            outVariant = variant;
+            goldenBubbleMultiplier = variant.goldenBubbleMultiplier;
+            goldenBubbleDuration = variant.goldenBubbleDuration;
 
-		goldenBubbleBuffVariant currentVariant = variant;
+            hitbox.setFillColor(variant.color);
 
-		if (randomValue <= cumulativeRarity)
-		{
-			currentVariant.buffType = buffVariantType::goldenBubbleBuff;
+            outSprite.setTexture(*variant.texturePtr, true);
+            outSprite.setPosition(hitbox.getPosition());
 
-			goldenBubbleMultiplier = currentVariant.goldenBubbleMultiplier;
-			goldenBubbleDuration = currentVariant.goldenBubbleDuration;
+            sf::Vector2f hitboxSize = hitbox.getSize();
+            sf::Vector2u textureSize = variant.texturePtr->getSize();
+            if (textureSize.x > 0 && textureSize.y > 0)
+            {
+                outSprite.setScale({
+                    hitboxSize.x / static_cast<float>(textureSize.x),
+                    hitboxSize.y / static_cast<float>(textureSize.y)
+                    });
+            }
 
-			hitbox.setFillColor(currentVariant.color);
+            return;
+        }
+    }
 
-			currentVariant.goldenBubbleSprite.setTexture(goldenBubbleTexture);
-			currentVariant.goldenBubbleSprite.setPosition(hitbox.getPosition());
+    // Fallback
+    outVariant = goldenBubbleVariants.front();
+    outSprite.setTexture(*outVariant.texturePtr, true);
+    outSprite.setPosition(hitbox.getPosition());
 
-			sf::Vector2f hitboxSize = hitbox.getSize();
-			sf::Vector2u textureSize = goldenBubbleTexture.getSize();
-
-			currentVariant.goldenBubbleSprite.setScale(sf::Vector2f(hitboxSize.x / textureSize.x, hitboxSize.y / textureSize.y));
-
-			outVariant = currentVariant;
-			outVariant.goldenBubbleSprite.setTexture(goldenBubbleTexture, true);
-
-			return;
-		}
-	}
-
-	outVariant = goldenBubbleVariants.front();
-	outVariant.goldenBubbleSprite.setTexture(goldenBubbleTexture, true);
-	outVariant.goldenBubbleSprite.setPosition(hitbox.getPosition());
-
-	sf::Vector2f hitboxSize = hitbox.getSize();
-	sf::Vector2u textureSize = goldenBubbleTexture.getSize();
-
-	if (textureSize.x > 0 && textureSize.y > 0)
-	{
-		outVariant.goldenBubbleSprite.setScale({
-			hitboxSize.x / static_cast<float>(textureSize.x),
-			hitboxSize.y / static_cast<float>(textureSize.y)
-			});
-	}
-
-	outVariant.goldenBubbleSprite.setColor(sf::Color(255, 255, 255, 0));
-
-	return;
+    sf::Vector2f hitboxSize = hitbox.getSize();
+    sf::Vector2u textureSize = outVariant.texturePtr->getSize();
+    if (textureSize.x > 0 && textureSize.y > 0)
+    {
+        outSprite.setScale({
+            hitboxSize.x / static_cast<float>(textureSize.x),
+            hitboxSize.y / static_cast<float>(textureSize.y)
+            });
+    }
 }

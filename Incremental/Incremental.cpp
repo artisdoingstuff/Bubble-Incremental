@@ -193,11 +193,6 @@ int main()
 	goldenBubbleTexture.loadFromFile("Assets/golden_bubble.png");
     goldenBubbleTexture.setSmooth(true);
 
-    for (auto& variant : goldenBubbleVariants)
-    {
-        variant.goldenBubbleSprite.setTexture(goldenBubbleTexture, true);
-    }
-
     // All sounds here
     sf::SoundBuffer rubberDuckQuackBuffer;
     rubberDuckQuackBuffer.loadFromFile("Assets/Audio/rubberDuckQuack.wav");
@@ -221,31 +216,28 @@ int main()
     vector<BubbleChaos> activeChaosBubbles;
     bool isBubbleChaosActive = false;
     float bubbleChaosDuration = 20.0f;
+    float bubbleChaosBuffMultiplier = 0.4f;
     float bubbleChaosSpawnInterval = 0.001f;
 
     vector<BubbleFrenzy> activeFrenzyBubbles;
     bool isBubbleFrenzyActive = false;
     float bubbleFrenzyDuration = 30.0f;
+    float bubbleFrenzyBuffMultiplier = 3.0f;
     float bubbleFrenzySpawnInterval = 0.5f;
 
     vector<BubbleMayhem> activeMayhemBubbles;
     bool isBubbleMayhemActive = false;
     float bubbleMayhemDuration = 20.0f;
-    float bubbleMayhemBuffMultiplier = 2.0f;
+    float bubbleMayhemBuffMultiplier = 1.5f;
     float bubbleMayhemSpawnInterval = 0.125f;
 
-    bool isBubbleBuffActive = false;
-    bool showBubbleBuffHitbox = false;
-    float bubbleBuffDuration = 20.0f;
-    float bubbleBuffMultiplier = 2.0f;
-    float bubbleBuffSpawnInterval = 180.0f;
-
+    sf::Sprite currentGoldenBubbleSprite(goldenBubbleTexture);
     bool isGoldenBubbleBuffActive = false;
     bool doesGoldenBubbleBuffExist = false;
     bool showGoldenBubbleBuffHitbox = false;
     float goldenBubbleBuffDuration = 0.0f;
     float goldenBubbleBuffMultiplier = 5.0f;
-    float goldenBubbleBuffSpawnInterval = 120.0f;
+    float goldenBubbleBuffSpawnInterval = 1.0f;
 
     bool isRubberDuckBuffActive = false;
     bool showRubberDuckBuffHitbox = false;
@@ -417,9 +409,6 @@ int main()
         long double realBubblesPerSecond = bubblesPerSecond;
         long double realBubbles = bubbles;
 
-        if (isBubbleBuffActive)
-            realBubblesPerSecond *= bubbleBuffMultiplier;
-
         if (isGoldenBubbleBuffActive)
             realBubblesPerSecond *= goldenBubbleBuffMultiplier;
 
@@ -428,9 +417,6 @@ int main()
 
         // Clicking buffs
         long double realClickMultiplier = clickMultiplier;
-
-        if (isBubbleBuffActive)
-            realClickMultiplier *= bubbleBuffMultiplier;
 
         if (isGoldenBubbleBuffActive)
             realClickMultiplier *= goldenBubbleBuffMultiplier;
@@ -567,33 +553,6 @@ int main()
 		}
 
         // Buff logic here
-        bool bubbleBuffClicked = buffHandler(
-            mousePositionF,
-            window,
-
-            bubbleBuffHitbox,
-
-            bubbleBuffClock,
-            bubbleBuffSpawnIntervalClock,
-            bubbleBuffLifetimeClock,
-
-            isBubbleBuffActive,
-            showBubbleBuffHitbox,
-
-            bubbleBuffSpawnInterval,
-            bubbleBuffMultiplier,
-            bubbleBuffDuration,
-            180.0f, 300.0f,
-
-            isCurrentlyPressed,
-            isButtonPressed
-        );
-
-        if (bubbleBuffClicked)
-        {
-            bubblePopping.play();
-        }
-
         bool goldenBubbleBuffClicked = buffHandler(
             mousePositionF,
             window,
@@ -619,12 +578,24 @@ int main()
 
             [&](sf::RectangleShape& buffHitbox, float& buffMultiplier, float& buffDuration)
             {
-                selectGoldenBubbleVariant(currentGoldenBubbleType, buffHitbox, buffMultiplier, buffDuration);
-                currentGoldenBubbleType.goldenBubbleSprite.setTexture(goldenBubbleTexture);
+                selectGoldenBubbleVariant(
+                    currentGoldenBubbleType,
+                    buffHitbox,
+                    buffMultiplier,
+                    buffDuration,
+                    currentGoldenBubbleSprite
+                );
                 doesGoldenBubbleBuffExist = true;
             },
             [&]()
             {
+                if (currentGoldenBubbleType.goldenBubbleType == goldenBubbleVariantType::Additive)
+                {
+                    float randomValue = 1.0f + static_cast<float>(rand()) / RAND_MAX * 4.0f;
+                    bubbles += (1 + pow(10, (floor(log10(realBubbles)) - 2))) * randomValue;
+                    doesGoldenBubbleBuffExist = false;
+                }
+
                 if (currentGoldenBubbleType.goldenBubbleType == goldenBubbleVariantType::BubbleChaos)
                 {
                     isBubbleChaosActive = true;
@@ -649,7 +620,7 @@ int main()
                     doesGoldenBubbleBuffExist = false;
                 }
             },
-            &currentGoldenBubbleType.goldenBubbleSprite,
+            &currentGoldenBubbleSprite,
             true
 		);
 
@@ -918,11 +889,6 @@ int main()
             window.draw(bubbleComboText);
         }
 
-        if (showBubbleBuffHitbox)
-        {
-            window.draw(bubbleBuffHitbox);
-        }
-
         if (showGoldenBubbleBuffHitbox)
         {
             if (doesGoldenBubbleBuffExist)
@@ -932,20 +898,20 @@ int main()
                     float t = goldenBubblePulseClock.getElapsedTime().asMilliseconds();
                     float pulse = 1.0f + 0.02f * sinf(t * 0.003f);
 
-                    currentGoldenBubbleType.goldenBubbleSprite.setScale(sf::Vector2f(pulse * 0.8f, pulse * 0.8f));
+                    currentGoldenBubbleSprite.setScale(sf::Vector2f(pulse * 0.8f, pulse * 0.8f));
 
-                    sf::Vector2u textureSize = goldenBubbleTexture.getSize();
-                    currentGoldenBubbleType.goldenBubbleSprite.setOrigin(sf::Vector2f(textureSize.x / 2.0f, textureSize.y / 2.0f));
+                    sf::Vector2u textureSize = currentGoldenBubbleSprite.getTexture().getSize();
+                    currentGoldenBubbleSprite.setOrigin(sf::Vector2f(textureSize.x / 2.0f, textureSize.y / 2.0f));
 
                     sf::Vector2f hitboxCenter = {
                         goldenBubbleBuffHitbox.getPosition().x + goldenBubbleBuffHitbox.getSize().x / 2.0f,
                         goldenBubbleBuffHitbox.getPosition().y + goldenBubbleBuffHitbox.getSize().y / 2.0f
                     };
 
-                    currentGoldenBubbleType.goldenBubbleSprite.setPosition(hitboxCenter);
+                    currentGoldenBubbleSprite.setPosition(hitboxCenter);
                 }
 
-                window.draw(currentGoldenBubbleType.goldenBubbleSprite);
+                window.draw(currentGoldenBubbleSprite);
             }
             else
             {

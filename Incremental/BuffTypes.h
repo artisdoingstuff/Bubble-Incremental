@@ -5,6 +5,6 @@
 enum class buffVariantType
 {
 	none,
-	bubbleBuff, goldenBubbleBuff,
+	goldenBubbleBuff,
 	rubberDuckBuff // this is the duck
 };
