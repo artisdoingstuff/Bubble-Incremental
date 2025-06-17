@@ -42,9 +42,9 @@ struct UpgradeItem
 
         // Only for milestone upgrades with unlockedByMilestone = true
         string baseName = name.substr(6); // remove "Super "
-        size_t spacePos = baseName.find(" x");
-        if (spacePos != string::npos)
-            baseName = baseName.substr(0, spacePos);
+        size_t tierPos = baseName.find(" Tier");
+        if (tierPos != string::npos)
+            baseName = baseName.substr(0, tierPos);
 
         auto it = find_if(upgrades.begin(), upgrades.end(), [&](const UpgradeItem& u) {
             return u.name == baseName;

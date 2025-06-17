@@ -57,7 +57,8 @@ void loadFileFromJson(
     long double& baseBubblesPerClick,
     long double& clickMultiplier,
     long double& bubblesPerSecond,
-    vector<UpgradeItem>& upgrades
+    vector<UpgradeItem>& upgrades,
+    const map<string, sf::Texture>& upgradeTextures
 )
 {
     ifstream file("save_file.json");
@@ -87,6 +88,19 @@ void loadFileFromJson(
         totalUpgradeCount = 0;
 
     upgrades = saveData["upgrades"].get<vector<UpgradeItem>>();
+
+    for (auto& upgrade : upgrades)
+    {
+        auto it = upgradeTextures.find(upgrade.name);
+        if (it != upgradeTextures.end())
+        {
+            upgrade.spriteUpgrade = sf::Sprite(it->second);
+        }
+        else
+        {
+            upgrade.spriteUpgrade.reset();
+        }
+    }
 
     file.close();
     cout << "Game loaded from save_file.json" << endl;

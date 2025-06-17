@@ -19,17 +19,19 @@ namespace UIConstants
     constexpr float TabSpacing = 10.0f;
     constexpr float TabRightMargin = 40.0f;
     constexpr float TabTopOffset = 50.0f;
+
+    constexpr float StartYOffset = UIConstants::TabTopOffset + UIConstants::TabHeight + 20.0f;
 }
 
 float scrollOffset = 0.0f;
 
 enum class UpgradeTab
 {
-    Buildings,
+    Items,
     Milestones
 };
 
-UpgradeTab currentTab = UpgradeTab::Buildings;
+UpgradeTab currentTab = UpgradeTab::Items;
 
 // Global Textures
 map<string, sf::Texture> loadUpgradeTextures()
@@ -245,7 +247,7 @@ int main()
     bool showGoldenBubbleBuffHitbox = false;
     float goldenBubbleBuffDuration = 0.0f;
     float goldenBubbleBuffMultiplier = 5.0f;
-    float goldenBubbleBuffSpawnInterval = 1.0f;
+    float goldenBubbleBuffSpawnInterval = 600.0f;
 
     bool isRubberDuckBuffActive = false;
     bool showRubberDuckBuffHitbox = false;
@@ -311,7 +313,8 @@ int main()
         baseBubblesPerClick,
         clickMultiplier,
         bubblesPerSecond,
-        upgrades
+        upgrades,
+        upgradeTextures
     );
     displayBubbles = bubbles;
 
@@ -406,13 +409,6 @@ int main()
             }
         }
 
-        // Clicking stuff
-        bool isCurrentlyPressed = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
-
-		// Get the mouse position relative to the window
-        sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
-        sf::Vector2f mousePositionF(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
-
         // Bubbles per second buff not showing on display fix
         bubblesPerSecond = 0.0L;
         for (const auto& u : upgrades)
@@ -446,6 +442,111 @@ int main()
 
         if (isRubberDuckBuffActive)
             realClickMultiplier *= rubberDuckBuffMultiplier;
+
+        // Clicking stuff
+        bool isCurrentlyPressed = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
+
+		// Get the mouse position relative to the window
+        sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+        sf::Vector2f mousePositionF(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
+
+        if (isCurrentlyPressed && !isButtonPressed)
+        {
+            // Mouse Position
+            sf::Vector2i mousePosI = sf::Mouse::getPosition(window);
+            sf::Vector2f mousePosF(static_cast<float>(mousePosI.x), static_cast<float>(mousePosI.y));
+
+            // Tab Switching
+            sf::Vector2f tabStartPos(
+                window.getSize().x - UIConstants::TabWidth - UIConstants::TabRightMargin,
+                UIConstants::TabTopOffset
+            );
+
+            sf::FloatRect itemsTabRect(
+                { tabStartPos.x - UIConstants::TabWidth - UIConstants::TabSpacing, tabStartPos.y },
+                { UIConstants::TabWidth, UIConstants::TabHeight }
+            );
+
+            sf::FloatRect upgradesTabRect(
+                { tabStartPos.x, tabStartPos.y },
+                { UIConstants::TabWidth, UIConstants::TabHeight }
+            );
+
+            if (itemsTabRect.contains(mousePosF))
+            {
+                currentTab = UpgradeTab::Items;
+                cout << "[Tab] Switched to Items" << endl;
+            }
+            else if (upgradesTabRect.contains(mousePosF))
+            {
+                currentTab = UpgradeTab::Milestones;
+                cout << "[Tab] Switched to Milestones" << endl;
+            }
+
+            // Click Bubble Logic
+            if (clickArea.contains(mousePosF))
+            {
+                long double clickValue = (baseBubblesPerClick + (bubblesPerSecond * 0.05)) * clickMultiplier;
+                addBubbles(clickValue, bubbles, allTimeBubbles, &allTimeBubblesPerClick, true);
+            }
+
+            // Buff Clicks
+            handleBubbleClick(activeChaosBubbles, mousePosF, bubbles, realBubblesPerSecond, bubbleChaosBuffMultiplier, bubblePopping);
+            handleBubbleClick(activeFrenzyBubbles, mousePosF, bubbles, realBubblesPerSecond, bubbleFrenzyBuffMultiplier, bubblePopping);
+            handleBubbleClick(activeMayhemBubbles, mousePosF, bubbles, realBubblesPerSecond, bubbleMayhemBuffMultiplier, bubblePopping);
+
+            // Upgrade Purchases
+            constexpr float boxWidth = 350.f;
+            constexpr float boxHeight = 60.f;
+            constexpr float boxSpacing = 70.f;
+            constexpr float milestoneSize = 80.f;
+            constexpr float milestoneSpacingX = 20.f;
+            constexpr float milestoneSpacingY = 20.f;
+            constexpr int itemsPerRow = 4;
+
+            float inputY = UIConstants::StartYOffset;
+            int milestoneIndex = 0;
+            int itemIndex = 0;
+
+            for (auto& upgrade : upgrades)
+            {
+                bool isUnlocked = upgrade.isUnlocked(allTimeBubbles, upgrades);
+
+                if (currentTab == UpgradeTab::Items)
+                {
+                    if (upgrade.isMilestone || !isUnlocked)
+                        continue;
+
+                    sf::FloatRect itemRect(
+                        { window.getSize().x - UIConstants::TabWidth - UIConstants::TabRightMargin - boxWidth - 20.f, inputY },
+                        { boxWidth, boxHeight }
+                    );
+
+                    if (itemRect.contains(mousePosF) && upgrade.canAfford(bubbles))
+                        upgrade.purchase(bubbles);
+
+                    inputY += boxSpacing;
+                }
+                else if (currentTab == UpgradeTab::Milestones)
+                {
+                    if (!upgrade.isMilestone || !isUnlocked || upgrade.count >= 1)
+                        continue;
+
+                    int row = milestoneIndex / itemsPerRow;
+                    int col = milestoneIndex % itemsPerRow;
+
+                    float boxX = window.getSize().x - UIConstants::TabWidth - UIConstants::TabRightMargin + col * (milestoneSize + milestoneSpacingX);
+                    float boxY = UIConstants::StartYOffset + row * (milestoneSize + milestoneSpacingY);
+
+                    sf::FloatRect milestoneRect({ boxX, boxY }, { milestoneSize, milestoneSize });
+
+                    if (milestoneRect.contains(mousePosF) && upgrade.canAfford(bubbles))
+                        upgrade.purchase(bubbles);
+
+                    ++milestoneIndex;
+                }
+            }
+        }
 
 		// Display bubbles and bubbles per second, along with other time logic
         float deltaTime = deltaClock.restart().asSeconds();
@@ -600,7 +701,7 @@ int main()
         for (auto& upgrade : upgrades)
         {
             // Skip if not part of active tab
-            if (currentTab == UpgradeTab::Buildings && upgrade.isMilestone)
+            if (currentTab == UpgradeTab::Items && upgrade.isMilestone)
                 continue;
             if (currentTab == UpgradeTab::Milestones && (!upgrade.isMilestone || !upgrade.isUnlocked(allTimeBubbles, upgrades)))
                 continue;
@@ -632,64 +733,6 @@ int main()
             inputY += 70.f;
         }
 
-        // Clicking logic
-        if (isCurrentlyPressed && !isButtonPressed)
-        {
-            sf::Vector2f tabStartPos(
-                window.getSize().x - UIConstants::TabWidth - UIConstants::TabRightMargin,
-                UIConstants::TabTopOffset
-            );
-
-            sf::FloatRect milestonesTabRect(tabStartPos, { UIConstants::TabWidth, UIConstants::TabHeight });
-            
-            sf::FloatRect buildingsTabRect(
-                sf::Vector2f(
-                    tabStartPos.x - UIConstants::TabWidth - UIConstants::TabSpacing,
-                    tabStartPos.y
-                ),
-                { UIConstants::TabWidth, UIConstants::TabHeight }
-            );
-
-            if (buildingsTabRect.contains(mousePositionF))
-                currentTab = UpgradeTab::Buildings;
-
-            else if (milestonesTabRect.contains(mousePositionF))
-                currentTab = UpgradeTab::Milestones;
-
-            if (clickArea.contains(mousePositionF))
-            {
-                long double clickValue = (baseBubblesPerClick + (bubblesPerSecond * 0.05)) * clickMultiplier;
-                addBubbles(clickValue, bubbles, allTimeBubbles, &allTimeBubblesPerClick, true);
-            }
-            
-            handleBubbleClick(activeChaosBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleChaosBuffMultiplier, bubblePopping);
-            handleBubbleClick(activeFrenzyBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleFrenzyBuffMultiplier, bubblePopping);
-            handleBubbleClick(activeMayhemBubbles, mousePositionF, bubbles, realBubblesPerSecond, bubbleMayhemBuffMultiplier, bubblePopping);
-
-            for (auto& upgrade : upgrades)
-            {
-                if (currentTab == UpgradeTab::Buildings && upgrade.isMilestone)
-                    continue;
-                if (currentTab == UpgradeTab::Milestones && (!upgrade.isMilestone || !upgrade.isUnlocked(allTimeBubbles, upgrades)))
-                    continue;
-                if (!upgrade.isUnlocked(allTimeBubbles, upgrades))
-                    continue;
-
-                sf::FloatRect boxBounds(
-                    { startX - 520.f, inputY },
-                    {500.0f, 60.0f }
-                );
-
-                if (boxBounds.contains(mousePositionF))
-                {
-                    if (upgrade.canAfford(bubbles))
-                        upgrade.purchase(bubbles);
-                }
-
-                inputY += 70.f;
-            }
-        }
-
         isButtonPressed = isCurrentlyPressed;
 
         bubblesText.setString(formatDisplayBubbles(displayBubbles) + " Bubbles Formed");
@@ -702,49 +745,61 @@ int main()
 
         window.draw(clickAreaShape);
         
+		// Entire shop/upgrade rendering logic
         float currentY = startY;
 
-        constexpr float boxWidth = 350.0f;
-        constexpr float boxHeight = 60.0f;
-        constexpr float boxSpacing = 70.0f;
-        constexpr float spriteSize = 36.0f;
+        constexpr float boxWidth = 350.f;
+        constexpr float boxHeight = 60.f;
+        constexpr float boxSpacing = 70.f;
+        constexpr float spriteSize = 36.f;
 
-        for (auto& upgrade : upgrades)
+        // Milestone Upgrades
+        if (currentTab == UpgradeTab::Milestones)
         {
-            // Filter logic
-            bool isUnlocked = upgrade.isUnlocked(allTimeBubbles, upgrades);
+            constexpr float milestoneSize = 80.f;
+            constexpr float spacingX = 20.f;
+            constexpr float spacingY = 20.f;
+            constexpr int itemsPerRow = 4;
 
-            if (currentTab == UpgradeTab::Buildings)
+            int index = 0;
+            for (auto& upgrade : upgrades)
             {
-                if (upgrade.isMilestone || !isUnlocked)
+                if (!upgrade.isMilestone || !upgrade.isUnlocked(allTimeBubbles, upgrades) || upgrade.count >= 1)
                     continue;
-            }
-            else if (currentTab == UpgradeTab::Milestones)
-            {
-                if (!upgrade.isMilestone || !isUnlocked || upgrade.count >= 1)
-                    continue;
-            }
 
-            // Milestone rendering
-            if (upgrade.isMilestone)
-            {
-                constexpr float boxSize = 60.f;
+                int row = index / itemsPerRow;
+                int col = index % itemsPerRow;
 
-                sf::RectangleShape milestoneBox(sf::Vector2f(boxSize, boxSize));
-                milestoneBox.setPosition({ startX - boxSize - 20.f, currentY });
-                milestoneBox.setFillColor(
-                    upgrade.canAfford(bubbles) ? sf::Color(255, 255, 200) : sf::Color(120, 120, 120));
-                window.draw(milestoneBox);
+                sf::Vector2f pos = {
+                    startX + col * (milestoneSize + spacingX),
+                    startY + row * (milestoneSize + spacingY)
+                };
+
+                // Milestone box
+                sf::RectangleShape box({ milestoneSize, milestoneSize });
+                box.setPosition(pos);
+                box.setFillColor(upgrade.canAfford(bubbles) ? sf::Color(255, 255, 200) : sf::Color(120, 120, 120));
+                window.draw(box);
+
+                // Sprite
+                if (upgrade.spriteUpgrade.has_value())
+                {
+                    sf::Sprite icon = *upgrade.spriteUpgrade;
+                    auto texSize = icon.getTexture().getSize();
+                    if (texSize.x > 0 && texSize.y > 0)
+                    {
+                        icon.setScale({ milestoneSize * 0.6f / texSize.x, milestoneSize * 0.6f / texSize.y });
+                        icon.setPosition({ pos.x + milestoneSize * 0.2f, pos.y + milestoneSize * 0.2f });
+                        window.draw(icon);
+                    }
+                }
 
                 // Cost
                 sf::Text costText(font);
                 costText.setCharacterSize(10);
                 costText.setString(formatDisplayBubbles(upgrade.currentCost));
                 costText.setFillColor(sf::Color::Black);
-                costText.setPosition({
-                    milestoneBox.getPosition().x + 4.f,
-                    milestoneBox.getPosition().y + 4.f
-                    });
+                costText.setPosition({ pos.x + 4.f, pos.y + 4.f });
                 window.draw(costText);
 
                 // Name
@@ -752,116 +807,106 @@ int main()
                 nameText.setCharacterSize(12);
                 nameText.setString(upgrade.name);
                 nameText.setFillColor(sf::Color::Black);
-                sf::FloatRect nameBounds = nameText.getLocalBounds();
-                nameText.setOrigin({
-                    nameBounds.position.x + nameBounds.size.x / 2.f,
-                    0.f
-                    });
-                nameText.setPosition({
-                    milestoneBox.getPosition().x + boxSize / 2.f,
-                    milestoneBox.getPosition().y + boxSize + 4.f
-                    });
+                auto bounds = nameText.getLocalBounds();
+                nameText.setOrigin({ bounds.position.x + bounds.size.x / 2.f, 0.f });
+                nameText.setPosition({ pos.x + milestoneSize / 2.f, pos.y + milestoneSize + 4.f });
                 window.draw(nameText);
 
-                currentY += boxSize + 30.f;
-                continue; // skip normal rendering
+                ++index;
             }
-
-            // Regular item rendering
-            sf::RectangleShape upgradeBox(sf::Vector2f(boxWidth, boxHeight));
-            upgradeBox.setPosition({ startX - boxWidth - 20.f, currentY });
-            upgradeBox.setFillColor(
-                upgrade.canAfford(bubbles) ? sf::Color(220, 255, 220) : sf::Color(140, 140, 140));
-            window.draw(upgradeBox);
-
-            float iconOffsetX = upgradeBox.getPosition().x + 10.f;
-            float iconOffsetY = upgradeBox.getPosition().y + 20.f;
-
-            if (upgrade.spriteUpgrade.has_value())
+        }
+        else if (currentTab == UpgradeTab::Items)
+        {
+            for (auto& upgrade : upgrades)
             {
-                sf::Sprite icon(*upgrade.spriteUpgrade);
-                icon.setTexture(upgrade.spriteUpgrade->getTexture());
+                if (upgrade.isMilestone || !upgrade.isUnlocked(allTimeBubbles, upgrades))
+                    continue;
 
-                const auto texSize = icon.getTexture().getSize();
-                if (texSize.x > 0 && texSize.y > 0)
-                    icon.setScale({ spriteSize / texSize.x, spriteSize / texSize.y });
+                sf::RectangleShape box({ boxWidth, boxHeight });
+                box.setPosition({ startX - boxWidth - 20.f, currentY });
+                box.setFillColor(upgrade.canAfford(bubbles) ? sf::Color(220, 255, 220) : sf::Color(140, 140, 140));
+                window.draw(box);
 
-                icon.setPosition({ iconOffsetX, iconOffsetY });
-                window.draw(icon);
-            }
+                float iconOffsetX = box.getPosition().x + 10.f;
+                float iconOffsetY = box.getPosition().y + 20.f;
 
-            if (!upgrade.isMilestone)
-            {
+                if (upgrade.spriteUpgrade.has_value())
+                {
+                    sf::Sprite icon = *upgrade.spriteUpgrade;
+                    auto texSize = icon.getTexture().getSize();
+                    if (texSize.x > 0 && texSize.y > 0)
+                    {
+                        icon.setScale({ spriteSize / texSize.x, spriteSize / texSize.y });
+                        icon.setPosition({ iconOffsetX, iconOffsetY });
+                        window.draw(icon);
+                    }
+                }
+
+                // Count
                 sf::Text countText(font);
                 countText.setCharacterSize(14);
                 countText.setString("x" + std::to_string(upgrade.count));
-
-                float iconCenterX = iconOffsetX + spriteSize / 2.0f;
-                float countTextY = upgradeBox.getPosition().y + (upgrade.spriteUpgrade.has_value() ? 2.0f : 32.0f);
-
-                sf::FloatRect bounds = countText.getLocalBounds();
-                countText.setOrigin({
-                    bounds.position.x + bounds.size.x / 2.f,
-                    0.0f
-                    }
-                );
-                countText.setPosition({ iconCenterX, countTextY });
+                auto bounds = countText.getLocalBounds();
+                countText.setOrigin({ bounds.position.x + bounds.size.x / 2.f, 0.f });
+                countText.setPosition({
+                    iconOffsetX + spriteSize / 2.f,
+                    box.getPosition().y + (upgrade.spriteUpgrade.has_value() ? 2.f : 32.f)
+                    });
                 countText.setFillColor(sf::Color::Black);
                 window.draw(countText);
+
+                // Name
+                float nameOffsetX = iconOffsetX + (upgrade.spriteUpgrade.has_value() ? spriteSize + 10.f : 0.f);
+                sf::Text nameText(font);
+                nameText.setCharacterSize(16);
+                nameText.setString(upgrade.name);
+                nameText.setPosition({ nameOffsetX, box.getPosition().y + 10.f });
+                nameText.setFillColor(sf::Color::Black);
+                window.draw(nameText);
+
+                // Cost
+                sf::Text costText(font);
+                costText.setCharacterSize(14);
+                costText.setString(formatDisplayBubbles(upgrade.currentCost) + " Bubbles");
+                costText.setPosition({ box.getPosition().x + boxWidth - 140.f, box.getPosition().y + 10.f });
+                costText.setFillColor(sf::Color::Black);
+                window.draw(costText);
+
+                currentY += boxSpacing;
             }
-
-            float nameOffsetX = iconOffsetX + (upgrade.spriteUpgrade.has_value() ? spriteSize + 10.0f : 0.0f);
-
-            sf::Text nameText(font);
-            nameText.setCharacterSize(16);
-            nameText.setString(upgrade.name);
-            nameText.setPosition({ nameOffsetX, upgradeBox.getPosition().y + 10.0f });
-            nameText.setFillColor(sf::Color::Black);
-            window.draw(nameText);
-
-            sf::Text costText(font);
-            costText.setCharacterSize(14);
-            costText.setString(formatDisplayBubbles(upgrade.currentCost) + " Bubbles");
-            costText.setPosition({ upgradeBox.getPosition().x + boxWidth - 140.0f, upgradeBox.getPosition().y + 10.f });
-            costText.setFillColor(sf::Color::Black);
-            window.draw(costText);
-
-            currentY += boxSpacing;
         }
 
-        // Tab position
+		// Tab positions and rendering
         sf::Vector2f tabStartPos(
             window.getSize().x - UIConstants::TabWidth - UIConstants::TabRightMargin,
             UIConstants::TabTopOffset
         );
 
-        // Items (Buildings) Tab
-        sf::RectangleShape buildingsTab(sf::Vector2f(UIConstants::TabWidth, UIConstants::TabHeight));
-        buildingsTab.setPosition(
-            sf::Vector2f(
-                tabStartPos.x - UIConstants::TabWidth - UIConstants::TabSpacing,
-                tabStartPos.y
-            )
-        );
-        buildingsTab.setFillColor(currentTab == UpgradeTab::Buildings ? sf::Color::White : sf::Color(150, 150, 150));
-        window.draw(buildingsTab);
-
-        sf::Text buildingsText(font);
-        buildingsText.setCharacterSize(18);
-        buildingsText.setString("Items");
-        sf::FloatRect buildingsBounds = buildingsText.getLocalBounds();
-        buildingsText.setOrigin({
-            buildingsBounds.position.x + buildingsBounds.size.x / 2.f,
-            buildingsBounds.position.y + buildingsBounds.size.y / 2.f
+        // Items Tab
+        sf::RectangleShape itemsTab(sf::Vector2f(UIConstants::TabWidth, UIConstants::TabHeight));
+        itemsTab.setPosition({
+            tabStartPos.x - UIConstants::TabWidth - UIConstants::TabSpacing,
+            tabStartPos.y
             });
-        buildingsText.setPosition({
-            buildingsTab.getPosition().x + UIConstants::TabWidth / 2.f,
-            buildingsTab.getPosition().y + UIConstants::TabHeight / 2.f
-            });
-        buildingsText.setFillColor(sf::Color::Black);
-        window.draw(buildingsText);
+        itemsTab.setFillColor(currentTab == UpgradeTab::Items ? sf::Color::White : sf::Color(150, 150, 150));
+        window.draw(itemsTab);
 
-        // Upgrades (Milestones) Tab
+        sf::Text itemsText(font);
+        itemsText.setCharacterSize(18);
+        itemsText.setString("Items");
+        sf::FloatRect itemsBounds = itemsText.getLocalBounds();
+        itemsText.setOrigin({
+            itemsBounds.position.x + itemsBounds.size.x / 2.f,
+            itemsBounds.position.y + itemsBounds.size.y / 2.f
+            });
+        itemsText.setPosition({
+            itemsTab.getPosition().x + UIConstants::TabWidth / 2.f,
+            itemsTab.getPosition().y + UIConstants::TabHeight / 2.f
+            });
+        itemsText.setFillColor(sf::Color::Black);
+        window.draw(itemsText);
+
+        // Milestones Tab
         sf::RectangleShape milestonesTab(sf::Vector2f(UIConstants::TabWidth, UIConstants::TabHeight));
         milestonesTab.setPosition(tabStartPos);
         milestonesTab.setFillColor(currentTab == UpgradeTab::Milestones ? sf::Color::White : sf::Color(150, 150, 150));
