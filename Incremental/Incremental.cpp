@@ -221,13 +221,11 @@ int main()
     vector<BubbleChaos> activeChaosBubbles;
     bool isBubbleChaosActive = false;
     float bubbleChaosDuration = 20.0f;
-    float bubbleChaosBuffMultiplier = 0.7f;
     float bubbleChaosSpawnInterval = 0.001f;
 
     vector<BubbleFrenzy> activeFrenzyBubbles;
     bool isBubbleFrenzyActive = false;
-    float bubbleFrenzyDuration = 20.0f;
-    float bubbleFrenzyBuffMultiplier = 5.0f;
+    float bubbleFrenzyDuration = 30.0f;
     float bubbleFrenzySpawnInterval = 0.5f;
 
     vector<BubbleMayhem> activeMayhemBubbles;
@@ -247,7 +245,7 @@ int main()
     bool showGoldenBubbleBuffHitbox = false;
     float goldenBubbleBuffDuration = 0.0f;
     float goldenBubbleBuffMultiplier = 5.0f;
-    float goldenBubbleBuffSpawnInterval = 600.0f;
+    float goldenBubbleBuffSpawnInterval = 120.0f;
 
     bool isRubberDuckBuffActive = false;
     bool showRubberDuckBuffHitbox = false;
@@ -418,9 +416,6 @@ int main()
 
         long double realBubblesPerSecond = bubblesPerSecond;
         long double realBubbles = bubbles;
-
-        if (isBubbleMayhemActive)
-            realBubblesPerSecond *= bubbleMayhemBuffMultiplier;
 
         if (isBubbleBuffActive)
             realBubblesPerSecond *= bubbleBuffMultiplier;
@@ -615,7 +610,7 @@ int main()
             goldenBubbleBuffSpawnInterval,
 			goldenBubbleBuffMultiplier,
             goldenBubbleBuffDuration,
-            600.0f, 900.0f,
+            120.0f, 180.0f,
 
             isCurrentlyPressed,
             isButtonPressed,

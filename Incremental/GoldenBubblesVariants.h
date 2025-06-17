@@ -34,7 +34,7 @@ struct goldenBubbleBuffVariant
 
 inline vector<goldenBubbleBuffVariant> goldenBubbleVariants = {
 	{
-		5.0f, 10.0f,
+		3.0f, 15.0f,
 		sf::Color::Blue,
 		0.0f,
 		buffVariantType::goldenBubbleBuff,
@@ -48,21 +48,21 @@ inline vector<goldenBubbleBuffVariant> goldenBubbleVariants = {
 		goldenBubbleVariantType::Additive
 	},
 	{
-		0.7, 20.0f,
+		0.4, 20.0f,
 		sf::Color::Blue,
 		2.0f,
 		buffVariantType::goldenBubbleBuff,
 		goldenBubbleVariantType::BubbleChaos
 	},
 	{
-		5.0, 20.0f,
+		3.0, 30.0f,
 		sf::Color::Blue,
 		90.0f,
 		buffVariantType::goldenBubbleBuff,
 		goldenBubbleVariantType::BubbleFrenzy
 	},
 	{
-		2.0, 20.0f,
+		1.5, 20.0f,
 		sf::Color::Blue,
 		8.0f,
 		buffVariantType::goldenBubbleBuff,
