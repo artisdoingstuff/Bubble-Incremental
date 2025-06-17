@@ -445,12 +445,13 @@ int main()
 
         // Clicking stuff
         bool isCurrentlyPressed = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
+        bool justClicked = isCurrentlyPressed && !isButtonPressed;
 
 		// Get the mouse position relative to the window
         sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
         sf::Vector2f mousePositionF(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
 
-        if (isCurrentlyPressed && !isButtonPressed)
+        if (justClicked)
         {
             // Mouse Position
             sf::Vector2i mousePosI = sf::Mouse::getPosition(window);
@@ -500,8 +501,8 @@ int main()
             constexpr float boxHeight = 60.f;
             constexpr float boxSpacing = 70.f;
             constexpr float milestoneSize = 80.f;
-            constexpr float milestoneSpacingX = 20.f;
-            constexpr float milestoneSpacingY = 20.f;
+            constexpr float milestoneSpacingX = 50.f;
+            constexpr float milestoneSpacingY = 50.f;
             constexpr int itemsPerRow = 4;
 
             float inputY = UIConstants::StartYOffset;
@@ -714,22 +715,6 @@ int main()
                 sf::Vector2f(500.f, 60.f)
             );
 
-            // Check click
-            if (isCurrentlyPressed && !isButtonPressed && upgradeClickArea.contains(mousePositionF))
-            {
-                if (upgrade.canAfford(bubbles))
-                {
-                    upgrade.purchase(bubbles);
-
-                    cout << "Purchased: " << upgrade.name
-                        << " | New count: " << upgrade.count << endl;
-                }
-                else
-                {
-                    cout << "Not enough bubbles to purchase " << upgrade.name << endl;
-                }
-            }
-
             inputY += 70.f;
         }
 
@@ -756,9 +741,10 @@ int main()
         // Milestone Upgrades
         if (currentTab == UpgradeTab::Milestones)
         {
+            float milestoneStartX = startX - 350.f;
             constexpr float milestoneSize = 80.f;
-            constexpr float spacingX = 20.f;
-            constexpr float spacingY = 20.f;
+            constexpr float spacingX = 50.f;
+            constexpr float spacingY = 50.f;
             constexpr int itemsPerRow = 4;
 
             int index = 0;
@@ -771,7 +757,7 @@ int main()
                 int col = index % itemsPerRow;
 
                 sf::Vector2f pos = {
-                    startX + col * (milestoneSize + spacingX),
+                    milestoneStartX + col * (milestoneSize + spacingX),
                     startY + row * (milestoneSize + spacingY)
                 };
 
