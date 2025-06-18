@@ -55,7 +55,7 @@ static map<string, sf::Texture> upgradeTextures = loadUpgradeTextures();
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.0.4-beta";
+string gameVersion = "v1.0.5-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
