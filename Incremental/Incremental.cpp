@@ -7,7 +7,7 @@
 #include "Buffs.h"
 // #include "DuckVariants.h"
 #include "GameFileState.h"
-#include "GoldenBubblesVariants.h"
+#include "GlobalBubblesVariants.h"
 #include "Upgrades.h"
 #include "OfflineBubbles.h"
 
@@ -48,7 +48,7 @@ map<string, sf::Texture> loadUpgradeTextures()
 }
 
 sf::Texture bubbleTexture;
-sf::Texture goldenBubbleTexture;
+sf::Texture globalBubbleTexture;
 
 // Global Variables if needed
 static map<string, sf::Texture> upgradeTextures = loadUpgradeTextures();
@@ -176,7 +176,7 @@ void updateAndDrawBubbles(vector<DrawBubbleEventBubbles>& bubbleList, sf::Render
 
 int main()
 {
-    goldenBubbleBuffVariant currentGoldenBubbleType{};
+    globalBubbleBuffVariant currentGlobalBubbleType{};
     duckBuffVariant currentDuckType{};
 
     sf::RenderWindow window(sf::VideoMode({ 1600, 900 }), "Bubble Incremental");
@@ -190,8 +190,8 @@ int main()
 	bubbleTexture.loadFromFile("Assets/bubble.png");
     bubbleTexture.setSmooth(true);
 
-	goldenBubbleTexture.loadFromFile("Assets/golden_bubble.png");
-    goldenBubbleTexture.setSmooth(true);
+	globalBubbleTexture.loadFromFile("Assets/golden_bubble.png");
+    globalBubbleTexture.setSmooth(true);
 
     // All sounds here
     sf::SoundBuffer rubberDuckQuackBuffer;
@@ -231,13 +231,13 @@ int main()
     float bubbleMayhemBuffMultiplier = 1.5f;
     float bubbleMayhemSpawnInterval = 0.125f;
 
-    sf::Sprite currentGoldenBubbleSprite(goldenBubbleTexture);
-    bool isGoldenBubbleBuffActive = false;
-    bool doesGoldenBubbleBuffExist = false;
-    bool showGoldenBubbleBuffHitbox = false;
-    float goldenBubbleBuffDuration = 0.0f;
-    float goldenBubbleBuffMultiplier = 5.0f;
-    float goldenBubbleBuffSpawnInterval = 1.0f;
+    sf::Sprite currentGlobalBubbleSprite(globalBubbleTexture);
+    bool isGlobalBubbleBuffActive = false;
+    bool doesGlobalBubbleBuffExist = false;
+    bool showGlobalBubbleBuffHitbox = false;
+    float globalBubbleBuffDuration = 0.0f;
+    float globalBubbleBuffMultiplier = 1.0f;
+    float globalBubbleBuffSpawnInterval = 90.0f;
 
     bool isRubberDuckBuffActive = false;
     bool showRubberDuckBuffHitbox = false;
@@ -327,10 +327,10 @@ int main()
     sf::Clock bubbleBuffSpawnIntervalClock;
     sf::Clock bubbleBuffLifetimeClock;
 
-	sf::Clock goldenBubbleBuffClock;
-	sf::Clock goldenBubbleBuffSpawnIntervalClock;
-    sf::Clock goldenBubbleBuffLifetimeClock;
-    sf::Clock goldenBubblePulseClock;
+	sf::Clock globalBubbleBuffClock;
+	sf::Clock globalBubbleBuffSpawnIntervalClock;
+    sf::Clock globalBubbleBuffLifetimeClock;
+    sf::Clock globalBubblePulseClock;
 
     sf::Clock rubberDuckBuffClock;
 	sf::Clock rubberDuckBuffSpawnIntervalClock;
@@ -353,15 +353,10 @@ int main()
 	bubbleComboText.setFillColor(sf::Color::Black);
 
     // Objects for buffs
-    sf::RectangleShape bubbleBuffHitbox;
-    bubbleBuffHitbox.setSize(sf::Vector2f(100, 100));
-    bubbleBuffHitbox.setFillColor(sf::Color::Blue);
-    bubbleBuffHitbox.setPosition({ -100, -100 });
-
-	sf::RectangleShape goldenBubbleBuffHitbox;
-    goldenBubbleBuffHitbox.setSize(sf::Vector2f(100, 100));
-    goldenBubbleBuffHitbox.setFillColor(sf::Color::Magenta);
-	goldenBubbleBuffHitbox.setPosition({ -100, -100 });
+	sf::RectangleShape globalBubbleBuffHitbox;
+    globalBubbleBuffHitbox.setSize(sf::Vector2f(100, 100));
+    globalBubbleBuffHitbox.setFillColor(sf::Color::Magenta);
+	globalBubbleBuffHitbox.setPosition({ 100, 100 });
 
     sf::RectangleShape rubberDuckBuffHitbox;
     rubberDuckBuffHitbox.setSize(sf::Vector2f(100, 100));
@@ -409,8 +404,8 @@ int main()
         long double realBubblesPerSecond = bubblesPerSecond;
         long double realBubbles = bubbles;
 
-        if (isGoldenBubbleBuffActive)
-            realBubblesPerSecond *= goldenBubbleBuffMultiplier;
+        if (isGlobalBubbleBuffActive)
+            realBubblesPerSecond *= globalBubbleBuffMultiplier;
 
         if (isRubberDuckBuffActive)
             realBubblesPerSecond *= rubberDuckBuffMultiplier;
@@ -418,8 +413,8 @@ int main()
         // Clicking buffs
         long double realClickMultiplier = clickMultiplier;
 
-        if (isGoldenBubbleBuffActive)
-            realClickMultiplier *= goldenBubbleBuffMultiplier;
+        if (isGlobalBubbleBuffActive)
+            realClickMultiplier *= globalBubbleBuffMultiplier;
 
         if (isRubberDuckBuffActive)
             realClickMultiplier *= rubberDuckBuffMultiplier;
@@ -552,24 +547,25 @@ int main()
             bubblesPerSecondStream << fixed << setprecision(0) << realBubblesPerSecond;
 		}
 
+        std::cout << "[DRAW] showGlobalBubbleBuffHitbox: " << showGlobalBubbleBuffHitbox << endl;
         // Buff logic here
-        bool goldenBubbleBuffClicked = buffHandler(
+        bool globalBubbleBuffClicked = buffHandler(
             mousePositionF,
             window,
 
-            goldenBubbleBuffHitbox,
+            globalBubbleBuffHitbox,
 
-            goldenBubbleBuffClock,
-            goldenBubbleBuffSpawnIntervalClock,
-            goldenBubbleBuffLifetimeClock,
+            globalBubbleBuffClock,
+            globalBubbleBuffSpawnIntervalClock,
+            globalBubbleBuffLifetimeClock,
 
-            isGoldenBubbleBuffActive,
-            showGoldenBubbleBuffHitbox,
+            isGlobalBubbleBuffActive,
+            showGlobalBubbleBuffHitbox,
 
-            goldenBubbleBuffSpawnInterval,
-			goldenBubbleBuffMultiplier,
-            goldenBubbleBuffDuration,
-            120.0f, 180.0f,
+            globalBubbleBuffSpawnInterval,
+			globalBubbleBuffMultiplier,
+            globalBubbleBuffDuration,
+            90.0f, 120.0f,
 
             isCurrentlyPressed,
             isButtonPressed,
@@ -578,53 +574,63 @@ int main()
 
             [&](sf::RectangleShape& buffHitbox, float& buffMultiplier, float& buffDuration)
             {
-                selectGoldenBubbleVariant(
-                    currentGoldenBubbleType,
+                selectGlobalBubbleVariant(
+                    currentGlobalBubbleType,
                     buffHitbox,
                     buffMultiplier,
                     buffDuration,
-                    currentGoldenBubbleSprite
+                    currentGlobalBubbleSprite
                 );
-                doesGoldenBubbleBuffExist = true;
+                doesGlobalBubbleBuffExist = true;
             },
             [&]()
             {
-                if (currentGoldenBubbleType.goldenBubbleType == goldenBubbleVariantType::Additive)
+                if (currentGlobalBubbleType.globalBubbleType == globalBubbleVariantType::Normal)
+                {
+                    doesGlobalBubbleBuffExist = false;
+                }
+
+                if (currentGlobalBubbleType.globalBubbleType == globalBubbleVariantType::Multiplicative)
+                {
+                    doesGlobalBubbleBuffExist = false;
+                }
+
+                if (currentGlobalBubbleType.globalBubbleType == globalBubbleVariantType::Additive)
                 {
                     float randomValue = 1.0f + static_cast<float>(rand()) / RAND_MAX * 4.0f;
                     bubbles += (1 + pow(10, (floor(log10(realBubbles)) - 2))) * randomValue;
-                    doesGoldenBubbleBuffExist = false;
+                    doesGlobalBubbleBuffExist = false;
                 }
 
-                if (currentGoldenBubbleType.goldenBubbleType == goldenBubbleVariantType::BubbleChaos)
+                if (currentGlobalBubbleType.globalBubbleType == globalBubbleVariantType::BubbleChaos)
                 {
                     isBubbleChaosActive = true;
                     bubbleChaosClock.restart();
                     bubbleChaosSpawnIntervalClock.restart();
-                    doesGoldenBubbleBuffExist = false;
+                    doesGlobalBubbleBuffExist = false;
                 }
 
-                if (currentGoldenBubbleType.goldenBubbleType == goldenBubbleVariantType::BubbleFrenzy)
+                if (currentGlobalBubbleType.globalBubbleType == globalBubbleVariantType::BubbleFrenzy)
                 {
                     isBubbleFrenzyActive = true;
                     bubbleFrenzyClock.restart();
                     bubbleFrenzySpawnIntervalClock.restart();
-                    doesGoldenBubbleBuffExist = false;
+                    doesGlobalBubbleBuffExist = false;
                 }
 
-                if (currentGoldenBubbleType.goldenBubbleType == goldenBubbleVariantType::BubbleMayhem)
+                if (currentGlobalBubbleType.globalBubbleType == globalBubbleVariantType::BubbleMayhem)
                 {
                     isBubbleMayhemActive = true;
                     bubbleMayhemClock.restart();
                     bubbleMayhemSpawnIntervalClock.restart();
-                    doesGoldenBubbleBuffExist = false;
+                    doesGlobalBubbleBuffExist = false;
                 }
             },
-            &currentGoldenBubbleSprite,
+            &currentGlobalBubbleSprite,
             true
 		);
 
-        if (goldenBubbleBuffClicked)
+        if (globalBubbleBuffClicked)
         {
             bubblePopping.play();
         }
@@ -889,34 +895,27 @@ int main()
             window.draw(bubbleComboText);
         }
 
-        if (showGoldenBubbleBuffHitbox)
+        if (showGlobalBubbleBuffHitbox)
         {
-            if (doesGoldenBubbleBuffExist)
+            if (!isGlobalBubbleBuffActive)
             {
-                if (!isGoldenBubbleBuffActive)
-                {
-                    float t = goldenBubblePulseClock.getElapsedTime().asMilliseconds();
-                    float pulse = 1.0f + 0.02f * sinf(t * 0.003f);
+                float t = globalBubblePulseClock.getElapsedTime().asMilliseconds();
+                float pulse = 1.0f + 0.02f * sinf(t * 0.003f);
 
-                    currentGoldenBubbleSprite.setScale(sf::Vector2f(pulse * 0.8f, pulse * 0.8f));
+                currentGlobalBubbleSprite.setScale(sf::Vector2f(pulse * 0.8f, pulse * 0.8f));
 
-                    sf::Vector2u textureSize = currentGoldenBubbleSprite.getTexture().getSize();
-                    currentGoldenBubbleSprite.setOrigin(sf::Vector2f(textureSize.x / 2.0f, textureSize.y / 2.0f));
+                sf::Vector2u textureSize = currentGlobalBubbleSprite.getTexture().getSize();
+                currentGlobalBubbleSprite.setOrigin(sf::Vector2f(textureSize.x / 2.0f, textureSize.y / 2.0f));
 
-                    sf::Vector2f hitboxCenter = {
-                        goldenBubbleBuffHitbox.getPosition().x + goldenBubbleBuffHitbox.getSize().x / 2.0f,
-                        goldenBubbleBuffHitbox.getPosition().y + goldenBubbleBuffHitbox.getSize().y / 2.0f
-                    };
+                sf::Vector2f hitboxCenter = {
+                    globalBubbleBuffHitbox.getPosition().x + globalBubbleBuffHitbox.getSize().x / 2.0f,
+                    globalBubbleBuffHitbox.getPosition().y + globalBubbleBuffHitbox.getSize().y / 2.0f
+                };
 
-                    currentGoldenBubbleSprite.setPosition(hitboxCenter);
-                }
-
-                window.draw(currentGoldenBubbleSprite);
+                currentGlobalBubbleSprite.setPosition(hitboxCenter);
             }
-            else
-            {
-                window.draw(goldenBubbleBuffHitbox);
-            }
+
+            window.draw(currentGlobalBubbleSprite);
         }
 
         if (showRubberDuckBuffHitbox)

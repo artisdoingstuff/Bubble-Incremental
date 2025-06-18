@@ -3,7 +3,7 @@
 #include "Includes.h"
 #include "BuffTypes.h"
 #include "DuckVariants.h"
-#include "GoldenBubblesVariants.h"
+#include "GlobalBubblesVariants.h"
 
 bool buffHandler(
     const sf::Vector2f& mousePos,
@@ -37,86 +37,98 @@ bool buffHandler(
 {
     float elapsedBuffLifetime = buffLifetimeClock.getElapsedTime().asSeconds();
 
-    if (!showBuffHitbox && buffSpawnIntervalClock.getElapsedTime().asSeconds() > buffSpawnInterval)
+    std::cout << "[Debug] Time: " << buffSpawnIntervalClock.getElapsedTime().asSeconds()
+        << " / Spawn in: " << buffSpawnInterval << endl;
+    
+    if (!showBuffHitbox && buffSpawnIntervalClock.getElapsedTime().asSeconds() >= buffSpawnInterval)
     {
-        float x = static_cast<float>(rand() % static_cast<int>(600)) + 550;
-        float y = static_cast<float>(rand() % static_cast<int>(800)) + 50;
+        std::cout << "[SPAWN] Triggered after " << buffSpawnIntervalClock.getElapsedTime().asSeconds() << "s\n";
+
+        float x = static_cast<float>(rand() % 600) + 550.f;
+        float y = static_cast<float>(rand() % 800) + 50.f;
+
+        std::cout << "[SPAWN] New Position: (" << x << ", " << y << ")" << endl;
 
         buffHitbox.setPosition({ x, y });
-
         showBuffHitbox = true;
-        buffSpawnIntervalClock.restart();
+        std::cout << "[SPAWN] showBuffHitbox set to TRUE" << endl;
         buffLifetimeClock.restart();
-        buffSpawnInterval = static_cast<float>(rand() % static_cast<int>(maxSpawnInterval - minSpawnInterval + 1) + minSpawnInterval);
+        buffSpawnIntervalClock.restart();
+
+        buffSpawnInterval = static_cast<float>(
+            rand() % static_cast<int>(maxSpawnInterval - minSpawnInterval + 1)
+            + static_cast<int>(minSpawnInterval)
+            );
+        std::cout << "[SPAWN] Next Interval: " << buffSpawnInterval << endl;
 
         if (isVariant && variantSelector)
-        {
-            variantSelector(
-                buffHitbox,
-                buffMultiplier,
-                buffDuration
-            );
-        }
+            variantSelector(buffHitbox, buffMultiplier, buffDuration);
 
         if (useSprite && buffSprite)
         {
             buffSprite->setPosition(buffHitbox.getPosition());
             sf::Color spriteColor = buffSprite->getColor();
             spriteColor.a = 0;
-            buffSprite->setColor(sf::Color(255, 255, 255, 0));
+            buffSprite->setColor(spriteColor);
         }
 
-        sf::Color color = buffHitbox.getFillColor();
-        color.a = 0;
-        buffHitbox.setFillColor(color);
+        sf::Color c = buffHitbox.getFillColor();
+        c.a = 0;
+        buffHitbox.setFillColor(c);
     }
 
     if (showBuffHitbox && !isBuffActive && elapsedBuffLifetime <= 1.0f)
     {
-        float fadeInAlpha = elapsedBuffLifetime / 1.0f * 255.0f;
-        int alpha = static_cast<int>(min(fadeInAlpha, 255.0f));
-
+        int alpha = static_cast<int>(min(elapsedBuffLifetime / 1.0f * 255.0f, 255.0f));
         sf::Color color = buffHitbox.getFillColor();
         color.a = alpha;
         buffHitbox.setFillColor(color);
 
         if (useSprite && buffSprite)
         {
-            sf::Color spriteColor = buffSprite->getColor();
-            spriteColor.a = alpha;
-            buffSprite->setColor(sf::Color(255, 255, 255, alpha));
+            sf::Color sc = buffSprite->getColor();
+            sc.a = alpha;
+            buffSprite->setColor(sc);
         }
     }
 
-    if (showBuffHitbox && !isBuffActive && elapsedBuffLifetime > 8.0f)
+    if (showBuffHitbox && !isBuffActive && elapsedBuffLifetime > 120.0f)
     {
-        float fadeOutAlpha = (1.0f - (elapsedBuffLifetime - 8.0f)) * 255.0f;
-        int alpha = static_cast<int>(max(0.0f, min(fadeOutAlpha, 255.0f)));
-
+        int alpha = static_cast<int>(max(0.0f, (1.0f - (elapsedBuffLifetime - 120.0f)) * 255.0f));
         sf::Color color = buffHitbox.getFillColor();
         color.a = alpha;
         buffHitbox.setFillColor(color);
 
         if (useSprite && buffSprite)
         {
-            sf::Color spriteColor = buffSprite->getColor();
-            spriteColor.a = alpha;
-            buffSprite->setColor(spriteColor);
+            sf::Color sc = buffSprite->getColor();
+            sc.a = alpha;
+            buffSprite->setColor(sc);
         }
 
-        if (showBuffHitbox && elapsedBuffLifetime >= 10.0f)
+        if (elapsedBuffLifetime >= 10.0f)
         {
             showBuffHitbox = false;
             buffHitbox.setPosition({ -100.f, -100.f });
             buffHitbox.setFillColor(sf::Color(0, 0, 255, 255));
 
             if (useSprite && buffSprite)
-            {
                 buffSprite->setPosition({ -100.f, -100.f });
-                sf::Color spriteColor = buffSprite->getColor();
-                buffSprite->setColor(sf::Color(255, 255, 255, spriteColor.a));
-            }
         }
+    }
+
+    if (showBuffHitbox && !isBuffActive && elapsedBuffLifetime > 122.0f)
+    {
+        cout << "[Failsafe] Resetting stuck buff at " << buffHitbox.getPosition().x << ", " << buffHitbox.getPosition().y << endl;
+        showBuffHitbox = false;
+        buffHitbox.setPosition({ -100.f, -100.f });
+
+        if (useSprite && buffSprite)
+            buffSprite->setPosition({ -100.f, -100.f });
+
+        buffSpawnInterval = static_cast<float>(rand() % static_cast<int>(maxSpawnInterval - minSpawnInterval + 1) + minSpawnInterval);
+        buffSpawnIntervalClock.restart();
+        buffLifetimeClock.restart();
     }
 
     if (useSprite && buffSprite && showBuffHitbox)
@@ -132,16 +144,12 @@ bool buffHandler(
         showBuffHitbox = false;
 
         if (onBuffClick)
-        {
             onBuffClick();
-        }
 
-        buffHitbox.setPosition({ -100, -100 });
+        buffHitbox.setPosition({ -100.f, -100.f });
 
         if (useSprite && buffSprite)
-        {
-            buffSprite->setPosition({ -100, -100 });
-        }
+            buffSprite->setPosition({ -100.f, -100.f });
 
         return true;
     }
