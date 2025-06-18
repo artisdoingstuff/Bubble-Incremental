@@ -55,6 +55,8 @@ static map<string, sf::Texture> upgradeTextures = loadUpgradeTextures();
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
+string gameVersion = "v1.0.4-beta";
+
 const long double shopInflationMultiplier = 1.15L;
 
 long double bubbles = 0.0L;
@@ -179,7 +181,7 @@ int main()
     globalBubbleBuffVariant currentGlobalBubbleType{};
     duckBuffVariant currentDuckType{};
 
-    sf::RenderWindow window(sf::VideoMode({ 1600, 900 }), "Bubble Incremental");
+    sf::RenderWindow window(sf::VideoMode({ 1600, 900 }), "Bubble Incremental | " + gameVersion);
 	window.setFramerateLimit(60);
     
     bool isButtonPressed = false;
@@ -237,7 +239,7 @@ int main()
     bool showGlobalBubbleBuffHitbox = false;
     float globalBubbleBuffDuration = 0.0f;
     float globalBubbleBuffMultiplier = 1.0f;
-    float globalBubbleBuffSpawnInterval = 90.0f;
+    float globalBubbleBuffSpawnInterval = 120.0f;
 
     bool isRubberDuckBuffActive = false;
     bool showRubberDuckBuffHitbox = false;
@@ -267,6 +269,7 @@ int main()
     upgrades.push_back({ "Bubble Bath", 0, 18000.0, 18000.0, 11.0, 20000.0 });
     upgrades.push_back({ "Bathtub Jet", 0, 40000.0, 40000.0, 20.0, 50000.0 });
     upgrades.push_back({ "Luxury Spa", 0, 100000.0, 100000.0, 36.0, 100000.0 });
+    upgrades.push_back({ "Foam Pit", 0, 150000.0, 150000.0, 50, 200000.0 });
 
     generateMilestoneUpgrades(upgrades, "Soap", 10.0);
     generateMilestoneUpgrades(upgrades, "Hand Wash", 60.0);
@@ -277,6 +280,7 @@ int main()
     generateMilestoneUpgrades(upgrades, "Bubble Bath", 18000.0);
     generateMilestoneUpgrades(upgrades, "Bathtub Jet", 40000.0);
     generateMilestoneUpgrades(upgrades, "Luxury Spa", 100000.0);
+    generateMilestoneUpgrades(upgrades, "Foam Pit", 150000.0);
 
     for (auto& upgrade : upgrades)
     {
@@ -380,6 +384,7 @@ int main()
             {
                 time_t currentTimestamp = time(nullptr);
                 saveFileToJson(
+                    gameVersion,
                     currentTimestamp,
                     duckCounter,
                     bubbles,
@@ -574,7 +579,7 @@ int main()
             globalBubbleBuffSpawnInterval,
 			globalBubbleBuffMultiplier,
             globalBubbleBuffDuration,
-            90.0f, 120.0f,
+            120.0f, 180.0f,
 
             isCurrentlyPressed,
             isButtonPressed,

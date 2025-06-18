@@ -4,9 +4,11 @@
 #include "Upgrades.h"
 
 extern long double totalUpgradeCount;
+extern string gameVersion;
 
 // Function to save the game state to a file
 void saveFileToJson(
+    string version,
     time_t timestamp,
     long double duckCounter,
     long double bubbles,
@@ -24,6 +26,7 @@ void saveFileToJson(
         return round(val * 100.0) / 100.0;
         };
 
+    saveData["version"] = version;
     saveData["timestamp"] = timestamp;
     saveData["duckCounter"] = round2(duckCounter);
     saveData["bubbles"] = round2(bubbles);
@@ -38,7 +41,7 @@ void saveFileToJson(
     ofstream file("save_file.json");
     if (file.is_open())
     {
-        file << std::setw(4) << saveData << endl;
+        file << setw(4) << saveData << endl;
         file.close();
         cout << "Game saved successfully." << endl;
     }

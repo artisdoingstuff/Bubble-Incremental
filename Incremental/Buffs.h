@@ -83,9 +83,9 @@ bool buffHandler(
         }
     }
 
-    if (showBuffHitbox && !isBuffActive && elapsedBuffLifetime > 120.0f)
+    if (showBuffHitbox && !isBuffActive && elapsedBuffLifetime > 180.0f)
     {
-        int alpha = static_cast<int>(max(0.0f, (1.0f - (elapsedBuffLifetime - 120.0f)) * 255.0f));
+        int alpha = static_cast<int>(max(0.0f, (1.0f - (elapsedBuffLifetime - 180.0f)) * 255.0f));
         sf::Color color = buffHitbox.getFillColor();
         color.a = alpha;
         buffHitbox.setFillColor(color);
@@ -108,7 +108,7 @@ bool buffHandler(
         }
     }
 
-    if (showBuffHitbox && !isBuffActive && elapsedBuffLifetime > 122.0f)
+    if (showBuffHitbox && !isBuffActive && elapsedBuffLifetime > 182.0f)
     {
         cout << "[Failsafe] Resetting stuck buff at " << buffHitbox.getPosition().x << ", " << buffHitbox.getPosition().y << endl;
         showBuffHitbox = false;
