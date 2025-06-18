@@ -452,15 +452,13 @@ int main()
             if (itemsTabRect.contains(mousePosF))
             {
                 currentTab = UpgradeTab::Items;
-                cout << "[Tab] Switched to Items" << endl;
             }
             else if (upgradesTabRect.contains(mousePosF))
             {
                 currentTab = UpgradeTab::Milestones;
-                cout << "[Tab] Switched to Milestones" << endl;
             }
 
-            // Click Bubble Logic
+            // Click Bubble
             if (clickArea.contains(mousePosF))
             {
                 long double clickValue = (baseBubblesPerClick + (bubblesPerSecond * 0.05)) * clickMultiplier;
@@ -473,54 +471,66 @@ int main()
             handleBubbleClick(activeMayhemBubbles, mousePosF, bubbles, realBubblesPerSecond, bubbleMayhemBuffMultiplier, bubblePopping);
 
             // Upgrade Purchases
-            constexpr float boxWidth = 350.f;
-            constexpr float boxHeight = 60.f;
-            constexpr float boxSpacing = 70.f;
-            constexpr float milestoneSize = 80.f;
-            constexpr float milestoneSpacingX = 50.f;
-            constexpr float milestoneSpacingY = 50.f;
-            constexpr int itemsPerRow = 4;
+            float startX = window.getSize().x - UIConstants::TabWidth - UIConstants::TabRightMargin;
+            float startY = UIConstants::TabTopOffset + UIConstants::TabHeight + 20.0f;
 
-            float inputY = UIConstants::StartYOffset;
-            int milestoneIndex = 0;
-            int itemIndex = 0;
-
-            for (auto& upgrade : upgrades)
+            if (currentTab == UpgradeTab::Items)
             {
-                bool isUnlocked = upgrade.isUnlocked(allTimeBubbles, upgrades);
+                constexpr float boxWidth = 350.f;
+                constexpr float boxHeight = 60.f;
+                constexpr float boxSpacing = 70.f;
 
-                if (currentTab == UpgradeTab::Items)
+                float currentY = startY;
+
+                for (auto& upgrade : upgrades)
                 {
-                    if (upgrade.isMilestone || !isUnlocked)
+                    if (upgrade.isMilestone || !upgrade.isUnlocked(allTimeBubbles, upgrades))
                         continue;
 
-                    sf::FloatRect itemRect(
-                        { window.getSize().x - UIConstants::TabWidth - UIConstants::TabRightMargin - boxWidth - 20.f, inputY },
+                    sf::FloatRect upgradeBoxRect(
+                        { startX - boxWidth - 20.f, currentY },
                         { boxWidth, boxHeight }
                     );
 
-                    if (itemRect.contains(mousePosF) && upgrade.canAfford(bubbles))
+                    if (upgradeBoxRect.contains(mousePosF) && upgrade.canAfford(bubbles))
+                    {
                         upgrade.purchase(bubbles);
+                    }
 
-                    inputY += boxSpacing;
+                    currentY += boxSpacing;
                 }
-                else if (currentTab == UpgradeTab::Milestones)
+            }
+            else if (currentTab == UpgradeTab::Milestones)
+            {
+                constexpr float milestoneSize = 80.f;
+                constexpr float spacingX = 50.f;
+                constexpr float spacingY = 50.f;
+                constexpr int itemsPerRow = 4;
+
+                float milestoneStartX = startX - 350.f;
+
+                int index = 0;
+                for (auto& upgrade : upgrades)
                 {
-                    if (!upgrade.isMilestone || !isUnlocked || upgrade.count >= 1)
+                    if (!upgrade.isMilestone || !upgrade.isUnlocked(allTimeBubbles, upgrades) || upgrade.count >= 1)
                         continue;
 
-                    int row = milestoneIndex / itemsPerRow;
-                    int col = milestoneIndex % itemsPerRow;
+                    int row = index / itemsPerRow;
+                    int col = index % itemsPerRow;
 
-                    float boxX = window.getSize().x - UIConstants::TabWidth - UIConstants::TabRightMargin + col * (milestoneSize + milestoneSpacingX);
-                    float boxY = UIConstants::StartYOffset + row * (milestoneSize + milestoneSpacingY);
+                    sf::Vector2f pos = {
+                        milestoneStartX + col * (milestoneSize + spacingX),
+                        startY + row * (milestoneSize + spacingY)
+                    };
 
-                    sf::FloatRect milestoneRect({ boxX, boxY }, { milestoneSize, milestoneSize });
+                    sf::FloatRect milestoneBoxRect(pos, { milestoneSize, milestoneSize });
 
-                    if (milestoneRect.contains(mousePosF) && upgrade.canAfford(bubbles))
+                    if (milestoneBoxRect.contains(mousePosF) && upgrade.canAfford(bubbles))
+                    {
                         upgrade.purchase(bubbles);
+                    }
 
-                    ++milestoneIndex;
+                    ++index;
                 }
             }
         }
@@ -547,7 +557,6 @@ int main()
             bubblesPerSecondStream << fixed << setprecision(0) << realBubblesPerSecond;
 		}
 
-        std::cout << "[DRAW] showGlobalBubbleBuffHitbox: " << showGlobalBubbleBuffHitbox << endl;
         // Buff logic here
         bool globalBubbleBuffClicked = buffHandler(
             mousePositionF,

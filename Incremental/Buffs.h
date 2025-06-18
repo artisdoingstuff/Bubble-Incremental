@@ -37,21 +37,13 @@ bool buffHandler(
 {
     float elapsedBuffLifetime = buffLifetimeClock.getElapsedTime().asSeconds();
 
-    std::cout << "[Debug] Time: " << buffSpawnIntervalClock.getElapsedTime().asSeconds()
-        << " / Spawn in: " << buffSpawnInterval << endl;
-    
     if (!showBuffHitbox && buffSpawnIntervalClock.getElapsedTime().asSeconds() >= buffSpawnInterval)
     {
-        std::cout << "[SPAWN] Triggered after " << buffSpawnIntervalClock.getElapsedTime().asSeconds() << "s\n";
-
         float x = static_cast<float>(rand() % 600) + 550.f;
         float y = static_cast<float>(rand() % 800) + 50.f;
 
-        std::cout << "[SPAWN] New Position: (" << x << ", " << y << ")" << endl;
-
         buffHitbox.setPosition({ x, y });
         showBuffHitbox = true;
-        std::cout << "[SPAWN] showBuffHitbox set to TRUE" << endl;
         buffLifetimeClock.restart();
         buffSpawnIntervalClock.restart();
 
@@ -59,7 +51,6 @@ bool buffHandler(
             rand() % static_cast<int>(maxSpawnInterval - minSpawnInterval + 1)
             + static_cast<int>(minSpawnInterval)
             );
-        std::cout << "[SPAWN] Next Interval: " << buffSpawnInterval << endl;
 
         if (isVariant && variantSelector)
             variantSelector(buffHitbox, buffMultiplier, buffDuration);
