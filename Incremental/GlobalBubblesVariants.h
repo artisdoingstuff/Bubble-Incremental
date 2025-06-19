@@ -24,7 +24,7 @@ struct globalBubbleBuffVariant
 extern sf::Texture bubbleTexture;
 extern sf::Texture globalBubbleTexture;
 
-inline std::vector<globalBubbleBuffVariant> globalBubbleVariants = {
+inline vector<globalBubbleBuffVariant> globalBubbleVariants = {
     {
         2.0f, 30.0f,
         sf::Color::Blue,

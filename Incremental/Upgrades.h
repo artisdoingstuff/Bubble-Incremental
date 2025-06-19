@@ -20,6 +20,14 @@ struct UpgradeItem
     bool unlockedByMilestone = false;
     long double milestoneTriggerValue = 0.0; // milestone threshold
 
+    bool isItemUpgrade = false;
+    bool isOtherUpgrade = false;
+
+    bool isClickUpgrade = false;
+    bool isDurationUpgrade = false;
+    bool isMinorUpgrade = false;
+    bool isMajorUpgrade = false;
+
     optional<sf::Sprite> spriteUpgrade;
 
     void updateCost(const long double inflation = shopInflationMultiplier)
@@ -42,7 +50,7 @@ struct UpgradeItem
 
         // Only for milestone upgrades with unlockedByMilestone = true
         string baseName = name.substr(6); // remove "Super "
-        size_t tierPos = baseName.find(" Tier");
+        size_t tierPos = baseName.find(" Tier ");
         if (tierPos != string::npos)
             baseName = baseName.substr(0, tierPos);
 
@@ -71,52 +79,61 @@ struct UpgradeItem
     }
 };
 
-inline void generateMilestoneUpgrades(
+inline void generateItemMilestoneUpgrades(
     vector<UpgradeItem>& upgrades,
     const string& baseName,
-    long double baseBuildingCost,
-    long double milestoneMultiplier = 0.5L)
+    long double baseBuildingCost
+)
 {
     const vector<int> thresholds = {
-        10, 25, 50, 100, 150, 200, 250, 300,
-        400, 500, 600, 700, 800, 900, 1000
+        10, 25, 50, 75, 100, 150, 200, 250
     };
-    const long double growth = shopInflationMultiplier;
 
     for (size_t i = 0; i < thresholds.size(); ++i)
     {
         int threshold = thresholds[i];
 
-        long double milestoneCost = baseBuildingCost * pow(growth, threshold) * milestoneMultiplier;
+        long double buildingCost = baseBuildingCost * pow(shopInflationMultiplier, threshold);
+        long double floorVal = floor(log10(buildingCost));
+        long double raisedVal = pow(10, floorVal);
 
-        upgrades.push_back({
-            "Super " + baseName + " Tier" + to_string(i + 1), // name
-            0,                                  // count
-            milestoneCost,                      // baseCost
-            milestoneCost,                      // currentCost
-            0.0L,                               // baseProduction
-            0.0L,                               // unlockThreshold
-            true,                               // isMilestone
-            true,                               // unlockedByMilestone
-            static_cast<long double>(threshold) // milestoneTriggerValue
-            });
+        long double milestoneCost = ceil(buildingCost / raisedVal) * raisedVal;
+
+        upgrades.push_back(
+            {
+                "Super " + baseName + " Tier " + to_string(i + 1), // name
+                0,                                  // count
+                milestoneCost,                      // baseCost
+                milestoneCost,                      // currentCost
+                0.0L,                               // baseProduction
+                0.0L,                               // unlockThreshold
+                true,                               // isMilestone
+                true,                               // unlockedByMilestone
+                static_cast<long double>(threshold),// milestoneTriggerValue
+                true                                // isItemUpgrade
+            }
+        );
     }
 }
 
 inline bool hasUpgrade(const vector<UpgradeItem>& upgrades, const string& name)
 {
-    return any_of(upgrades.begin(), upgrades.end(), [&](const UpgradeItem& u) {
-        return u.name == name && u.count > 0;
-        });
+    return any_of(upgrades.begin(), upgrades.end(), [&](const UpgradeItem& u)
+        {
+            return u.name == name && u.count > 0;
+        }
+    );
 }
 
 inline int getUpgradeMilestoneCount(const string& baseName, const vector<UpgradeItem>& upgrades)
 {
-    return count_if(upgrades.begin(), upgrades.end(), [&](const UpgradeItem& u) {
-        return u.isMilestone &&
-            u.count > 0 &&
-            u.name.find("Super " + baseName + " Tier") == 0;
-        });
+    return count_if(upgrades.begin(), upgrades.end(), [&](const UpgradeItem& u)
+        {
+            return u.isMilestone &&
+                u.count > 0 &&
+                u.name.find("Super " + baseName + " Tier ") == 0;
+        }
+    );
 }
 
 inline long double getBuffedProduction(const UpgradeItem& u, const vector<UpgradeItem>& upgrades)
@@ -126,10 +143,19 @@ inline long double getBuffedProduction(const UpgradeItem& u, const vector<Upgrad
     int milestoneCount = getUpgradeMilestoneCount(u.name, upgrades);
 
     if (milestoneCount > 0)
-        production *= pow(1.5, milestoneCount);
+        if (u.isItemUpgrade)
+            production *= pow(1.5, milestoneCount);
 
     return production * u.count;
 }
+
+bool isItemUpgrade = false;
+bool isOtherUpgrade = false;
+
+bool isClickUpgrade = false;
+bool isDurationUpgrade = false;
+bool isMinorUpgrade = false;
+bool isMajorUpgrade = false;
 
 inline void to_json(json& j, const UpgradeItem& u)
 {
@@ -141,7 +167,13 @@ inline void to_json(json& j, const UpgradeItem& u)
         {"unlockThreshold", u.unlockThreshold},
         {"isMilestone", u.isMilestone},
         {"unlockedByMilestone", u.unlockedByMilestone},
-        {"milestoneTriggerValue", u.milestoneTriggerValue}
+        {"milestoneTriggerValue", u.milestoneTriggerValue},
+        {"isItemUpgrade", u.isItemUpgrade},
+        {"isOtherUpgrade", u.isOtherUpgrade},
+        {"isClickUpgrade", u.isClickUpgrade},
+        {"isDurationUpgrade", u.isDurationUpgrade},
+        {"isMinorUpgrade", u.isMinorUpgrade},
+        {"isMajorUpgrade", u.isMajorUpgrade}
     };
 }
 
@@ -155,6 +187,12 @@ inline void from_json(const json& j, UpgradeItem& u)
     if (j.contains("isMilestone")) j.at("isMilestone").get_to(u.isMilestone);
     if (j.contains("unlockedByMilestone")) j.at("unlockedByMilestone").get_to(u.unlockedByMilestone);
     if (j.contains("milestoneTriggerValue")) j.at("milestoneTriggerValue").get_to(u.milestoneTriggerValue);
+    if (j.contains("isItemUpgrade")) j.at("isItemUpgrade").get_to(u.isItemUpgrade);
+    if (j.contains("isOtherUpgrade")) j.at("isOtherUpgrade").get_to(u.isOtherUpgrade);
+    if (j.contains("isClickUpgrade")) j.at("isClickUpgrade").get_to(u.isClickUpgrade);
+    if (j.contains("isDurationUpgrade")) j.at("isDurationUpgrade").get_to(u.isDurationUpgrade);
+    if (j.contains("isMinorUpgrade")) j.at("isMinorUpgrade").get_to(u.isMinorUpgrade);
+    if (j.contains("isMajorUpgrade")) j.at("isMajorUpgrade").get_to(u.isMajorUpgrade);
 
     u.updateCost();
 }

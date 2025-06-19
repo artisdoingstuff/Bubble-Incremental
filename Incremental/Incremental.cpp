@@ -55,7 +55,7 @@ static map<string, sf::Texture> upgradeTextures = loadUpgradeTextures();
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.0.5-beta";
+string gameVersion = "v1.0.6-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
@@ -215,6 +215,8 @@ int main()
     long double duckCounter = 0.0L;
 
     // Buffs variables here
+    bool canPressGlobalBubbleBuff = false;
+
     vector<BubbleChaos> activeChaosBubbles;
     bool isBubbleChaosActive = false;
     float bubbleChaosDuration = 20.0f;
@@ -257,30 +259,36 @@ int main()
             "Soap",     // Reference Name
             0,          // Item count
             10.0, 10.0, // Item base/current cost
-            0.1,        // Item production (bubbles per second)
-            10.0        // Unlock threshold
+            0.15,        // Item production (bubbles per second)
+            10.0,       // Unlock threshold
+            false,      // isMilestone
+            false,      // unlockedByMilestone
+            0.0,        // milestoneTriggerValue
+            true        // isitemUpgrade <-- This is what matters for Items
         }
     );
-    upgrades.push_back({ "Hand Wash", 0, 60.0, 60.0, 0.3, 100.0 });
-    upgrades.push_back({ "Shampoo", 0, 250.0, 250.0, 0.8, 350.0 });
-    upgrades.push_back({ "Shaving Foam", 0, 900.0, 900.0, 1.6, 1000.0 });
-    upgrades.push_back({ "Toothpaste", 0, 2800.0, 2800.0, 3.2, 3000.0 });
-    upgrades.push_back({ "Loofah", 0, 7000.0, 7000.0, 6.0, 7500.0 });
-    upgrades.push_back({ "Bubble Bath", 0, 18000.0, 18000.0, 11.0, 20000.0 });
-    upgrades.push_back({ "Bathtub Jet", 0, 40000.0, 40000.0, 20.0, 50000.0 });
-    upgrades.push_back({ "Luxury Spa", 0, 100000.0, 100000.0, 36.0, 100000.0 });
-    upgrades.push_back({ "Foam Pit", 0, 150000.0, 150000.0, 50, 200000.0 });
+    upgrades.push_back({ "Hand Wash", 0, 75.0, 75.0, 0.5, 100.0, false, false, 0.0, true });
+    upgrades.push_back({ "Shampoo", 0, 250.0, 250.0, 1.0, 350.0, false, false, 0.0, true });
+    upgrades.push_back({ "Shaving Foam", 0, 1000.0, 1000.0, 2.5, 1200.0, false, false, 0.0, true });
+    upgrades.push_back({ "Toothpaste", 0, 3000.0, 3000.0, 5.0, 3500.0, false, false, 0.0, true });
+    upgrades.push_back({ "Loofah", 0, 7000.0, 7000.0, 8.0, 7500.0, false, false, 0.0, true });
+    upgrades.push_back({ "Bubble Bath", 0, 18000.0, 18000.0, 15.0, 20000.0, false, false, 0.0, true });
+    upgrades.push_back({ "Bathtub Jet", 0, 40000.0, 40000.0, 22.0, 50000.0, false, false, 0.0, true });
+    upgrades.push_back({ "Luxury Spa", 0, 100000.0, 100000.0, 35.0, 150000.0, false, false, 0.0, true });
+    upgrades.push_back({ "Foam Pit", 0, 150000.0, 150000.0, 50, 200000.0, false, false, 0.0, true });
+    upgrades.push_back({ "Foam Party", 0, 250000.0, 250000.0, 75, 500000.0, false, false, 0.0, true });
 
-    generateMilestoneUpgrades(upgrades, "Soap", 10.0);
-    generateMilestoneUpgrades(upgrades, "Hand Wash", 60.0);
-    generateMilestoneUpgrades(upgrades, "Shampoo", 250.0);
-    generateMilestoneUpgrades(upgrades, "Shaving Foam", 900.0);
-    generateMilestoneUpgrades(upgrades, "Toothpaste", 2800.0);
-    generateMilestoneUpgrades(upgrades, "Loofah", 7000.0);
-    generateMilestoneUpgrades(upgrades, "Bubble Bath", 18000.0);
-    generateMilestoneUpgrades(upgrades, "Bathtub Jet", 40000.0);
-    generateMilestoneUpgrades(upgrades, "Luxury Spa", 100000.0);
-    generateMilestoneUpgrades(upgrades, "Foam Pit", 150000.0);
+    generateItemMilestoneUpgrades(upgrades, "Soap", 10.0);
+    generateItemMilestoneUpgrades(upgrades, "Hand Wash", 60.0);
+    generateItemMilestoneUpgrades(upgrades, "Shampoo", 250.0);
+    generateItemMilestoneUpgrades(upgrades, "Shaving Foam", 900.0);
+    generateItemMilestoneUpgrades(upgrades, "Toothpaste", 2800.0);
+    generateItemMilestoneUpgrades(upgrades, "Loofah", 7000.0);
+    generateItemMilestoneUpgrades(upgrades, "Bubble Bath", 18000.0);
+    generateItemMilestoneUpgrades(upgrades, "Bathtub Jet", 40000.0);
+    generateItemMilestoneUpgrades(upgrades, "Luxury Spa", 100000.0);
+    generateItemMilestoneUpgrades(upgrades, "Foam Pit", 150000.0);
+    generateItemMilestoneUpgrades(upgrades, "Foam Party", 250000.0);
 
     for (auto& upgrade : upgrades)
     {
@@ -596,6 +604,7 @@ int main()
                     currentGlobalBubbleSprite
                 );
                 doesGlobalBubbleBuffExist = true;
+                canPressGlobalBubbleBuff = true;
             },
             [&]()
             {
@@ -644,9 +653,10 @@ int main()
             true
 		);
 
-        if (globalBubbleBuffClicked)
+        if (globalBubbleBuffClicked && canPressGlobalBubbleBuff)
         {
             bubblePopping.play();
+            canPressGlobalBubbleBuff = false;
         }
 
         // Rubber ducks removed for now, will be added back during release
