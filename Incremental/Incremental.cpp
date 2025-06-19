@@ -279,10 +279,10 @@ int main()
     upgrades.push_back({ "Foam Party", 0, 250000.0, 250000.0, 75, 500000.0, false, false, 0.0, true });
 
     generateItemMilestoneUpgrades(upgrades, "Soap", 10.0);
-    generateItemMilestoneUpgrades(upgrades, "Hand Wash", 60.0);
+    generateItemMilestoneUpgrades(upgrades, "Hand Wash", 75.0);
     generateItemMilestoneUpgrades(upgrades, "Shampoo", 250.0);
-    generateItemMilestoneUpgrades(upgrades, "Shaving Foam", 900.0);
-    generateItemMilestoneUpgrades(upgrades, "Toothpaste", 2800.0);
+    generateItemMilestoneUpgrades(upgrades, "Shaving Foam", 1000.0);
+    generateItemMilestoneUpgrades(upgrades, "Toothpaste", 3000.0);
     generateItemMilestoneUpgrades(upgrades, "Loofah", 7000.0);
     generateItemMilestoneUpgrades(upgrades, "Bubble Bath", 18000.0);
     generateItemMilestoneUpgrades(upgrades, "Bathtub Jet", 40000.0);
