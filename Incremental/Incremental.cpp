@@ -264,19 +264,24 @@ int main()
             false,      // isMilestone
             false,      // unlockedByMilestone
             0.0,        // milestoneTriggerValue
-            true        // isitemUpgrade <-- This is what matters for Items
+            true,       // isitemUpgrade <-- This is what matters for Items
+            false,      // isOtherUpgrade <-- ONLY for non-item upgrades (such as Bubble Milestones)
+            true,       // isClickUpgrade <-- True only for Soap
+            false,      // isDurationUpgrade <-- Doesn't affect buff duration
+            true,       // isMinorUpgrade <-- Will have Minor Upgrades (small buffs)
+            true        // isMajorUpgrade <-- Will have Major Upgrades (big buffs)
         }
     );
-    upgrades.push_back({ "Hand Wash", 0, 75.0, 75.0, 0.5, 100.0, false, false, 0.0, true });
-    upgrades.push_back({ "Shampoo", 0, 250.0, 250.0, 1.0, 350.0, false, false, 0.0, true });
-    upgrades.push_back({ "Shaving Foam", 0, 1000.0, 1000.0, 2.5, 1200.0, false, false, 0.0, true });
-    upgrades.push_back({ "Toothpaste", 0, 3000.0, 3000.0, 5.0, 3500.0, false, false, 0.0, true });
-    upgrades.push_back({ "Loofah", 0, 7000.0, 7000.0, 8.0, 7500.0, false, false, 0.0, true });
-    upgrades.push_back({ "Bubble Bath", 0, 18000.0, 18000.0, 15.0, 20000.0, false, false, 0.0, true });
-    upgrades.push_back({ "Bathtub Jet", 0, 40000.0, 40000.0, 22.0, 50000.0, false, false, 0.0, true });
-    upgrades.push_back({ "Luxury Spa", 0, 100000.0, 100000.0, 35.0, 150000.0, false, false, 0.0, true });
-    upgrades.push_back({ "Foam Pit", 0, 150000.0, 150000.0, 50, 200000.0, false, false, 0.0, true });
-    upgrades.push_back({ "Foam Party", 0, 250000.0, 250000.0, 75, 500000.0, false, false, 0.0, true });
+    upgrades.push_back({ "Hand Wash", 0, 75.0, 75.0, 0.5, 100.0, false, false, 0.0, true, false, false, false, true, true });
+    upgrades.push_back({ "Shampoo", 0, 250.0, 250.0, 1.0, 350.0, false, false, 0.0, true, false, false, false, true, true });
+    upgrades.push_back({ "Shaving Foam", 0, 1000.0, 1000.0, 2.5, 1200.0, false, false, 0.0, true, false, false, false, true, true });
+    upgrades.push_back({ "Toothpaste", 0, 3000.0, 3000.0, 5.0, 3500.0, false, false, 0.0, true, false, false, false, true, true });
+    upgrades.push_back({ "Loofah", 0, 7000.0, 7000.0, 8.0, 7500.0, false, false, 0.0, true, false, false, false, true, true });
+    upgrades.push_back({ "Bubble Bath", 0, 18000.0, 18000.0, 15.0, 20000.0, false, false, 0.0, true, false, false, false, true, true });
+    upgrades.push_back({ "Bathtub Jet", 0, 40000.0, 40000.0, 22.0, 50000.0, false, false, 0.0, true, false, false, false, true, true });
+    upgrades.push_back({ "Luxury Spa", 0, 100000.0, 100000.0, 35.0, 150000.0, false, false, 0.0, true, false, false, false, true, true });
+    upgrades.push_back({ "Foam Pit", 0, 150000.0, 150000.0, 50, 200000.0, false, false, 0.0, true, false, false, false, true, true });
+    upgrades.push_back({ "Foam Party", 0, 250000.0, 250000.0, 75, 500000.0, false, false, 0.0, true, false, false, false, true, true });
 
     generateItemMilestoneUpgrades(upgrades, "Soap", 10.0);
     generateItemMilestoneUpgrades(upgrades, "Hand Wash", 75.0);

@@ -149,14 +149,6 @@ inline long double getBuffedProduction(const UpgradeItem& u, const vector<Upgrad
     return production * u.count;
 }
 
-bool isItemUpgrade = false;
-bool isOtherUpgrade = false;
-
-bool isClickUpgrade = false;
-bool isDurationUpgrade = false;
-bool isMinorUpgrade = false;
-bool isMajorUpgrade = false;
-
 inline void to_json(json& j, const UpgradeItem& u)
 {
     j = json{
