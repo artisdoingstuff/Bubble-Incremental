@@ -4,6 +4,7 @@
 
 extern const long double shopInflationMultiplier;
 extern long double totalUpgradeCount;
+extern long double bubblesPerSecond;
 
 struct UpgradeItem
 {
@@ -68,14 +69,15 @@ struct UpgradeItem
 
     void purchase(long double& currentBubbles, const long double inflation = shopInflationMultiplier)
     {
-        if (!canAfford(currentBubbles)) return;
+        if (!canAfford(currentBubbles))
+            return;
         if (isMilestone && count >= 1)
             return;
 
         currentBubbles -= currentCost;
         count++;
-        updateCost(inflation);
         totalUpgradeCount++;
+        updateCost(inflation);
     }
 };
 
@@ -105,8 +107,8 @@ inline void generateItemMilestoneUpgrades(
                 0,                                  // count
                 milestoneCost,                      // baseCost
                 milestoneCost,                      // currentCost
-                0.0L,                               // baseProduction
-                0.0L,                               // unlockThreshold
+                0.0,                               // baseProduction
+                0.0,                               // unlockThreshold
                 true,                               // isMilestone
                 true,                               // unlockedByMilestone
                 static_cast<long double>(threshold),// milestoneTriggerValue
@@ -125,13 +127,11 @@ inline bool hasUpgrade(const vector<UpgradeItem>& upgrades, const string& name)
     );
 }
 
-inline int getUpgradeMilestoneCount(const string& baseName, const vector<UpgradeItem>& upgrades)
+inline int getUpgradeItemMilestoneCount(const string& baseName, const vector<UpgradeItem>& upgrades)
 {
     return count_if(upgrades.begin(), upgrades.end(), [&](const UpgradeItem& u)
         {
-            return u.isMilestone &&
-                u.count > 0 &&
-                u.name.find("Super " + baseName + " Tier ") == 0;
+            return u.isMilestone && u.count > 0 && u.name.find("Super " + baseName + " Tier ") == 0;
         }
     );
 }
@@ -140,11 +140,11 @@ inline long double getBuffedProduction(const UpgradeItem& u, const vector<Upgrad
 {
     long double production = u.baseProduction;
 
-    int milestoneCount = getUpgradeMilestoneCount(u.name, upgrades);
+    int itemMilestoneCount = getUpgradeItemMilestoneCount(u.name, upgrades);
 
-    if (milestoneCount > 0)
+    if (itemMilestoneCount > 0)
         if (u.isItemUpgrade)
-            production *= pow(1.5, milestoneCount);
+            production *= pow(1.75, itemMilestoneCount);
 
     return production * u.count;
 }

@@ -55,13 +55,15 @@ static map<string, sf::Texture> upgradeTextures = loadUpgradeTextures();
 
 const sf::Font font("Assets/Fonts/arial.ttf");
 
-string gameVersion = "v1.0.6-beta";
+string gameVersion = "v1.0.7-beta";
 
 const long double shopInflationMultiplier = 1.15L;
 
 long double bubbles = 0.0L;
 long double allTimeBubbles = 0.0L;
 long double allTimeBubblesPerClick = 0.0L;
+
+long double bubblesPerSecond = 0.0L;
 
 long double totalUpgradeCount = 0.0L;
 
@@ -209,8 +211,6 @@ int main()
 
     long double baseBubblesPerClick = 1.0L;
     long double clickMultiplier = 1.0L;
-
-    long double bubblesPerSecond = 0.0L;
 
     long double duckCounter = 0.0L;
 
