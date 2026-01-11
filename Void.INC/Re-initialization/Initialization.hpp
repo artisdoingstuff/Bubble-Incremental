@@ -7,6 +7,7 @@ struct RootPatch {
     std::string desc;
     long double bytes;
     int patched = 0;
+    int disabled = 0;
     sf::RectangleShape rect;
 
     RootPatch(std::string n, std::string t, long double c) : name(n), desc(t), bytes(c) {
@@ -18,6 +19,7 @@ struct RootPatch {
 };
 
 inline std::vector<RootPatch> rootTree;
+inline sf::Clock patch_1Clock;
 
 inline void initRootTree() {
     if (!rootTree.empty()) return;
@@ -26,6 +28,10 @@ inline void initRootTree() {
     rootTree.emplace_back("Patch_2", "Triples bits and doubles clicks.", 50.0L);
     rootTree.emplace_back("Patch_3_1", "x5.5 BPS but lowers byte rate to 3e-7.", 500.0L);
     rootTree.emplace_back("Patch_3_2", "Byte-scaled feedback loop (0.2% per Byte).", 1000.0L);
+    rootTree.emplace_back("Patch_4_1", "Deprecates Logic Gates 1-3.", 5000.0L);
+    rootTree.emplace_back("Patch_4_2", "Legacy hardware performance refactor (+5% per Logic Gate).", 12500.0L);
+    rootTree.emplace_back("Patch_5_1", "x50 BPS and x1.5 Bytes, but disables _1 & _2", 75000.0L);
+    rootTree.emplace_back("Patch_5_2", "x75 BPS, x10 clicks... and 10% off on gates?", 200000.0L);
 }
 
 inline void drawRootDirectory(sf::RenderWindow& window, long double currentBytes) {
@@ -35,23 +41,51 @@ inline void drawRootDirectory(sf::RenderWindow& window, long double currentBytes
     float startY = 150.f;
 
     for (size_t i = 0; i < rootTree.size(); ++i) {
-        bool isUnlocked = (i == 0) || (i < 3 && rootTree[i - 1].patched) || (i >= 3 && rootTree[2].patched);
+        bool isUnlocked = false;
+
+        if (i == 0) {
+            isUnlocked = true;
+        }
+        else if (i < 3) {
+            isUnlocked = rootTree[i - 1].patched;
+        }
+        else if (i == 3 || i == 4) {
+            isUnlocked = rootTree[2].patched;
+        }
+        else {
+            isUnlocked = rootTree[i - 2].patched;
+        }
 
         if (isUnlocked) {
-            float xOffset = (i >= 3) ? (i - 3) * 320.f : 0;
-            float yPos = startY + (std::min((int)i, 3) * 80.f);
-            rootTree[i].rect.setPosition({ startX + xOffset, yPos });
+            float xPos = startX;
+            float yPos = startY;
+
+            if (i < 3) {
+                yPos = startY + (i * 80.f);
+            }
+            else {
+                bool isColumn2 = (i % 2 == 0);
+                int verticalLevel = (i - 3) / 2;
+
+                xPos = startX + (isColumn2 ? 320.f : 0.f);
+                yPos = startY + (3 * 80.f) + (verticalLevel * 80.f);
+            }
+
+            rootTree[i].rect.setPosition({ xPos, yPos });
 
             std::string statusText;
-            if (rootTree[i].patched) {
+            if (rootTree[i].disabled == 1) {
+                statusText = rootTree[i].name + ".sys\n[ OFFLINE ]";
+                rootTree[i].rect.setOutlineColor(sf::Color(100, 100, 100));
+                rootTree[i].rect.setFillColor(sf::Color(20, 20, 20, 150));
+            }
+            else if (rootTree[i].patched) {
                 statusText = rootTree[i].name + ".sys\n[ PATCHED ]";
                 rootTree[i].rect.setOutlineColor(sf::Color(50, 100, 75));
                 rootTree[i].rect.setFillColor(sf::Color(5, 10, 5, 150));
             }
             else {
-                std::stringstream stream;
-                stream << std::fixed << std::setprecision(2) << rootTree[i].bytes;
-                statusText = rootTree[i].name + ".sys\nBytes: -" + stream.str() + " Bytes";
+                statusText = rootTree[i].name + ".sys\nBytes: -" + format(rootTree[i].bytes, true) + " Bytes";
                 rootTree[i].rect.setOutlineColor(sf::Color(0, 255, 150));
 
                 if (rootTree[i].rect.getGlobalBounds().contains(mousePos)) {
@@ -81,10 +115,10 @@ inline void drawRootDirectory(sf::RenderWindow& window, long double currentBytes
     if (initBtn.getGlobalBounds().contains(mousePos)) {
         initBtn.setFillColor(sf::Color::Red);
         if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && canClickInit) {
-            currentInitStep = InitState::IDLE;
-            initialization = false;
+            currentReinitStep = ReinitState::IDLE;
+            reinitialization = false;
+            initialization = true;
             canClickInit = false;
-            canClick = true;
         }
     }
     window.draw(initBtn);

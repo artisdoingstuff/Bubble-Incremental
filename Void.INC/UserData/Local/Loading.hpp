@@ -29,15 +29,24 @@ inline void load(
 	bytes = saveData["BY"];
 	allBits = saveData["AB"];
 	allClickedBits = saveData["ACB"];
-	bitsPerSecond = saveData["BPS"];
-	hotfixMult = saveData["HFM"];
 	timesInitialized = saveData["TINIT"];
 
-	std::vector<json> savedLogicArray = saveData["LOGIC"];
-	std::vector<json> savedHotfixArray = saveData["HOTFIX"];
-	std::vector<json> savedRoot = saveData["ROOT"];
+	bitsPerSecond = 0.0L;
 	hotfixMult = 1.0L;
 
+	std::vector<json> savedRoot = saveData["ROOT"];
+	for (const auto& item : savedRoot) {
+		for (auto& actualPatch : rootTree) {
+			if (actualPatch.name == item["n"]) {
+				actualPatch.patched = item["p"];
+			}
+		}
+	}
+
+	costMult = 1.0L;
+	if (rootTree[8].patched) costMult = 0.9f;
+
+	std::vector<json> savedLogicArray = saveData["LOGIC"];
 	for (const auto& item : savedLogicArray) {
 		std::string name = item["n"];
 		int ver = item["v"];
@@ -45,12 +54,14 @@ inline void load(
 		for (auto& lg : logicGate) {
 			if (lg.name == name) {
 				lg.ver = ver;
-				lg.currentBits = lg.baseBits * std::pow(logicGateInflation, lg.ver);
+				lg.currentBits = lg.baseBits * std::pow(logicGateInflation, lg.ver) * costMult;
+				bitsPerSecond += (lg.ver * lg.bps);
 				break;
 			}
 		}
 	}
 
+	std::vector<json> savedHotfixArray = saveData["HOTFIX"];
 	for (const auto& item : savedHotfixArray) {
 		std::string name = item["n"];
 		int isWritten = item["w"];
@@ -58,19 +69,10 @@ inline void load(
 		for (auto& hf : hotfix) {
 			if (hf.name == name) {
 				hf.written = isWritten;
-
 				if (hf.written == 1) {
 					hotfixMult += hf.bitMult;
 				}
 				break;
-			}
-		}
-	}
-
-	for (const auto& item : savedRoot) {
-		for (auto& actualPatch : rootTree) {
-			if (actualPatch.name == item["n"]) {
-				actualPatch.patched = item["p"];
 			}
 		}
 	}

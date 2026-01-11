@@ -44,13 +44,17 @@ inline void drawLoadingUI(sf::RenderWindow& window, float actualProgress) {
     };
 
     if (actualProgress < 0.85f) {
-        if (time - lastUpdate > 2.f) {
-            currentStatus = messages[std::rand() % messages.size()];
-            lastUpdate = time;
+        if (!reinitialization) currentStatus = "Closing Root.dir...";
+        else {
+            if (time - lastUpdate > 2.f) {
+                currentStatus = messages[std::rand() % messages.size()];
+                lastUpdate = time;
+            }
         }
     }
     else {
-        currentStatus = "Opening Root.dir...";
+        if (reinitialization) currentStatus = "Opening Root.dir...";
+		if (initialization) currentStatus = "Initializing...";
     }
 
     sf::RectangleShape bg({ width, height });
