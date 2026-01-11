@@ -85,6 +85,7 @@ int main() {
 		bitMultiplier = 1.0L;
 		patch_3_2Mult = 1.0L;
 		clickMultiplier = 1.0L;
+		costMult = 1.0f;
 		if (rootTree[2].patched && rootTree[2].disabled == 0) {
 			bitMultiplier *= 3.0L; clickMultiplier *= 2.0L;
 		}
