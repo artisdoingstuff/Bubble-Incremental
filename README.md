@@ -16,5 +16,12 @@
 > 3. After extraction, run `Void.INC.exe` and e̷̛͜ň̶͜ǰ̴̤õ̵̯y̴̤̐.
 >
 > _DISCLAIMER: Void.INC is not responsible for any psychological conditions that you may develop._
+>
+> _For legal reasons, the above is satire._
 
-_For legal reasons, this is satire._
+<br>
+
+> #### System Requirements
+> Void.INC recommends at least a toaster with a screen.
+> <br>
+> _<2MB of disk space & <50MB of memory._
