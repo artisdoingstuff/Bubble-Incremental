@@ -4,7 +4,7 @@
 
 [/] 1.0.1 - UI refresh for Logic Gates and Hotfixes + Rebalance to 1.0.0 content. (Released 9th of January, 2026 @ [Releases](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.1-release))
 
-[ ] 1.0.2 - Content drop + Pricing rebalance for Hotfixes + INIT(); animation.
+[/] 1.0.2 - Content drop + Pricing rebalance for Hotfixes + INIT(); animation. (Released 11th of January, 2026 @ [Releases](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.2-release))
 
 [ ] 1.0.3 - UI refresh (Root Directory).
 
