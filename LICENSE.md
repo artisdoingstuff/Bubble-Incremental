@@ -23,13 +23,8 @@ NoDerivatives
 
 - If you remix, transform, or build upon the material, **you may not distribute the modified material**.
 
----
-
-Full License Text
 
 Read the full license here:  
 [https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode](https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode)
-
-Author
 
 This project is created and maintained by **Scott**.
