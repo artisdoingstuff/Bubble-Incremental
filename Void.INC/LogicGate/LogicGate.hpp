@@ -59,9 +59,9 @@ inline void initLogicGates() {
     // logicGateList.emplace_back("root_nullifier", "The final line of code.", 50000000000.L, 50000000000.L, 850000000.L);
 }
 
-inline void updateLogicGateUI(sf::RenderWindow& gameWindow, long double allBits) {
+inline void updateLogicGateUI(sf::RenderWindow& window, long double allBits) {
     const float margin = 40.f;
-    float startX = gameWindow.getSize().x - uiWidth - margin;
+    float startX = window.getSize().x - uiWidth - margin;
     float startY = 105.f;
 
     int visibleCount = 0;

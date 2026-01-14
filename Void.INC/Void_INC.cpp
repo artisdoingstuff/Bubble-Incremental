@@ -7,15 +7,16 @@
 
 #include "Effects/Bits.hpp"
 
+#include "Initialisation/Initialisation.hpp"
+#include "Initialisation/Re-initialisation.hpp"
+
 #include "LogicGate/Hotfixes.hpp"
 #include "LogicGate/LogicGate.hpp"
 
-#include "Re-initialization/Directory.hpp"
-#include "Re-initialization/Initialization.hpp"
-#include "Re-initialization/Re-initialization.hpp"
-
+#include "UI/Directory.hpp"
+#include "UI/Loading.hpp"
 #include "UI/Terminal.hpp"
-#include "UI/Vortex.hpp"
+#include "UI/Star.hpp"
 
 #include "UserData/Local/Loading.hpp"
 #include "UserData/Local/Saving.hpp"
@@ -27,9 +28,7 @@ int main() {
 	gameWindow.setFramerateLimit(60);
 	gameWindow.setIcon(sf::Image("icon.png"));
 
-	float wHeight = gameWindow.getSize().y;
-	float wWidth = gameWindow.getSize().x;
-	sf::Vector2f center = { wWidth / 2, wHeight / 2 };
+	sf::Vector2f centre = { gameWindow.getSize().x / 2.f, gameWindow.getSize().y / 2.f };
 
 	time_t timeEnd = 0;
 
@@ -39,19 +38,19 @@ int main() {
 	sf::RectangleShape clickRect;
 	clickRect.setSize(sf::Vector2f(256, 256));
 	clickRect.setOrigin(sf::Vector2f(clickRect.getSize().x / 2, clickRect.getSize().y / 2));
-	clickRect.setPosition(center);
+	clickRect.setPosition(centre);
 	clickRect.setOutlineColor(sf::Color::Black);
 	clickRect.setOutlineThickness(5);
 	sf::Vector2f clickAreaSize = clickRect.getSize();
 
-	Vortex vortex;
-	vortex.vortex = sf::VertexArray(sf::PrimitiveType::LineStrip, 4000);
-	float vortexScale = 1.f;
+	Star star;
+	star.star = sf::VertexArray(sf::PrimitiveType::LineStrip, 4000);
+	float starScale = 1.f;
 
 	sf::VertexArray lines(sf::PrimitiveType::Lines);
-	for (int i = 0; i < wHeight; i += 4) {
+	for (int i = 0; i < gameWindow.getSize().y; i += 4) {
 		lines.append(sf::Vertex{ sf::Vector2f(0.f, (float)i), sf::Color(255, 255, 255, 40) });
-		lines.append(sf::Vertex{ sf::Vector2f((float)wWidth, (float)i), sf::Color(255, 255, 255, 40) });
+		lines.append(sf::Vertex{ sf::Vector2f((float)gameWindow.getSize().x, (float)i), sf::Color(255, 255, 255, 40)});
 	}
 
 	sf::Text bitsText(jetBrainsMono);
@@ -64,43 +63,44 @@ int main() {
 
 	sf::Text bytesText(jetBrainsMono);
 	bytesText.setCharacterSize(36);
-	bytesText.setFillColor(sf::Color(180, 0, 255));
+	bytesText.setFillColor(sf::Color(0, 255, 150));
 
 	initLogicGates();
 	initHotfixes();
-	initRootTree();
-	load(timeEnd, bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialized, logicGateList, hotfixList, rootTree);
+	initDirTree();
+	positionTreeNodes(gameWindow.getSize());
+	load(timeEnd, bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialised, logicGateList, hotfixList, dirTree);
 	offline(timeEnd, bits, allBits, bitsPerSecond, hotfixMult);
 	
 	while (gameWindow.isOpen()) {
-		if (rootTree[1].patched && patch_1Clock.getElapsedTime().asSeconds() >= 30.f && rootTree[1].disabled == 0) {
+		if (dirTree[1].patched && patch_1Clock.getElapsedTime().asSeconds() >= 30.f && dirTree[1].disabled == 0) {
 			patch_1Mult = 1.5f + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (1.7f - 1.5f)));
 			patch_1Clock.restart();
 		}
 
 		bitsToBytesRate = 1e-8L;
-		if (rootTree[0].patched) bitsToBytesRate = 1e-6L;
-		if (rootTree[3].patched) bitsToBytesRate = 3e-7L;
+		if (dirTree[0].patched) bitsToBytesRate = 1e-6L;
+		if (dirTree[3].patched) bitsToBytesRate = 3e-7L;
 
 		bitMultiplier = 1.0L;
 		patch_3_2Mult = 1.0L;
 		clickMultiplier = 1.0L;
 		costMult = 1.0f;
-		if (rootTree[2].patched && rootTree[2].disabled == 0) {
+		if (dirTree[2].patched && dirTree[2].disabled == 0) {
 			bitMultiplier *= 3.0L; clickMultiplier *= 2.0L;
 		}
-		if (rootTree[3].patched) bitMultiplier *= 5.5L;
-		if (rootTree[4].patched) {
+		if (dirTree[3].patched) bitMultiplier *= 5.5L;
+		if (dirTree[4].patched) {
 			long double patch3_2Mult = 1.0L + (bytes * 0.002L);
 			patch_3_2Mult = std::min(patch3_2Mult, 100.0L);
 		}
-		if (rootTree[5].patched) {
+		if (dirTree[5].patched) {
 			bitMultiplier *= 12.0L; clickMultiplier *= 3.0L;
 			for (int i = 0; i < 2; ++i) {
 				logicGateList[i].bps = 0.L;
 			}
 		}
-		if (rootTree[6].patched) {
+		if (dirTree[6].patched) {
 			bitsPerSecond = 0.L;
 			for (size_t i = 0; i < logicGateList.size(); ++i) {
 				long double indivMult = 1.0L;
@@ -115,11 +115,11 @@ int main() {
 				bitsPerSecond += (logicGateList[i].bps * logicGateList[i].ver) * indivMult;
 			}
 		}
-		if (rootTree[7].patched) {
+		if (dirTree[7].patched) {
 			bitMultiplier *= 50.0L; byteMult *= 1.5f;
-			rootTree[1].disabled = 1; rootTree[2].disabled = 1;
+			dirTree[1].disabled = 1; dirTree[2].disabled = 1;
 		}
-		if (rootTree[8].patched) {
+		if (dirTree[8].patched) {
 			bitMultiplier *= 75.0L; clickMultiplier *= 10.0L; costMult *= 0.9f;
 		}
 
@@ -129,26 +129,26 @@ int main() {
 
 		bits += realBitsPerSecond * deltaTime; allBits += realBitsPerSecond * deltaTime;
 
-		updateVortex(vortex, center, elapsedTime, vortexScale);
-		vortexScale += (1.f - vortexScale) * 0.1f;
+		updateStar(star, centre, elapsedTime, starScale);
+		starScale += (1.f - starScale) * 0.1f;
 
-		updateStream(gameWindow, center, deltaTime);
+		updateStream(gameWindow, centre, deltaTime);
 
 		bitsText.setString("-" + format(bits) + " Bits");
-		centerText(bitsText, { clickRect.getPosition().x, clickRect.getPosition().y + 400 });
+		centreText(bitsText, { clickRect.getPosition().x, clickRect.getPosition().y + 400 });
 
 		bitsPerSecondText.setString("-" + format(realBitsPerSecond, true) + " Bits per Second");
-		centerText(bitsPerSecondText, { clickRect.getPosition().x, clickRect.getPosition().y + 440 });
+		centreText(bitsPerSecondText, { clickRect.getPosition().x, clickRect.getPosition().y + 440 });
 
 		bytesText.setString("-" + format(bytes, true) + " Bytes");
-		centerText(bytesText, { clickRect.getPosition().x, clickRect.getPosition().y + 400 });
+		centreText(bytesText, { clickRect.getPosition().x, clickRect.getPosition().y + 400 });
 
 		sf::RenderStates states;
 		states.blendMode = sf::BlendAdd;
 
 		gameWindow.clear(sf::Color::Black);
 
-		if (!reinitialization && !initialization) {
+		if (!reinitialisation && !initialisation) {
 			gameWindow.draw(bitsText);
 			gameWindow.draw(bitsPerSecondText);
 
@@ -159,14 +159,14 @@ int main() {
 			updateLogicGateUI(gameWindow, allBits);
 			drawTerminalUI(gameWindow, bits, allBits);
 
-			gameWindow.draw(vortex.vortex, states);
+			gameWindow.draw(star.star, states);
 
 			if (showConfirmPopup) {
-				drawConfirmPopup(gameWindow, reinitialization);
+				drawConfirmPopup(gameWindow, reinitialisation);
 			}
 		}
 
-		if (reinitialization) {
+		if (reinitialisation) {
 			if (currentReinitStep == ReinitState::IDLE) {
 				currentReinitStep = ReinitState::VORTEX_EXPANSION;
 				canClick = false;
@@ -176,29 +176,29 @@ int main() {
 
 			switch (currentReinitStep) {
 				case ReinitState::VORTEX_EXPANSION: {
-					vortexScale += (20.f - vortexScale) * 0.05f;
+					starScale += (20.f - starScale) * 0.05f;
 
-					float intensity = (vortexScale / 20.f) * 15.f;
+					float intensity = (starScale / 20.f) * 15.f;
 					float offsetX = (std::rand() % 100 - 50) / 50.f * intensity;
 					float offsetY = (std::rand() % 100 - 50) / 50.f * intensity;
 					shakeView.move({ offsetX, offsetY });
 
 					gameWindow.setView(shakeView);
-					gameWindow.draw(vortex.vortex, states);
+					gameWindow.draw(star.star, states);
 
 					if (initTimer >= 0.5f) currentReinitStep = ReinitState::VORTEX_SHRINK;
 					break;
 				}
 
 				case ReinitState::VORTEX_SHRINK: {
-					vortexScale += (0.f - vortexScale) * 0.15f;
+					starScale += (0.f - starScale) * 0.15f;
 					shakeView.move({ (std::rand() % 10 - 5) / 2.f, (std::rand() % 10 - 5) / 2.f });
 
 					gameWindow.setView(shakeView);
-					gameWindow.draw(vortex.vortex, states);
+					gameWindow.draw(star.star, states);
 
 					if (initTimer >= 0.7f) {
-						vortexScale = -10.f;
+						starScale = -10.f;
 						currentReinitStep = ReinitState::LOADING_BAR;
 					}
 					break;
@@ -221,13 +221,16 @@ int main() {
 					initTimer = 0.0f;
 					canClickInit = true;
 
-					drawRootDirectory(gameWindow, bytes);
+					drawTreeLines(gameWindow);
+					drawDirTreeUI(gameWindow);
+
+					drawInitButton(gameWindow);
 					gameWindow.draw(bytesText);
 					break;
 			}
 		}
 
-		if (initialization) {
+		if (initialisation) {
 			if (currentInitStep == InitState::IDLE) {
 				currentInitStep = InitState::LOADING_BAR;
 			}
@@ -243,21 +246,21 @@ int main() {
 					if (loadingProgress >= 1.0f) {
 						loadingProgress = 1.0f;
 						currentInitStep = InitState::VORTEX_EXPANSION;
-						vortexScale = 0.1f;
+						starScale = 0.1f;
 					}
 					break;
 				}
 
 				case InitState::VORTEX_EXPANSION: {
-					vortexScale += (1.f - vortexScale) * 0.1f;
+					starScale += (1.f - starScale) * 0.1f;
 
-					float intensity = (1.f - vortexScale) * 20.f;
+					float intensity = (1.f - starScale) * 20.f;
 					float offsetX = (std::rand() % 100 - 50) / 50.f * intensity;
 					float offsetY = (std::rand() % 100 - 50) / 50.f * intensity;
 					shakeView.move({ offsetX, offsetY });
 					gameWindow.setView(shakeView);
 
-					gameWindow.draw(vortex.vortex, states);
+					gameWindow.draw(star.star, states);
 
 					for (auto it = dataStream.begin(); it != dataStream.end();) {
 						it->pos += it->vel * deltaTime;
@@ -265,7 +268,7 @@ int main() {
 
 						gameWindow.draw(it->bit);
 
-						if (it->pos.x < 0 || it->pos.x > wWidth || it->pos.y < 0 || it->pos.y > wHeight) {
+						if (it->pos.x < 0 || it->pos.x > gameWindow.getSize().x || it->pos.y < 0 || it->pos.y > gameWindow.getSize().y) {
 							it = dataStream.erase(it);
 						}
 						else {
@@ -279,10 +282,10 @@ int main() {
 						initTimer = 0.0f;
 						canClick = true;
 
-						vortexScale = 1.f;
+						starScale = 1.f;
 
 						currentInitStep = InitState::IDLE;
-						initialization = false;
+						initialisation = false;
 					}
 					break;
 				}
@@ -296,7 +299,7 @@ int main() {
 		while (const std::optional gameEvent = gameWindow.pollEvent()) {
 			if (gameEvent->is<sf::Event::Closed>()) {
 				time_t timeStart = time(nullptr);
-				save(timeStart, bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialized, logicGateList, hotfixList, rootTree);
+				save(timeStart, bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialised, logicGateList, hotfixList, dirTree);
 				gameWindow.close();
 			}
 
@@ -314,7 +317,7 @@ int main() {
 				if (mouseEvent->button == sf::Mouse::Button::Left && canClick) {
 					if (clickRect.getGlobalBounds().contains(mousePos)) {
 						long double bitsClicked = bitsPerClick * clickMultiplier * (1 + realBitsPerSecond * 0.05f);
-						vortexScale = 1.1f; bits += bitsClicked; allBits += bitsClicked; allClickedBits += bitsClicked;
+						starScale = 1.1f; bits += bitsClicked; allBits += bitsClicked; allClickedBits += bitsClicked;
 					}
 
 					float startX = 40.f;
@@ -373,13 +376,33 @@ int main() {
 				}
 
 				if (mouseEvent->button == sf::Mouse::Button::Left && canClickInit) {
-					for (size_t i = 0; i < rootTree.size(); ++i) {
-						auto& patch = rootTree[i];
-						if (patch.patched == 0 && patch.rect.getGlobalBounds().contains(mousePos)) {
+					for (size_t i = 0; i < dirTree.size(); ++i) {
+						auto& patch = dirTree[i];
+
+						sf::Vector2f diff = mousePos - patch.pos;
+						float distanceSquared = (diff.x * diff.x) + (diff.y * diff.y);
+
+						if (patch.patched == 0 && !patch.disabled && distanceSquared <= (30.f * 30.f)) {
 							bool canBuy = false;
-							if (i == 0) canBuy = true;
-							else if (i < 3 && rootTree[i - 1].patched == 1) canBuy = true;
-							else if (i >= 3 && rootTree[2].patched == 1) canBuy = true;
+
+							if (i == 0) {
+								canBuy = true;
+							}
+							else if (i == 1 || i == 2) {
+								if (dirTree[0].patched == 1) canBuy = true;
+							}
+							else if (i == 3 || i == 6) {
+								if (dirTree[1].patched == 1) canBuy = true;
+							}
+							else if (i == 4 || i == 5) {
+								if (dirTree[2].patched == 1) canBuy = true;
+							}
+							else if (i == 7) {
+								if (dirTree[3].patched == 1) canBuy = true;
+							}
+							else if (i == 8) {
+								if (dirTree[4].patched == 1) canBuy = true;
+							}
 
 							if (canBuy && bytes >= patch.bytes) {
 								bytes -= patch.bytes;
@@ -388,7 +411,7 @@ int main() {
 								if (patch.name == "Patch_0") {
 									bitsToBytesRate = 1e-6L;
 								}
-								if (patch.name == "Patch_3_1") {
+								else if (patch.name == "Patch_3_1") {
 									bitsToBytesRate = 3e-7L;
 								}
 							}

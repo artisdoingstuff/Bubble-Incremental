@@ -10,10 +10,10 @@ inline void load(
 	long double& allClickedBits,
 	long double& bitsPerSecond,
 	long double& hotfixMult,
-	long long& timesInitialized,
+	long long& timesInitialised,
 	std::vector<LogicGate>& logicGate,
 	std::vector<Hotfix>& hotfix,
-	std::vector<RootPatch>& root
+	std::vector<DirNodes>& root
 ) {
 	std::ifstream file("save.json", std::ios::in);
 	if (!file.is_open()) {
@@ -29,14 +29,14 @@ inline void load(
 	bytes = saveData["BY"];
 	allBits = saveData["AB"];
 	allClickedBits = saveData["ACB"];
-	timesInitialized = saveData["TINIT"];
+	timesInitialised = saveData["TINIT"];
 
 	bitsPerSecond = 0.0L;
 	hotfixMult = 1.0L;
 
 	std::vector<json> savedRoot = saveData["ROOT"];
 	for (const auto& item : savedRoot) {
-		for (auto& actualPatch : rootTree) {
+		for (auto& actualPatch : dirTree) {
 			if (actualPatch.name == item["n"]) {
 				actualPatch.patched = item["p"];
 			}
@@ -44,7 +44,7 @@ inline void load(
 	}
 
 	costMult = 1.0L;
-	if (rootTree[8].patched) costMult = 0.9f;
+	if (dirTree[8].patched) costMult = 0.9f;
 
 	std::vector<json> savedLogicArray = saveData["LOGIC"];
 	for (const auto& item : savedLogicArray) {

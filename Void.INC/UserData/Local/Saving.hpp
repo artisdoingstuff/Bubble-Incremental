@@ -10,10 +10,10 @@ inline void save(
 	long double allClickedBits,
 	long double bitsPerSecond,
 	long double hotfixMult,
-	long long timesInitialized,
+	long long timesInitialised,
 	std::vector<LogicGate>& logicGate,
 	std::vector<Hotfix>& hotfix,
-	std::vector<RootPatch>& root
+	std::vector<DirNodes>& root
 ) {
 	json saveData;
 
@@ -26,7 +26,7 @@ inline void save(
 	saveData["ACB"] = round(allClickedBits);
 	saveData["BPS"] = round(bitsPerSecond);
 	saveData["HFM"] = round(hotfixMult);
-	saveData["TINIT"] = timesInitialized;
+	saveData["TINIT"] = timesInitialised;
 	saveData["LOGIC"] = logicGate;
 	saveData["HOTFIX"] = hotfix;
 	saveData["ROOT"] = root;

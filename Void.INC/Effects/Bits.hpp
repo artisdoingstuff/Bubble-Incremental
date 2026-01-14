@@ -9,9 +9,7 @@ struct DataParticle {
     float speed;
     float spiral;
 
-    DataParticle(sf::Font& font, sf::Vector2f startPos, sf::Vector2f initialVel = { 0,0 })
-        : bit(font), pos(startPos), vel(initialVel)
-    {
+    DataParticle(sf::Font& font, sf::Vector2f startPos, sf::Vector2f initialVel = { 0,0 }) : bit(font), pos(startPos), vel(initialVel) {
         bit.setString(rand() % 2 == 0 ? "0" : "1");
         bit.setCharacterSize(16);
         bit.setFillColor(sf::Color(243, 238, 225, 150));
@@ -23,7 +21,7 @@ struct DataParticle {
 inline std::vector<DataParticle> dataStream;
 inline sf::Clock spawnClock;
 
-inline void updateStream(sf::RenderWindow& window, sf::Vector2f center, float dt) {
+inline void updateStream(sf::RenderWindow& window, sf::Vector2f centre, float dt) {
     if (spawnClock.getElapsedTime().asSeconds() > 0.10f) {
         sf::Vector2f spawnPos;
         int edge = rand() % 4;
@@ -37,7 +35,7 @@ inline void updateStream(sf::RenderWindow& window, sf::Vector2f center, float dt
     }
 
     for (auto it = dataStream.begin(); it != dataStream.end();) {
-        sf::Vector2f dir = center - it->pos;
+        sf::Vector2f dir = centre - it->pos;
         float distance = std::sqrt(dir.x * dir.x + dir.y * dir.y);
 
         if (distance < 100.f || distance > 2500.f) {

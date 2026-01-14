@@ -2,12 +2,12 @@
 
 #include "../Misc/GIncludes.hpp"
 
-struct Vortex {
-    sf::VertexArray vortex;
+struct Star {
+    sf::VertexArray star;
 };
 
-inline void updateVortex(Vortex& vortex, sf::Vector2f center, float time, float currentScale) {
-    size_t totalVertices = vortex.vortex.getVertexCount();
+inline void updateStar(Star& star, sf::Vector2f centre, float time, float currentScale) {
+    size_t totalVertices = star.star.getVertexCount();
     const int numArms = 4;
     size_t pointsPerArm = totalVertices / numArms;
 
@@ -24,11 +24,11 @@ inline void updateVortex(Vortex& vortex, sf::Vector2f center, float time, float 
 
             float thickness = std::sin(time * 15.f + i) * 3.5f;
 
-            float x = center.x + (radius + thickness) * std::cos(angle);
-            float y = center.y + (radius + thickness) * std::sin(angle);
+            float x = centre.x + (radius + thickness) * std::cos(angle);
+            float y = centre.y + (radius + thickness) * std::sin(angle);
 
-            vortex.vortex[idx].position = { x, y };
-            vortex.vortex[idx].color = sf::Color(243, 238, 225, 120);
+            star.star[idx].position = { x, y };
+            star.star[idx].color = sf::Color(243, 238, 225, 120);
         }
     }
 }

@@ -8,7 +8,7 @@
 
 [ ] 1.0.3 - UI refresh (Root Directory).
 
-[ ] 1.0.4 - Stats tab + Cosmetic (colour) changes to the Vortex based on game stage.
+[ ] 1.0.4 - Stats tab + Cosmetic (colour) changes to the Star based on game stage.
 
 [ ] 1.0.5 - Design freedom + Rebalance to 1.0.2 content (if needed).
 

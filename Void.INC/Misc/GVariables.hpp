@@ -4,8 +4,8 @@
 // Global references
 inline std::string voidVersion = "v1.0.3"; // Version control for the game (Updater purposes)
 
-inline bool reinitialization = false;
-inline bool initialization = false;
+inline bool reinitialisation = false;
+inline bool initialisation = false;
 inline float loadingProgress = 0.0f;
 float initTimer = 0.0f;
 
@@ -27,8 +27,8 @@ enum class InitState {
 
 inline InitState currentInitStep = InitState::IDLE;;
 
-inline bool canClick = true; // Pre-initialization
-inline bool canClickInit = false; // Post-reinitialization
+inline bool canClick = true; // Pre-reinitialisation
+inline bool canClickInit = false; // Post-initialisation
 
 enum class Directory { NONE, LOGIC_GATES, HOTFIXES, REINIT };
 inline Directory currentDir = Directory::LOGIC_GATES;
@@ -56,7 +56,7 @@ inline long double bitsPerClick = 1.0L; // Bits per click
 inline long double clickMultiplier = 1.0L; // Click multiplier
 
 inline long double bytes = 0.0L; // Current bytes (from Re-initializing)
-inline long long timesInitialized = 0LL; // Re-initializing is "Ascending"
+inline long long timesInitialised = 0LL; // Re-initializing is "Ascending"
 inline long double bitsToBytesRate = 1e-8; // Rate of bits to bytes conversion rate
 inline long double bitMultiplier = 1.0L; // Multiplier for bits per second (from root patches)
 

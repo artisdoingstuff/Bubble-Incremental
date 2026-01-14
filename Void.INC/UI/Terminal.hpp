@@ -21,7 +21,7 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double bits, long doub
     float currentY = 100.f - scrollOffset;
 
     bool isLogicOpen = (currentDir == Directory::LOGIC_GATES);
-    drawFolderHeader(window, "root/LOGIC_GATES/", { startX, currentY }, isLogicOpen);
+    drawFolderHeader(window, "Void_INC/LOGIC_GATES/", { startX, currentY }, isLogicOpen);
     currentY += 40.f;
 
     if (isLogicOpen) {
@@ -46,12 +46,12 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double bits, long doub
 
     currentY += 10.f;
     bool isHotfixOpen = (currentDir == Directory::HOTFIXES);
-    drawFolderHeader(window, "root/HOTFIXES/", { startX, currentY }, isHotfixOpen);
+    drawFolderHeader(window, "Void_INC/HOTFIXES/", { startX, currentY }, isHotfixOpen);
     currentY += 40.f;
 
     if (isHotfixOpen) {
         for (auto& hf : hotfixList) {
-            std::string ext = (hf.written == 1) ? ".sys" : ".pkg";
+            std::string ext = (hf.written == 1) ? ".bin" : ".pkg";
             hf.rect.setPosition({ startX + 20.f, currentY });
             hf.rect.setSize({ 350.f, 35.f });
 
@@ -75,10 +75,10 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double bits, long doub
     if (allBits >= 5000000.0L) {
         currentY += 10.f;
         bool isReinitOpen = (currentDir == Directory::REINIT);
-        drawFolderHeader(window, "root/REINIT/", { startX, currentY }, isReinitOpen);
+        drawFolderHeader(window, "Void_INC/REINIT/", { startX, currentY }, isReinitOpen);
 
         if (isReinitOpen) {
-            sf::Text t(jetBrainsMono, "|-- reinit.bat\n`-- reinit.stat\n   `-- -" + format(getPendingBytes(bits), true) + "_bytes_yield.log", 12);
+            sf::Text t(jetBrainsMono, "|-- reinit.bat\n`-- reinit.stat\n   |-- -" + format(getPendingBytes(bits), true) + "_bytes_yield.log\n   `-- " + format(timesInitialised) + "_times_init.log", 12);
             t.setPosition(sf::Vector2f(startX + 25.f, currentY + 40.f));
             window.draw(t);
         }
