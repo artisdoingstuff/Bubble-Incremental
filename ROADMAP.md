@@ -6,7 +6,7 @@
 
 [/] 1.0.2 - Content drop + Pricing rebalance for Hotfixes + INIT(); animation. (Released 11th of January, 2026 @ [Releases](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.2-release))
 
-[ ] 1.0.3 - UI refresh (Root Directory).
+[/] 1.0.3 - UI refresh (Root Directory). (Released 14th of January, 2026 @ [Releases](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.3-release))
 
 [ ] 1.0.4 - Stats tab + Cosmetic (colour) changes to the Star based on game stage.
 
