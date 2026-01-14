@@ -11,8 +11,8 @@
 <br>
 
 > #### Installation Setup
-> 1. Download _your_ personal installation of the Void.INC terminal from [releases](https://github.com/artdoesstuff/Void.INC/releases).
-> 2. After installation, extract `Void.INC_v1.x.x.zip` anywhere you please.
+> 1. Download _your_ personal copy of the Void.INC terminal from [releases](https://github.com/artdoesstuff/Void.INC/releases).
+> 2. After downloading, extract `Void.INC_v1.x.x.zip`. Location is irrelevant.
 > 3. After extraction, run `Void.INC.exe` and e̷̛͜ň̶͜ǰ̴̤õ̵̯y̴̤̐.
 >
 > _DISCLAIMER: Void.INC is not responsible for any psychological conditions that you may develop._
