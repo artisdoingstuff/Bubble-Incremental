@@ -27,47 +27,68 @@ inline long double getPendingBytes(long double bits) {
 }
 
 inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit) {
-    sf::RectangleShape overlay({ (float)window.getSize().x, (float)window.getSize().y });
-    overlay.setFillColor(sf::Color(20, 20, 20, 200));
-
-    sf::RectangleShape box({ 400.f, 200.f });
-    box.setOrigin({ 200.f, 100.f });
-    box.setPosition({ window.getSize().x / 2.f, window.getSize().y / 2.f });
-    box.setFillColor(sf::Color(20, 20, 20));
-    box.setOutlineColor(sf::Color::Red);
-    box.setOutlineThickness(2);
-
-    sf::Text warnText(jetBrainsMono, "REINITIALISING WILL WIPE\nALL CURRENT DATA.\n\nPROCEED?", 18);
-    warnText.setOrigin({ warnText.getGlobalBounds().size.x / 2.f, 0.f });
-    warnText.setPosition(sf::Vector2f(box.getPosition().x, box.getPosition().y - 70.f));
-
-    sf::Text yesText(jetBrainsMono, "[ YES ]", 18);
-    yesText.setPosition(sf::Vector2f(box.getPosition().x - 100.f, box.getPosition().y + 40.f));
-    yesText.setFillColor(sf::Color::Green);
-
-    sf::Text noText(jetBrainsMono, "[ NO ]", 18);
-    noText.setPosition(sf::Vector2f(box.getPosition().x + 20.f, box.getPosition().y + 40.f));
-    noText.setFillColor(sf::Color::Red);
-
     sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+    bool mouseLeft = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
 
+    sf::Vector2f centre(window.getSize().x / 2.f, window.getSize().y / 2.f);
+    sf::Vector2f boxSize(550.f, 220.f);
+
+    sf::RectangleShape overlay({ (float)window.getSize().x, (float)window.getSize().y });
+    overlay.setFillColor(sf::Color(10, 10, 10, 220));
     window.draw(overlay);
+
+    sf::RectangleShape box(boxSize);
+    box.setOrigin(boxSize / 2.f);
+    box.setPosition(centre);
+    box.setFillColor(sf::Color(15, 15, 15));
+    box.setOutlineColor(sf::Color(50, 50, 50));
+    box.setOutlineThickness(1);
+
+    sf::RectangleShape titleBar({ boxSize.x, 30.f });
+    titleBar.setOrigin({ boxSize.x / 2.f, 0.f });
+    titleBar.setPosition({ centre.x, centre.y - (boxSize.y / 2.f) });
+    titleBar.setFillColor(sf::Color(40, 40, 40));
+
+    sf::Text titleText(jetBrainsMono, "reinit.bat", 14);
+    titleText.setPosition({ titleBar.getPosition().x - (boxSize.x / 2.f) + 10.f, titleBar.getPosition().y + 5.f });
+    titleText.setFillColor(sf::Color(200, 200, 200));
+
+    sf::Text controls(jetBrainsMono, "- x", 16);
+    controls.setOrigin({ controls.getLocalBounds().size.x, 0.f });
+    controls.setPosition({ titleBar.getPosition().x + (boxSize.x / 2.f) - 10.f, titleBar.getPosition().y + 2.f });
+
     window.draw(box);
+    window.draw(titleBar);
+    window.draw(titleText);
+    window.draw(controls);
+
+    std::string warningMsg =
+        "WARNING: System Re-initialisation Requested.\n"
+        "All current data will be wiped.\n"
+        "Unforeseen consequences possible.\n\n"
+        "Proceed with operation? (Y/N) > " + getCursor();
+
+    sf::Text warnText(jetBrainsMono, warningMsg, 16);
+    warnText.setOrigin({ warnText.getGlobalBounds().size.x / 2.f, 0.f });
+    warnText.setPosition({ centre.x, centre.y - 40.f });
+    warnText.setFillColor(sf::Color(200, 200, 200));
+
     window.draw(warnText);
 
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
-        if (yesText.getGlobalBounds().contains(mousePos)) {
-            startInit = true;
-            bytes += getPendingBytes(bits);
-            resetProgress();
-            timesInitialised++;
-            showConfirmPopup = false;
-        }
-        if (noText.getGlobalBounds().contains(mousePos)) {
-            showConfirmPopup = false;
-        }
-    }
+    auto triggerInit = [&]() {
+        startInit = true;
+        bytes += getPendingBytes(bits);
+        resetProgress();
+        timesInitialised++;
+        showConfirmPopup = false;
+    };
 
-    window.draw(yesText);
-    window.draw(noText);
+    auto cancelInit = [&]() {
+        showConfirmPopup = false;
+    };
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Y)) triggerInit();
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::N) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape)) cancelInit();
+
+    if (mouseLeft && controls.getGlobalBounds().contains(mousePos)) cancelInit();
 }
