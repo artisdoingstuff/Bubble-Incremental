@@ -33,7 +33,7 @@ inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit) {
     sf::Vector2f centre(window.getSize().x / 2.f, window.getSize().y / 2.f);
     sf::Vector2f boxSize(550.f, 220.f);
 
-    sf::RectangleShape overlay({ window.getSize().x, window.getSize().y });
+    sf::RectangleShape overlay({ (float)window.getSize().x, (float)window.getSize().y });
     overlay.setFillColor(sf::Color(10, 10, 10, 220));
     window.draw(overlay);
 

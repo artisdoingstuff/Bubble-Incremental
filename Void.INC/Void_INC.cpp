@@ -28,11 +28,11 @@ int main() {
 	if (std::filesystem::exists("updater.exe")) std::system("updater.exe");
 	if (!std::filesystem::exists("updater.exe")) std::cout << "updater.exe not detected, skipping..." << std::endl;
 
-	sf::RenderWindow gameWindow(sf::VideoMode({ 1920, 1080 }), "Void.INC | " + voidVersion, sf::State::Fullscreen);
-	gameWindow.setFramerateLimit(60);
-	gameWindow.setIcon(sf::Image("icon.png"));
+	sf::RenderWindow window(sf::VideoMode({ 1920, 1080 }), "Void.INC | " + voidVersion, sf::State::Fullscreen);
+	window.setFramerateLimit(60);
+	window.setIcon(sf::Image("icon.png"));
 
-	sf::Vector2f centre = { gameWindow.getSize().x / 2.f, gameWindow.getSize().y / 2.f };
+	sf::Vector2f centre = { window.getSize().x / 2.f, window.getSize().y / 2.f };
 
 	time_t timeEnd = 0;
 
@@ -52,9 +52,9 @@ int main() {
 	float starScale = 1.f;
 
 	sf::VertexArray lines(sf::PrimitiveType::Lines);
-	for (int i = 0; i < gameWindow.getSize().y; i += 4) {
+	for (int i = 0; i < window.getSize().y; i += 4) {
 		lines.append(sf::Vertex{ sf::Vector2f(0.f, (float)i), sf::Color(255, 255, 255, 40) });
-		lines.append(sf::Vertex{ sf::Vector2f((float)gameWindow.getSize().x, (float)i), sf::Color(255, 255, 255, 40)});
+		lines.append(sf::Vertex{ sf::Vector2f((float)window.getSize().x, (float)i), sf::Color(255, 255, 255, 40)});
 	}
 
 	sf::Text bitsText(jetBrainsMono);
@@ -72,11 +72,11 @@ int main() {
 	initLogicGates();
 	initHotfixes();
 	initDirTree();
-	positionTreeNodes(gameWindow.getSize());
+	positionTreeNodes(window.getSize());
 	load(timeEnd, bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialised, logicGateList, hotfixList, dirTree);
 	offline(timeEnd, bits, allBits, bitsPerSecond, hotfixMult);
 	
-	while (gameWindow.isOpen()) {
+	while (window.isOpen()) {
 		if (dirTree[1].patched && patch_1Clock.getElapsedTime().asSeconds() >= 30.f && dirTree[1].disabled == 0) {
 			patch_1Mult = 1.5f + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (1.7f - 1.5f)));
 			patch_1Clock.restart();
@@ -136,7 +136,7 @@ int main() {
 		updateStar(star, centre, elapsedTime, starScale, allBits);
 		starScale += (1.f - starScale) * 0.1f;
 
-		updateStream(gameWindow, centre, deltaTime);
+		updateStream(window, centre, deltaTime);
 
 		bitsText.setString("-" + format(bits) + " Bits");
 		centreText(bitsText, { clickRect.getPosition().x, clickRect.getPosition().y + 400 });
@@ -150,23 +150,24 @@ int main() {
 		sf::RenderStates states;
 		states.blendMode = sf::BlendAdd;
 
-		gameWindow.clear(sf::Color::Black);
+		window.clear(sf::Color::Black);
 
 		if (!reinitialisation && !initialisation) {
-			gameWindow.draw(bitsText);
-			gameWindow.draw(bitsPerSecondText);
+			window.draw(bitsText);
+			window.draw(bitsPerSecondText);
 
+			updateStream(window, centre, deltaTime);
 			for (auto& d : dataStream) {
-				gameWindow.draw(d.bit);
+				window.draw(d.bit);
 			}
 
-			updateLogicGateUI(gameWindow, allBits);
-			drawTerminalUI(gameWindow, bits, allBits);
+			updateLogicGateUI(window, allBits);
+			drawTerminalUI(window, bits, allBits);
 
-			gameWindow.draw(star.star, states);
+			window.draw(star.star, states);
 
 			if (showConfirmPopup) {
-				drawConfirmPopup(gameWindow, reinitialisation);
+				drawConfirmPopup(window, reinitialisation);
 			}
 		}
 
@@ -176,7 +177,7 @@ int main() {
 				canClick = false;
 			}
 			initTimer += deltaTime;
-			sf::View shakeView = gameWindow.getDefaultView();
+			sf::View shakeView = window.getDefaultView();
 
 			switch (currentReinitStep) {
 				case ReinitState::VORTEX_EXPANSION: {
@@ -187,8 +188,8 @@ int main() {
 					float offsetY = (std::rand() % 100 - 50) / 50.f * intensity;
 					shakeView.move({ offsetX, offsetY });
 
-					gameWindow.setView(shakeView);
-					gameWindow.draw(star.star, states);
+					window.setView(shakeView);
+					window.draw(star.star, states);
 
 					if (initTimer >= 0.5f) currentReinitStep = ReinitState::VORTEX_SHRINK;
 					break;
@@ -198,8 +199,8 @@ int main() {
 					starScale += (0.f - starScale) * 0.15f;
 					shakeView.move({ (std::rand() % 10 - 5) / 2.f, (std::rand() % 10 - 5) / 2.f });
 
-					gameWindow.setView(shakeView);
-					gameWindow.draw(star.star, states);
+					window.setView(shakeView);
+					window.draw(star.star, states);
 
 					if (initTimer >= 0.7f) {
 						starScale = -10.f;
@@ -216,20 +217,20 @@ int main() {
 						currentReinitStep = ReinitState::ROOTDIR;
 					}
 
-					drawLoadingUI(gameWindow, loadingProgress);
+					drawLoadingUI(window, loadingProgress);
 					break;
 
 				case ReinitState::ROOTDIR:
-					gameWindow.setView(gameWindow.getDefaultView());
+					window.setView(window.getDefaultView());
 					loadingProgress = 0.0f;
 					initTimer = 0.0f;
 					canClickInit = true;
 
-					drawTreeLines(gameWindow);
-					drawDirTreeUI(gameWindow);
+					drawTreeLines(window);
+					drawDirTreeUI(window);
 
-					drawInitButton(gameWindow);
-					gameWindow.draw(bytesText);
+					drawInitButton(window);
+					window.draw(bytesText);
 					break;
 			}
 		}
@@ -240,12 +241,12 @@ int main() {
 			}
 
 			initTimer += deltaTime;
-			sf::View shakeView = gameWindow.getDefaultView();
+			sf::View shakeView = window.getDefaultView();
 
 			switch (currentInitStep) {
 				case InitState::LOADING_BAR: {
 					loadingProgress = initTimer / 3.0f;
-					drawLoadingUI(gameWindow, loadingProgress);
+					drawLoadingUI(window, loadingProgress);
 
 					if (loadingProgress >= 1.0f) {
 						loadingProgress = 1.0f;
@@ -262,26 +263,12 @@ int main() {
 					float offsetX = (std::rand() % 100 - 50) / 50.f * intensity;
 					float offsetY = (std::rand() % 100 - 50) / 50.f * intensity;
 					shakeView.move({ offsetX, offsetY });
-					gameWindow.setView(shakeView);
+					window.setView(shakeView);
 
-					gameWindow.draw(star.star, states);
-
-					for (auto it = dataStream.begin(); it != dataStream.end();) {
-						it->pos += it->vel * deltaTime;
-						it->bit.setPosition(it->pos);
-
-						gameWindow.draw(it->bit);
-
-						if (it->pos.x < 0 || it->pos.x > gameWindow.getSize().x || it->pos.y < 0 || it->pos.y > gameWindow.getSize().y) {
-							it = dataStream.erase(it);
-						}
-						else {
-							++it;
-						}
-					}
+					window.draw(star.star, states);
 
 					if (initTimer >= 3.5f) {
-						gameWindow.setView(gameWindow.getDefaultView());
+						window.setView(window.getDefaultView());
 						loadingProgress = 0.0f;
 						initTimer = 0.0f;
 						canClick = true;
@@ -296,16 +283,16 @@ int main() {
 			}
 		}
 
-		gameWindow.draw(lines);
+		window.draw(lines);
 
-		gameWindow.display();
+		window.display();
 
-		while (const std::optional gameEvent = gameWindow.pollEvent()) {
+		while (const std::optional gameEvent = window.pollEvent()) {
 			if (gameEvent->is<sf::Event::Closed>()) {
 				time_t timeStart = time(nullptr);
 				save(timeStart, bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialised, logicGateList, hotfixList, dirTree);
 				versionSave(voidVersion);
-				gameWindow.close();
+				window.close();
 			}
 
 			if (gameEvent->is<sf::Event::MouseWheelScrolled>()) {
@@ -316,8 +303,8 @@ int main() {
 
 			if (gameEvent->is<sf::Event::MouseButtonPressed>()) {
 				const auto& mouseEvent = gameEvent->getIf<sf::Event::MouseButtonPressed>();
-				sf::Vector2i mousePixelPos = sf::Mouse::getPosition(gameWindow);
-				sf::Vector2f mousePos = gameWindow.mapPixelToCoords(mousePixelPos);
+				sf::Vector2i mousePixelPos = sf::Mouse::getPosition(window);
+				sf::Vector2f mousePos = window.mapPixelToCoords(mousePixelPos);
 
 				if (mouseEvent->button == sf::Mouse::Button::Left && canClick) {
 					if (clickRect.getGlobalBounds().contains(mousePos)) {
