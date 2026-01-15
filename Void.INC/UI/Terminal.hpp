@@ -78,7 +78,7 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double bits, long doub
         drawFolderHeader(window, "Void_INC/REINIT/", { startX, currentY }, isReinitOpen);
 
         if (isReinitOpen) {
-            sf::Text t(jetBrainsMono, "|-- reinit.bat\n|-- reinit.stat\n|  |-- -" + format(getPendingBytes(bits), true) + "_bytes_yield.log\n|  `-- " + format(timesInitialised) + "_times_init.log\n`-- other.stat\n   |-- " + format(allBits) + "_all_bits.log\n   `-- " + format(allClickedBits) + "_all_clicked_bits.log", 12);
+            sf::Text t(jetBrainsMono, "|-- reinit.bat\n|-- reinit.stat\n|  |-- -" + format(getPendingBytes(bits), true) + "_bytes_yield.log\n|  `-- " + format(timesInitialised) + "_times_init.log\n`-- other.stat\n   |-- -" + format(allBits) + "_all_bits.log\n   `-- -" + format(allClickedBits) + "_all_clicked_bits.log", 12);
             t.setPosition(sf::Vector2f(startX + 25.f, currentY + 40.f));
             window.draw(t);
         }
