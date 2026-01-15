@@ -20,9 +20,13 @@
 
 #include "UserData/Local/Loading.hpp"
 #include "UserData/Local/Saving.hpp"
+#include "UserData/Local/Version.hpp"
 
 int main() {
 	hideConsole();
+	
+	if (std::filesystem::exists("updater.exe")) std::system("updater.exe");
+	if (!std::filesystem::exists("updater.exe")) std::cout << "updater.exe not detected, skipping..." << std::endl;
 
 	sf::RenderWindow gameWindow(sf::VideoMode({ 1920, 1080 }), "Void.INC | " + voidVersion, sf::State::Fullscreen);
 	gameWindow.setFramerateLimit(60);
@@ -129,7 +133,7 @@ int main() {
 
 		bits += realBitsPerSecond * deltaTime; allBits += realBitsPerSecond * deltaTime;
 
-		updateStar(star, centre, elapsedTime, starScale);
+		updateStar(star, centre, elapsedTime, starScale, allBits);
 		starScale += (1.f - starScale) * 0.1f;
 
 		updateStream(gameWindow, centre, deltaTime);
@@ -300,6 +304,7 @@ int main() {
 			if (gameEvent->is<sf::Event::Closed>()) {
 				time_t timeStart = time(nullptr);
 				save(timeStart, bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialised, logicGateList, hotfixList, dirTree);
+				versionSave(voidVersion);
 				gameWindow.close();
 			}
 

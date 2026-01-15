@@ -2,7 +2,7 @@
 #include "GIncludes.hpp"
 
 // Global references
-inline std::string voidVersion = "v1.0.3"; // Version control for the game (Updater purposes)
+inline std::string voidVersion = "v1.0.4-release"; // Version control for the game (Updater purposes)
 
 inline bool reinitialisation = false;
 inline bool initialisation = false;
@@ -36,6 +36,8 @@ inline Directory currentDir = Directory::LOGIC_GATES;
 inline sf::FloatRect logicFolderBounds;
 inline sf::FloatRect hotfixFolderBounds;
 inline sf::FloatRect reinitFolderBounds;
+
+inline float pi = 3.14159f;
 
 // Dynamic shenanigans
 inline float costMult = 1.0f; // Change the cost of all logicGates

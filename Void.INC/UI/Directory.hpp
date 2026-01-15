@@ -40,7 +40,7 @@ inline void drawTreeLines(sf::RenderWindow& window) {
 
         sf::Vector2f direction = end - start;
         float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-        float angle = std::atan2(direction.y, direction.x) * 180.f / 3.14159f;
+        float angle = std::atan2(direction.y, direction.x) * 180.f / pi;
 
         sf::RectangleShape cable({ distance, 3.f });
         cable.setOrigin({ 0.f, 1.5f });
