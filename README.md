@@ -19,6 +19,8 @@
 >
 > _For legal reasons, the above is satire._
 
+<br>
+
 > #### Updater Setup
 > 1. Download [`Updater_0.1.0.exe`](https://github.com/artdoesstuff/Void.INC/releases/download/v1.0.4-release/Updater_0.1.0.exe) and drag it into your folder that contains the `Void.INC.exe`.
 > 2. Run either `Updater_0.1.0.exe` or `Void.INC.exe` _(1.0.4+ only)._
