@@ -8,7 +8,7 @@
 
 [/] 1.0.3 - UI refresh (Root Directory). (Released 14th of January, 2026 @ [Releases](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.3-release))
 
-[ ] 1.0.4 - Stats tab + Cosmetic (colour) changes to the Star based on game stage.
+[/] 1.0.4 - Stats tab + Cosmetic (colour) changes to the Star based on game stage. (Released 15th of January, 2026 @ [Releases](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.4-release))
 
 [ ] 1.0.5 - Design freedom + Rebalance to 1.0.2 content (if needed).
 
