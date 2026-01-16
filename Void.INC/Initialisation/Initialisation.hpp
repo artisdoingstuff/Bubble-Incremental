@@ -33,7 +33,7 @@ inline void initDirTree() {
     dirTree.emplace_back("Patch_4_1", "x12 BPS, x3 clicks, deprecates Logic Gates 1 & 2.", 5000.0L);
     dirTree.emplace_back("Patch_4_2", "Legacy hardware performance refactor (+5% per Logic Gate).", 12500.0L);
     dirTree.emplace_back("Patch_5_1", "x50 BPS and x1.5 Bytes, but disables Patch_1 & Patch_2", 75000.0L);
-    dirTree.emplace_back("Patch_5_2", "x75 BPS, x10 clicks... and 10% off on gates?", 200000.0L);
+    dirTree.emplace_back("Patch_5_2", "x100 BPS, x5 clicks... and 10% off on gates?", 200000.0L);
 }
 
 inline void drawInitButton(sf::RenderWindow& window) {

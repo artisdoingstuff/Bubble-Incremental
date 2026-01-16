@@ -124,7 +124,7 @@ int main() {
 			dirTree[1].disabled = 1; dirTree[2].disabled = 1;
 		}
 		if (dirTree[8].patched) {
-			bitMultiplier *= 75.0L; clickMultiplier *= 10.0L; costMult *= 0.9f;
+			bitMultiplier *= 100.0L; clickMultiplier *= 5.0L; costMult *= 0.9f;
 		}
 
 		long double realBitsPerSecond = (bitsPerSecond * hotfixMult * bitMultiplier * patch_1Mult) * patch_3_2Mult;

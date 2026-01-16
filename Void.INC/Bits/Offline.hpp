@@ -36,7 +36,7 @@ inline void offline(time_t timestamp, long double& bits, long double& allBits, l
 
         if (dirTree[5].patched) dirMult *= 12.0L;
 
-		if (dirTree[8].patched) dirMult *= 75.0L;
+		if (dirTree[8].patched) dirMult *= 100.0L;
 		
 		long double offlineBits = (elapsedTime * eBPS * hotfixMult * dirMult) * 1;
 		
