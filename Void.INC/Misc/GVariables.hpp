@@ -30,12 +30,9 @@ inline InitState currentInitStep = InitState::IDLE;;
 inline bool canClick = true; // Pre-reinitialisation
 inline bool canClickInit = false; // Post-initialisation
 
-enum class Directory { NONE, LOGIC_GATES, HOTFIXES, REINIT };
-inline Directory currentDir = Directory::LOGIC_GATES;
-
-inline sf::FloatRect logicFolderBounds;
-inline sf::FloatRect hotfixFolderBounds;
-inline sf::FloatRect reinitFolderBounds;
+enum class Tab { NONE, LOGIC, HOTFIX, REINIT };
+inline Tab activeTab = Tab::NONE;
+inline float tabProgress = 0.f;
 
 inline float pi = 3.14159f;
 
