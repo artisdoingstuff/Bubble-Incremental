@@ -2,7 +2,7 @@
 #include "GIncludes.hpp"
 
 // Global references
-inline std::string voidVersion = "v1.0.5-release"; // Version control for the game (Updater purposes)
+inline std::string voidVersion = "v1.0.6-release"; // Version control for the game (Updater purposes)
 
 inline bool reinitialisation = false;
 inline bool initialisation = false;
