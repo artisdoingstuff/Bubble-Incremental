@@ -10,9 +10,9 @@
 
 [/] 1.0.4 - Stats tab + Cosmetic (colour) changes to the Star based on game stage. (Released 15th of January, 2026 @ [Releases](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.4-release))
 
-[/] 1.0.5 - Design freedom + Rebalance to 1.0.2 content (if needed).
+[/] 1.0.5 - Design freedom + Rebalance to 1.0.2 content (if needed). (Released 16th of January, 2026 @ [Releases](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.5-release))
 
-[/] 1.0.6 - Design freedom.
+[/] 1.0.6 - Design freedom. (Released 17th of January, 2026 @ [Releases](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.6-release))
 
 [ ] 1.0.7 - Content drop + Starting screen (menu screen).
 
