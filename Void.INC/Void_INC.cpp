@@ -162,9 +162,10 @@ int main() {
 			}
 
 			updateLogicGateUI(window, allBits);
-			drawTerminalUI(window, bits, allBits);
 
 			window.draw(star.star, states);
+
+			drawTerminalUI(window, bits, allBits, deltaTime);
 
 			if (showConfirmPopup) {
 				drawConfirmPopup(window, reinitialisation);
@@ -312,44 +313,38 @@ int main() {
 						starScale = 1.1f; bits += bitsClicked; allBits += bitsClicked; allClickedBits += bitsClicked;
 					}
 
-					float startX = 40.f;
-					float baseFolder1Y = 105.f;
-					float baseFolder2Y = baseFolder1Y + 40.f + (currentDir == Directory::LOGIC_GATES ? (getLogicHeight()) : 0.f);
-					float baseFolder3Y = baseFolder2Y + 40.f + (currentDir == Directory::HOTFIXES ? (getHotfixHeight()) : 0.f);
+					sf::Vector2f winSize = (sf::Vector2f)window.getSize();
 
-					float folder1Y = baseFolder1Y - scrollOffset;
-					float folder2Y = baseFolder2Y - scrollOffset;
-					float folder3Y = baseFolder3Y - scrollOffset;
-
-					if (sf::FloatRect({ startX, folder1Y }, { 350.f, 30.f }).contains(mousePos)) {
-						currentDir = (currentDir == Directory::LOGIC_GATES) ? Directory::NONE : Directory::LOGIC_GATES;
-						scrollOffset = 0;
-					}
-					else if (sf::FloatRect({ startX, folder2Y }, { 350.f, 30.f }).contains(mousePos)) {
-						currentDir = (currentDir == Directory::HOTFIXES) ? Directory::NONE : Directory::HOTFIXES;
-						scrollOffset = 0;
-					}
-					else if (sf::FloatRect({ startX, folder3Y }, { 350.f, 30.f }).contains(mousePos)) {
-						currentDir = (currentDir == Directory::REINIT) ? Directory::NONE : Directory::REINIT;
-						scrollOffset = 0;
+					if (mousePos.y > winSize.y - 60.f) {
+						if (sf::FloatRect({ 10, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
+							activeTab = (activeTab == Tab::LOGIC) ? Tab::NONE : Tab::LOGIC;
+						}
+						else if (sf::FloatRect({ 200, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
+							activeTab = (activeTab == Tab::HOTFIX) ? Tab::NONE : Tab::HOTFIX;
+						}
+						else if (sf::FloatRect({ 390, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
+							activeTab = (activeTab == Tab::REINIT) ? Tab::NONE : Tab::REINIT;
+						}
 					}
 
-					if (currentDir == Directory::LOGIC_GATES) {
+					if (activeTab == Tab::LOGIC) {
 						for (auto& lg : logicGateList) {
-							if (lg.ver > 0 || allBits >= lg.baseBits) {
-								if (lg.rect.getGlobalBounds().contains(mousePos)) {
-									if (bits >= lg.currentBits) {
-										bits -= lg.currentBits;
-										lg.ver++;
-										bitsPerSecond += lg.bps;
-										lg.currentBits = lg.baseBits * std::pow(logicGateInflation, lg.ver) * costMult;
-									}
+							if (lg.rect.getGlobalBounds().contains(mousePos)) {
+								if (bits >= lg.currentBits) {
+									bits -= lg.currentBits;
+									lg.ver++;
+									bitsPerSecond += lg.bps;
+									lg.currentBits = lg.baseBits * std::pow(logicGateInflation, lg.ver) * costMult;
 								}
 							}
 						}
+						showConfirmPopup = false;
 					}
-					else if (currentDir == Directory::HOTFIXES) {
-						for (auto& hf : hotfixList) {
+					else if (activeTab == Tab::HOTFIX) {
+						size_t startIdx = hotfixPage * HF_PER_PAGE;
+						size_t endIdx = std::min(startIdx + HF_PER_PAGE, hotfixList.size());
+						for (size_t i = startIdx; i < endIdx; ++i) {
+							auto& hf = hotfixList[i];
 							if (hf.written == 0 && hf.rect.getGlobalBounds().contains(mousePos)) {
 								if (bits >= hf.bits) {
 									bits -= hf.bits;
@@ -358,12 +353,13 @@ int main() {
 								}
 							}
 						}
+						showConfirmPopup = false;
 					}
-					else if (currentDir == Directory::REINIT) {
-						sf::FloatRect reinitBatHitbox({ startX + 25.f, folder3Y + 40.f }, { 300.f, 30.f });
-						if (reinitBatHitbox.contains(mousePos)) {
-							showConfirmPopup = true;
-						}
+					else if (activeTab == Tab::REINIT) {
+						showConfirmPopup = true;
+					}
+					else if (activeTab == Tab::NONE) {
+						showConfirmPopup = false;
 					}
 				}
 

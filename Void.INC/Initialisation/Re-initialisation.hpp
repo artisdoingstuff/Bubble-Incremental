@@ -34,7 +34,7 @@ inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit) {
     sf::Vector2f boxSize(550.f, 220.f);
 
     sf::RectangleShape overlay({ (float)window.getSize().x, (float)window.getSize().y });
-    overlay.setFillColor(sf::Color(10, 10, 10, 220));
+    overlay.setFillColor(sf::Color(0, 0, 0, 180));
     window.draw(overlay);
 
     sf::RectangleShape box(boxSize);
@@ -53,7 +53,7 @@ inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit) {
     titleText.setPosition({ titleBar.getPosition().x - (boxSize.x / 2.f) + 10.f, titleBar.getPosition().y + 5.f });
     titleText.setFillColor(sf::Color(200, 200, 200));
 
-    sf::Text controls(jetBrainsMono, "- x", 16);
+    sf::Text controls(jetBrainsMono, "- X", 16);
     controls.setOrigin({ controls.getLocalBounds().size.x, 0.f });
     controls.setPosition({ titleBar.getPosition().x + (boxSize.x / 2.f) - 10.f, titleBar.getPosition().y + 2.f });
 
@@ -80,10 +80,12 @@ inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit) {
         bytes += getPendingBytes(bits);
         resetProgress();
         timesInitialised++;
+        activeTab = Tab::NONE;
         showConfirmPopup = false;
     };
 
     auto cancelInit = [&]() {
+        activeTab = Tab::NONE;
         showConfirmPopup = false;
     };
 
