@@ -34,7 +34,7 @@ inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit) {
     sf::Vector2f boxSize(550.f, 220.f);
 
     sf::RectangleShape overlay({ (float)window.getSize().x, (float)window.getSize().y });
-    overlay.setFillColor(sf::Color(10, 10, 10, 220));
+    overlay.setFillColor(sf::Color(0, 0, 0, 180));
     window.draw(overlay);
 
     sf::RectangleShape box(boxSize);
@@ -80,10 +80,12 @@ inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit) {
         bytes += getPendingBytes(bits);
         resetProgress();
         timesInitialised++;
+        activeTab = Tab::NONE;
         showConfirmPopup = false;
     };
 
     auto cancelInit = [&]() {
+        activeTab = Tab::NONE;
         showConfirmPopup = false;
     };
 

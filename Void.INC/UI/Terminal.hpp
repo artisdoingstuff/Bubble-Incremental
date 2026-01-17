@@ -4,6 +4,7 @@
 
 inline int hotfixPage = 0;
 const int HF_PER_PAGE = 40;
+inline sf::Clock cooldown;
 
 inline void backgroundDeco(sf::RenderWindow& window, sf::Vector2f pos, sf::Vector2f size, bool buy) {
     sf::Color traceColor = buy ? sf::Color(243, 238, 225, 50) : sf::Color(140, 140, 140, 30);
@@ -29,10 +30,10 @@ inline void backgroundDeco(sf::RenderWindow& window, sf::Vector2f pos, sf::Vecto
     sf::Vector2f traceStart = pos + sf::Vector2f(size.x * 0.75f, 0.f);
 
     addVertex(traceStart, traceColor);
-    addVertex(traceStart + sf::Vector2f(40.f, 20.f), traceColor);
+    addVertex(traceStart + sf::Vector2f(35.f, 20.f), traceColor);
 
-    addVertex(traceStart + sf::Vector2f(40.f, 20.f), traceColor);
-    addVertex(traceStart + sf::Vector2f(40.f, size.y), traceColor);
+    addVertex(traceStart + sf::Vector2f(35.f, 20.f), traceColor);
+    addVertex(traceStart + sf::Vector2f(35.f, size.y), traceColor);
 
     window.draw(traces);
 
@@ -75,9 +76,16 @@ inline void drawTerminalModule(sf::RenderWindow& window, std::string title, floa
     t.setPosition(titleBar.getPosition() + sf::Vector2f(10.f, 5.f));
     window.draw(t);
 
+    sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+
     sf::Text close(jetBrainsMono, "- X", 14);
     close.setPosition(titleBar.getPosition() + sf::Vector2f(width - 50.f, 5.f));
+    bool canClose = close.getGlobalBounds().contains(mousePos);
     window.draw(close);
+
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
+        if (canClose) activeTab = Tab::NONE;
+    }
 
     contentDraw(frame.getPosition() + sf::Vector2f(20.f, 50.f));
 }
@@ -103,12 +111,12 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double bits, long doub
         window.draw(txt);
     };
 
-    drawTabButton("LOGIC_GATES", 40.f, Tab::LOGIC);
-    drawTabButton("HOTFIXES", 230.f, Tab::HOTFIX);
-    if (allBits >= 5000000.0L) drawTabButton("REINIT", 420.f, Tab::REINIT);
+    drawTabButton("logic.bat", 10.f, Tab::LOGIC);
+    drawTabButton("hotfixes.bat", 200.f, Tab::HOTFIX);
+    if (allBits >= 5000000.0L) drawTabButton("reinit.bat", 390.f, Tab::REINIT);
 
     if (activeTab == Tab::LOGIC) {
-        drawTerminalModule(window, "void://hardware/logic_gates/" + getCursor(), tabProgress, [&](sf::Vector2f start) {
+        drawTerminalModule(window, "void://hardware/logic.bat" + getCursor(), tabProgress, [&](sf::Vector2f start) {
             float boxW = (moduleWidth - 100.f) / 5.f;
             float boxH = (moduleHeight - 120.f) / 4.f;
             float pad = 10.f;
@@ -159,9 +167,10 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double bits, long doub
     }
 
     else if (activeTab == Tab::HOTFIX) {
-        drawTerminalModule(window, "void://hardware/hotfixes/" + getCursor(), tabProgress, [&](sf::Vector2f start) {
-            float size = (moduleWidth - 140.f) / 10.f;
-            float pad = 8.f;
+        drawTerminalModule(window, "void://hardware/hotfixes.bat" + getCursor(), tabProgress, [&](sf::Vector2f start) {
+            const float size = (moduleWidth - 140.f) / 10.f;
+            const float pad = 8.f;
+            const sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
             size_t startIdx = hotfixPage * HF_PER_PAGE;
             size_t endIdx = std::min(startIdx + HF_PER_PAGE, hotfixList.size());
@@ -169,41 +178,80 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double bits, long doub
             for (size_t i = startIdx; i < endIdx; ++i) {
                 auto& hf = hotfixList[i];
                 int localIdx = static_cast<int>(i - startIdx);
-                int col = localIdx % 10;
-                int row = localIdx / 10;
-                sf::Vector2f pos = start + sf::Vector2f(col * (size + pad), row * (size + pad));
-
-                std::string ext = (hf.written == 1) ? ".bin" : ".pkg";
+                sf::Vector2f pos = start + sf::Vector2f((localIdx % 10) * (size + pad), (localIdx / 10) * (size + pad));
 
                 hf.rect.setSize({ size, size });
                 hf.rect.setPosition(pos);
-                hf.rect.setFillColor(sf::Color::Transparent);
-                hf.rect.setOutlineColor(hf.written ? sf::Color(50, 50, 50) : sf::Color(80, 80, 80));
+                hf.rect.setFillColor(sf::Color::Black);
+                hf.rect.setOutlineColor(hf.written ? sf::Color(60, 60, 60) : sf::Color(100, 100, 100));
                 hf.rect.setOutlineThickness(1.f);
                 window.draw(hf.rect);
 
-                sf::Text n(jetBrainsMono, hf.name + ext, 10);
+                backgroundDeco(window, pos, { size, size }, (bits >= hf.bits));
+
+                sf::Text n(jetBrainsMono, hf.name + (hf.written ? ".bin" : ".pkg"), 10);
                 n.setPosition(pos + sf::Vector2f(6.f, 6.f));
                 window.draw(n);
 
-                if (hf.written) {
-                    sf::Text l(jetBrainsMono, "[ LOADED ]", 9);
-                    l.setPosition(pos + sf::Vector2f(6.f, 20.f));
-                    l.setFillColor(sf::Color(243, 238, 225));
-                    window.draw(l);
-                }
-                else {
-                    sf::Text c(jetBrainsMono, "-" + format(hf.bits), 9);
-                    c.setPosition(pos + sf::Vector2f(6.f, 20.f));
-                    c.setFillColor(bits >= hf.bits ? sf::Color(243, 238, 225) : sf::Color(140, 140, 140));
-                    window.draw(c);
-                }
+                sf::Text status(jetBrainsMono, hf.written ? "[ LOADED ]" : "-" + format(hf.bits) + "_bits.tmp", 9);
+                status.setPosition(pos + sf::Vector2f(6.f, 20.f));
+                status.setFillColor(!hf.written && bits < hf.bits ? sf::Color(140, 140, 140) : sf::Color(243, 238, 225));
+                window.draw(status);
             }
 
-            sf::Text pg(jetBrainsMono, "<< PAGE " + std::to_string(hotfixPage + 1) + " >>", 14);
-            pg.setOrigin({ pg.getLocalBounds().size.x / 2.f, 0.f });
-            pg.setPosition({ start.x + (moduleWidth / 2.f) - 20.f, start.y + moduleHeight - 65.f });
-            window.draw(pg);
-        });
+            auto drawNav = [&](const std::string& str, sf::Vector2f offset, bool isPrev) {
+                sf::Text t(jetBrainsMono, str, 14);
+                t.setPosition(start + sf::Vector2f(moduleWidth / 2.f + offset.x, moduleHeight - 80.f));
+                bool hovered = t.getGlobalBounds().contains(mousePos);
+                t.setFillColor(hovered ? sf::Color(243, 238, 225) : sf::Color(100, 100, 100));
+                window.draw(t);
+
+                if (hovered && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && cooldown.getElapsedTime().asMilliseconds() > 200) {
+                    if (isPrev && hotfixPage > 0) { hotfixPage--; cooldown.restart(); }
+                    if (!isPrev && (hotfixPage + 1) * HF_PER_PAGE < (int)hotfixList.size()) { hotfixPage++; cooldown.restart(); }
+                }
+                };
+
+            drawNav("<< ", { -45.f, 0.f }, true);
+            drawNav(" >>", { 20.f, 0.f }, false);
+
+            sf::Text pgNum(jetBrainsMono, "PAGE " + std::to_string(hotfixPage + 1), 14);
+            pgNum.setOrigin({ pgNum.getLocalBounds().size.x / 2.f, 0.f });
+            pgNum.setPosition(start + sf::Vector2f(moduleWidth / 2.f, moduleHeight - 80.f));
+            window.draw(pgNum);
+
+            int affordableCount = 0;
+            for (const auto& hf : hotfixList) {
+                if (!hf.written && bits >= hf.bits) affordableCount++;
+            }
+
+            if (affordableCount > 0) {
+                sf::Vector2f bPos = start + sf::Vector2f(moduleWidth - 220.f, moduleHeight - 80.f);
+                sf::RectangleShape bBtn({ 180.f, 30.f });
+                bBtn.setPosition(bPos - sf::Vector2f(0.f, 20.f));
+                bool bHover = bBtn.getGlobalBounds().contains(mousePos);
+
+                bBtn.setFillColor(bHover ? sf::Color(30, 30, 30) : sf::Color::Black);
+                bBtn.setOutlineColor(sf::Color(140, 140, 140));
+                bBtn.setOutlineThickness(1.f);
+                window.draw(bBtn);
+
+                sf::Text bTxt(jetBrainsMono, "install_hotfixes.bat", 12);
+                bTxt.setPosition(bPos - sf::Vector2f(-7.f, 15.f));
+                bTxt.setFillColor(sf::Color(243, 238, 225));
+                window.draw(bTxt);
+
+                if (bHover && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && cooldown.getElapsedTime().asMilliseconds() > 300) {
+                    for (auto& hf : hotfixList) {
+                        if (!hf.written && bits >= hf.bits) {
+                            bits -= hf.bits;
+                            hf.written = 1;
+                            hotfixMult += hf.bitMult;
+                        }
+                    }
+                    cooldown.restart();
+                }
+            }
+            });
     }
 }

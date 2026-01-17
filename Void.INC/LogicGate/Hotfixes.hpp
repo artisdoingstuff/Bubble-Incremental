@@ -69,7 +69,7 @@ inline void initHotfixes() {
     hotfixList.push_back({ "quantum_state_fix", 130000000000.0L, 0.05f });
     hotfixList.push_back({ "dma_acceleration", 185000000000.0L, 0.05f });
     hotfixList.push_back({ "packet_burst_v5", 255000000000.0L, 0.05f });
-    hotfixList.push_back({ "thermal_throttle_off", 350000000000.0L, 0.05f });
+    hotfixList.push_back({ "thermal_limiter", 350000000000.0L, 0.05f });
     hotfixList.push_back({ "gpu_compute_v6", 485000000000.0L, 0.05f });
     hotfixList.push_back({ "isa_refactoring", 670000000000.0L, 0.05f });
     hotfixList.push_back({ "microcode_unlock", 930000000000.0L, 0.05f });

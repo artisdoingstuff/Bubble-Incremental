@@ -316,13 +316,13 @@ int main() {
 					sf::Vector2f winSize = (sf::Vector2f)window.getSize();
 
 					if (mousePos.y > winSize.y - 60.f) {
-						if (sf::FloatRect({ 40, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
+						if (sf::FloatRect({ 10, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
 							activeTab = (activeTab == Tab::LOGIC) ? Tab::NONE : Tab::LOGIC;
 						}
-						else if (sf::FloatRect({ 230, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
+						else if (sf::FloatRect({ 200, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
 							activeTab = (activeTab == Tab::HOTFIX) ? Tab::NONE : Tab::HOTFIX;
 						}
-						else if (sf::FloatRect({ 420, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
+						else if (sf::FloatRect({ 390, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
 							activeTab = (activeTab == Tab::REINIT) ? Tab::NONE : Tab::REINIT;
 						}
 					}
@@ -338,18 +338,9 @@ int main() {
 								}
 							}
 						}
+						showConfirmPopup = false;
 					}
 					else if (activeTab == Tab::HOTFIX) {
-						if (sf::FloatRect({ winSize.x - 100.f, winSize.y - 100.f }, { 40.f, 40.f }).contains(mousePos)) {
-							if ((hotfixPage + 1) * HF_PER_PAGE < (int)hotfixList.size()) {
-								hotfixPage++;
-							}
-						}
-						if (sf::FloatRect({ winSize.x - 150.f, winSize.y - 100.f }, { 40.f, 40.f }).contains(mousePos)) {
-							if (hotfixPage > 0) {
-								hotfixPage--;
-							}
-						}
 						size_t startIdx = hotfixPage * HF_PER_PAGE;
 						size_t endIdx = std::min(startIdx + HF_PER_PAGE, hotfixList.size());
 						for (size_t i = startIdx; i < endIdx; ++i) {
@@ -362,6 +353,13 @@ int main() {
 								}
 							}
 						}
+						showConfirmPopup = false;
+					}
+					else if (activeTab == Tab::REINIT) {
+						showConfirmPopup = true;
+					}
+					else if (activeTab == Tab::NONE) {
+						showConfirmPopup = false;
 					}
 				}
 
