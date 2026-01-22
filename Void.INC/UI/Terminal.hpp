@@ -4,7 +4,6 @@
 
 inline int hotfixPage = 0;
 const int HF_PER_PAGE = 40;
-inline sf::Clock cooldown;
 
 inline void backgroundDeco(sf::RenderWindow& window, sf::Vector2f pos, sf::Vector2f size, bool buy) {
     sf::Color traceColor = buy ? sf::Color(243, 238, 225, 50) : sf::Color(140, 140, 140, 30);

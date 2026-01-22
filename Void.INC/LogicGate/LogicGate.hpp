@@ -46,17 +46,15 @@ inline void initLogicGates() {
     logicGateList.emplace_back("buffer_overflow", "Spills data into unallocated voids.", 15000000.L, 15000000.L, 450000.L);
     logicGateList.emplace_back("logic_bomb", "A timed explosion of nothingness.", 40000000.L, 40000000.L, 1100000.L);
     logicGateList.emplace_back("hardware_interrupt", "Halts the flow of reality.", 100000000.L, 100000000.L, 2600000.L);
-    
-    // FOR 1.0.7 LOGIC GATES (FINAL BATCH)
-    // logicGateList.emplace_back("deadlock_thread", "Infinite waiting for zero output.", 220000000.L, 220000000.L, 5500000.L);
-    // logicGateList.emplace_back("kernel_overload", "Total system failure for profit.", 450000000.L, 450000000.L, 10500000.L);
+    logicGateList.emplace_back("deadlock_thread", "Infinite waiting for zero output.", 220000000.L, 220000000.L, 5500000.L);
+    logicGateList.emplace_back("kernel_overload", "Total system failure for profit.", 450000000.L, 450000000.L, 10500000.L);
 
     // END-GAME
-    // logicGateList.emplace_back("write_blocker", "Prevents any new data creation.", 1000000000.L, 1000000000.L, 22000000.L);
-    // logicGateList.emplace_back("entropy_driver", "Accelerates the decay of code.", 2500000000.L, 2500000000.L, 50000000.L);
-    // logicGateList.emplace_back("negative_bus", "Transports bits that shouldn't exist.", 6000000000.L, 6000000000.L, 115000000.L);
-    // logicGateList.emplace_back("ghost_process", "Executes without consuming resources.", 15000000000.L, 15000000000.L, 275000000.L);
-    // logicGateList.emplace_back("root_nullifier", "The final line of code.", 50000000000.L, 50000000000.L, 850000000.L);
+    logicGateList.emplace_back("write_blocker", "Prevents any new data creation.", 1000000000.L, 1000000000.L, 22000000.L);
+    logicGateList.emplace_back("entropy_driver", "Accelerates the decay of code.", 2500000000.L, 2500000000.L, 50000000.L);
+    logicGateList.emplace_back("negative_bus", "Transports bits that shouldn't exist.", 6000000000.L, 6000000000.L, 115000000.L);
+    logicGateList.emplace_back("ghost_process", "Executes without consuming resources.", 15000000000.L, 15000000000.L, 275000000.L);
+    logicGateList.emplace_back("root_nullifier", "The final line of code.", 50000000000.L, 50000000000.L, 850000000.L);
 }
 
 inline void updateLogicGateUI(sf::RenderWindow& window, long double allBits) {

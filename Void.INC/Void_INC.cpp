@@ -15,8 +15,9 @@
 
 #include "UI/Directory.hpp"
 #include "UI/Loading.hpp"
-#include "UI/Terminal.hpp"
 #include "UI/Star.hpp"
+#include "UI/Start.hpp"
+#include "UI/Terminal.hpp"
 
 #include "UserData/Local/Loading.hpp"
 #include "UserData/Local/Saving.hpp"
@@ -47,9 +48,7 @@ int main() {
 	clickRect.setOutlineThickness(5);
 	sf::Vector2f clickAreaSize = clickRect.getSize();
 
-	Star star;
 	star.star = sf::VertexArray(sf::PrimitiveType::LineStrip, 4000);
-	float starScale = 1.f;
 
 	sf::VertexArray lines(sf::PrimitiveType::Lines);
 	for (int i = 0; i < window.getSize().y; i += 4) {
@@ -128,15 +127,11 @@ int main() {
 		}
 
 		long double realBitsPerSecond = (bitsPerSecond * hotfixMult * bitMultiplier * patch_1Mult) * patch_3_2Mult;
-		float deltaTime = deltaClock.restart().asSeconds();
-		float elapsedTime = elapsedClock.getElapsedTime().asSeconds();
+		deltaTime = deltaClock.restart().asSeconds();
+		elapsedTime = elapsedClock.getElapsedTime().asSeconds();
 
 		bits += realBitsPerSecond * deltaTime; allBits += realBitsPerSecond * deltaTime;
-
-		updateStar(star, centre, elapsedTime, starScale, allBits);
 		starScale += (1.f - starScale) * 0.1f;
-
-		updateStream(window, centre, deltaTime);
 
 		bitsText.setString("-" + format(bits) + " Bits");
 		centreText(bitsText, { clickRect.getPosition().x, clickRect.getPosition().y + 400 });
@@ -152,23 +147,30 @@ int main() {
 
 		window.clear(sf::Color::Black);
 
-		if (!reinitialisation && !initialisation) {
-			window.draw(bitsText);
-			window.draw(bitsPerSecondText);
+		if (showStart) {
+			drawStartUI(window);
+		}
 
-			updateStream(window, centre, deltaTime);
-			for (auto& d : dataStream) {
-				window.draw(d.bit);
-			}
+		else if (!showStart) {
+			if (!reinitialisation && !initialisation) {
+				window.draw(bitsText);
+				window.draw(bitsPerSecondText);
 
-			updateLogicGateUI(window, allBits);
+				updateStream(window, centre, deltaTime);
+				for (auto& d : dataStream) {
+					window.draw(d.bit);
+				}
 
-			window.draw(star.star, states);
+				updateLogicGateUI(window, allBits);
 
-			drawTerminalUI(window, bits, allBits, deltaTime);
+				updateStar(star, centre, elapsedTime, starScale, allBits);
+				window.draw(star.star, states);
 
-			if (showConfirmPopup) {
-				drawConfirmPopup(window, reinitialisation);
+				drawTerminalUI(window, bits, allBits, deltaTime);
+
+				if (showConfirmPopup) {
+					drawConfirmPopup(window, reinitialisation);
+				}
 			}
 		}
 

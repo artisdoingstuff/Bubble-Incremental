@@ -2,12 +2,18 @@
 #include "GIncludes.hpp"
 
 // Global references
-inline std::string voidVersion = "v1.0.5-release"; // Version control for the game (Updater purposes)
+inline std::string voidVersion = "v1.0.6-release"; // Version control for the game (Updater purposes)
 
 inline bool reinitialisation = false;
 inline bool initialisation = false;
+inline bool showStart = true;
 inline float loadingProgress = 0.0f;
-float initTimer = 0.0f;
+inline float initTimer = 0.0f;
+
+inline float elapsedTime = 0.0f;
+inline float deltaTime = 0.0f;
+
+inline sf::Clock cooldown;
 
 enum class ReinitState {
     IDLE,
@@ -16,7 +22,6 @@ enum class ReinitState {
     LOADING_BAR,
     ROOTDIR
 };
-
 inline ReinitState currentReinitStep = ReinitState::IDLE;
 
 enum class InitState {
@@ -24,26 +29,30 @@ enum class InitState {
     LOADING_BAR,
 	VORTEX_EXPANSION
 };
-
 inline InitState currentInitStep = InitState::IDLE;;
 
-inline bool canClick = true; // Pre-reinitialisation
+inline bool canClickStart = true; // Start menu only
+inline bool canClick = false; // Pre-reinitialisation
 inline bool canClickInit = false; // Post-initialisation
 
 enum class Tab { NONE, LOGIC, HOTFIX, REINIT };
 inline Tab activeTab = Tab::NONE;
 inline float tabProgress = 0.f;
 
+enum class MultBuy { X1, X5, X10, X100, MAX };
+inline MultBuy currentBuy = MultBuy::X1;
+
 inline float pi = 3.14159f;
 
 // Dynamic shenanigans
 inline float costMult = 1.0f; // Change the cost of all logicGates
-inline float byteMult = 1.0f; // Change the byte gain rate from REINIT(); specifically (does NOT affect conversion)
+inline float byteMult = 1.0f; // Change the byte gain rate from reinit.bat specifically (does NOT affect conversion)
 
 // Inflation multipliers
 inline float logicGateInflation = 1.135f; // Inflates the cost of logicGate (base*(1.135^amt))
+inline float hotfixGrowth = 1.4f;
 
-// Important data
+// Important (and needed) data
 inline long double bits = 0.0L; // Current bits
 inline long double allBits = 0.0L; // Total accumulated bits
 inline long double allClickedBits = 0.0L; // Total accumulated bits from clicks

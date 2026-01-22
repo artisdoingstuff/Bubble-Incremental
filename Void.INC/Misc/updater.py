@@ -52,7 +52,7 @@ class Updater:
             return None
         
     def stage_files(self, source_dir):
-        preserve = {"save.json", "V.json", "updater.exe"}
+        preserve = {"save.json", "V.json", "Updater_0.1.0.exe"}
         staged_updates = []
         for root, dirs, files in os.walk(source_dir):
             for file in files:

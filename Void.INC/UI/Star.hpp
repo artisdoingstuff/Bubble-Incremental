@@ -6,6 +6,9 @@ struct Star {
     sf::VertexArray star;
 };
 
+inline Star star;
+inline float starScale = 1.f;
+
 inline sf::Color lerpColour(sf::Color a, sf::Color b, float t) {
     if (t < 0) t = 0; if (t > 1) t = 1;
     return sf::Color(

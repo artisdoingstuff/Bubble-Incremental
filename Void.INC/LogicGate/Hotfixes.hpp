@@ -25,69 +25,31 @@ inline const float hfHeight = 80.0f;
 inline const float hfSpacing = 15.0f;
 
 inline void initHotfixes() {
-    // Pricing rebalance for 1.0.0 hotfixes
-    hotfixList.push_back({ "init_patch", 100.0L, 0.05f });
-    hotfixList.push_back({ "boot_optim", 250.0L, 0.05f });
-    hotfixList.push_back({ "cache_clear", 650.0L, 0.05f });
-    hotfixList.push_back({ "core_refactor", 1600.0L, 0.05f });
-    hotfixList.push_back({ "thread_sync", 4200.0L, 0.05f });
-    hotfixList.push_back({ "heap_trim", 11000.0L, 0.05f });
-    hotfixList.push_back({ "stack_flush", 28000.0L, 0.05f });
-    hotfixList.push_back({ "bit_stable_fix", 70000.0L, 0.05f });
-    hotfixList.push_back({ "io_throttle", 175000.0L, 0.05f });
-    hotfixList.push_back({ "cycle_reduce", 450000.0L, 0.05f });
-    hotfixList.push_back({ "bit_flip_v1", 1000000.0L, 0.05f });
-    hotfixList.push_back({ "overflow_ctrl", 2200000.0L, 0.05f });
-    hotfixList.push_back({ "registry_tweak", 4800000.0L, 0.05f });
-    hotfixList.push_back({ "nullptr_fix", 10000000.0L, 0.05f });
-    hotfixList.push_back({ "parity_fix", 20000000.0L, 0.05f });
-    hotfixList.push_back({ "mem_compress", 38000000.0L, 0.05f });
-    hotfixList.push_back({ "cycle_skip", 70000000.0L, 0.05f });
-    hotfixList.push_back({ "runtime_opt", 120000000.0L, 0.05f });
-    hotfixList.push_back({ "clock_spd_fix", 200000000.0L, 0.05f });
-    hotfixList.push_back({ "bus_overdrive", 320000000.0L, 0.05f });
-    hotfixList.push_back({ "ptr_deref_opt", 450000000.0L, 0.05f });
-    hotfixList.push_back({ "seg_fault_supp", 600000000.0L, 0.05f });
-    hotfixList.push_back({ "bin_compact", 750000000.0L, 0.05f });
-    hotfixList.push_back({ "gate_bypass_v1", 850000000.0L, 0.05f });
-    hotfixList.push_back({ "fetch_accel", 920000000.0L, 0.05f });
-    hotfixList.push_back({ "patch_x86_ext", 950000000.0L, 0.05f });
-    hotfixList.push_back({ "mem_map_align", 975000000.0L, 0.05f });
-    hotfixList.push_back({ "syscall_bypass", 990000000.0L, 0.05f });
-    hotfixList.push_back({ "data_leak_fix", 999000000.0L, 0.05f });
-    hotfixList.push_back({ "inst_set_ext", 1000000000.0L, 0.05f });
+    std::vector<std::string> names = {
+        // 1.0.0 hotfixes
+        "init_patch", "boot_optim", "cache_clear", "core_refactor", "thread_sync",
+        "heap_trim", "stack_flush", "bit_stable_fix", "io_throttle", "cycle_reduce",
+        "bit_flip_v1", "overflow_ctrl", "registry_tweak", "nullptr_fix", "parity_fix",
+        "mem_compress", "cycle_skip", "runtime_opt", "clock_spd_fix", "bus_overdrive",
+        "ptr_deref_opt", "seg_fault_supp", "bin_compact", "gate_bypass_v1", "fetch_accel",
+        "patch_x86_ext", "mem_map_align", "syscall_bypass", "data_leak_fix", "inst_set_ext",
+        // 1.0.2 hotfixes
+        "hypervisor_v1", "kernel_bypass", "ring_zero_access", "vram_injection", "latency_shred",
+        "overclock_v1," "node_clustering", "logic_gate_v2", "quantum_state_fix", "dma_acceleration",
+        "packet_burst_v1", "thermal_limiter", "gpu_compute_v1", "isa_refactoring", "microcode_unlock",
+        "cache_coherency_v1", "signal_cleaner", "branch_pred_v1", "multi_die_link", "fsb_unlocker",
+        "die_shrink_v1", "dark_silicon_fix", "euv_optimization", "clock_domain_v1", "tensor_pipeline",
+        "atomic_ops_v1", "sub_zero_cooling", "photonic_bridge", "vacuum_state_fix", "singularity_boot",
+        // 1.0.7 hotfixes
+    };
 
-    // 1.0.2 hotfixes (10b - 100t in cost)
-    hotfixList.push_back({ "hypervisor_v2", 10000000000.0L, 0.05f });
-    hotfixList.push_back({ "kernel_bypass", 13800000000.0L, 0.05f });
-    hotfixList.push_back({ "ring_zero_access", 19000000000.0L, 0.05f });
-    hotfixList.push_back({ "vram_injection", 26000000000.0L, 0.05f });
-    hotfixList.push_back({ "latency_shred", 36000000000.0L, 0.05f });
-    hotfixList.push_back({ "overclock_v3", 50000000000.0L, 0.05f });
-    hotfixList.push_back({ "node_clustering", 70000000000.0L, 0.05f });
-    hotfixList.push_back({ "logic_gate_v4", 95000000000.0L, 0.05f });
-    hotfixList.push_back({ "quantum_state_fix", 130000000000.0L, 0.05f });
-    hotfixList.push_back({ "dma_acceleration", 185000000000.0L, 0.05f });
-    hotfixList.push_back({ "packet_burst_v5", 255000000000.0L, 0.05f });
-    hotfixList.push_back({ "thermal_limiter", 350000000000.0L, 0.05f });
-    hotfixList.push_back({ "gpu_compute_v6", 485000000000.0L, 0.05f });
-    hotfixList.push_back({ "isa_refactoring", 670000000000.0L, 0.05f });
-    hotfixList.push_back({ "microcode_unlock", 930000000000.0L, 0.05f });
-    hotfixList.push_back({ "cache_coherency_v7", 1300000000000.0L, 0.05f });
-    hotfixList.push_back({ "signal_cleaner", 1800000000000.0L, 0.05f });
-    hotfixList.push_back({ "branch_pred_v8", 2500000000000.0L, 0.05f });
-    hotfixList.push_back({ "multi_die_link", 3500000000000.0L, 0.05f });
-    hotfixList.push_back({ "fsb_unlocker", 4800000000000.0L, 0.05f });
-    hotfixList.push_back({ "die_shrink_v9", 6700000000000.0L, 0.05f });
-    hotfixList.push_back({ "dark_silicon_fix", 9300000000000.0L, 0.05f });
-    hotfixList.push_back({ "euv_optimization", 13000000000000.0L, 0.05f });
-    hotfixList.push_back({ "clock_domain_v10", 18000000000000.0L, 0.05f });
-    hotfixList.push_back({ "tensor_pipeline", 25000000000000.0L, 0.05f });
-    hotfixList.push_back({ "atomic_ops_v11", 35000000000000.0L, 0.05f });
-    hotfixList.push_back({ "sub_zero_cooling", 48000000000000.0L, 0.05f });
-    hotfixList.push_back({ "photonic_bridge", 67000000000000.0L, 0.05f });
-    hotfixList.push_back({ "vacuum_state_fix", 93000000000000.0L, 0.05f });
-    hotfixList.push_back({ "singularity_boot", 100000000000000.0L, 0.05f });
+    long double currentBits = 100.0L;
+    float mult = 0.05f;
+
+    for (const auto& n : names) {
+        hotfixList.push_back({ n, currentBits, mult });
+        currentBits *= hotfixGrowth;
+    }
 }
 
 inline void to_json(json& j, const Hotfix& h) {
