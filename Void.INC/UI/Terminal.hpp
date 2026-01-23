@@ -4,7 +4,6 @@
 
 inline int hotfixPage = 0;
 const int HF_PER_PAGE = 40;
-inline sf::Clock cooldown;
 
 inline void backgroundDeco(sf::RenderWindow& window, sf::Vector2f pos, sf::Vector2f size, bool buy) {
     sf::Color traceColor = buy ? sf::Color(243, 238, 225, 50) : sf::Color(140, 140, 140, 30);
@@ -74,14 +73,16 @@ inline void drawTerminalModule(sf::RenderWindow& window, std::string title, floa
 
     sf::Text t(jetBrainsMono, "> " + title, 14);
     t.setPosition(titleBar.getPosition() + sf::Vector2f(10.f, 5.f));
+    t.setFillColor(sf::Color(243, 238, 225));
     window.draw(t);
 
     sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
-    sf::Text close(jetBrainsMono, "- X", 14);
-    close.setPosition(titleBar.getPosition() + sf::Vector2f(width - 50.f, 5.f));
-    bool canClose = close.getGlobalBounds().contains(mousePos);
-    window.draw(close);
+    sf::Text c(jetBrainsMono, "- X", 14);
+    c.setPosition({ titleBar.getPosition().x + (width * 0.97f), titleBar.getPosition().y + 5.f});
+    c.setFillColor(sf::Color(243, 238, 225));
+    bool canClose = c.getGlobalBounds().contains(mousePos);
+    window.draw(c);
 
     if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
         if (canClose) activeTab = Tab::NONE;
@@ -90,7 +91,7 @@ inline void drawTerminalModule(sf::RenderWindow& window, std::string title, floa
     contentDraw(frame.getPosition() + sf::Vector2f(20.f, 50.f));
 }
 
-inline void drawTerminalUI(sf::RenderWindow& window, long double bits, long double allBits, float dt) {
+inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long double allBits, float dt) {
     sf::Vector2u winSize = window.getSize();
     float moduleWidth = winSize.x * 0.8f;
     float moduleHeight = winSize.y * 0.7f;
@@ -226,7 +227,7 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double bits, long doub
             }
 
             if (affordableCount > 0) {
-                sf::Vector2f bPos = start + sf::Vector2f(moduleWidth - 220.f, moduleHeight - 80.f);
+                sf::Vector2f bPos = start + sf::Vector2f(0.f, moduleHeight - 80.f);
                 sf::RectangleShape bBtn({ 180.f, 30.f });
                 bBtn.setPosition(bPos - sf::Vector2f(0.f, 20.f));
                 bool bHover = bBtn.getGlobalBounds().contains(mousePos);
@@ -237,7 +238,7 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double bits, long doub
                 window.draw(bBtn);
 
                 sf::Text bTxt(jetBrainsMono, "install_hotfixes.bat", 12);
-                bTxt.setPosition(bPos - sf::Vector2f(-7.f, 15.f));
+                bTxt.setPosition(bPos + sf::Vector2f(pad + 1.f, -15.f));
                 bTxt.setFillColor(sf::Color(243, 238, 225));
                 window.draw(bTxt);
 

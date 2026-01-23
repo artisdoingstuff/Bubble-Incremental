@@ -15,8 +15,9 @@
 
 #include "UI/Directory.hpp"
 #include "UI/Loading.hpp"
-#include "UI/Terminal.hpp"
 #include "UI/Star.hpp"
+#include "UI/Start.hpp"
+#include "UI/Terminal.hpp"
 
 #include "UserData/Local/Loading.hpp"
 #include "UserData/Local/Saving.hpp"
@@ -35,9 +36,6 @@ int main() {
 	sf::Vector2f centre = { window.getSize().x / 2.f, window.getSize().y / 2.f };
 
 	time_t timeEnd = 0;
-
-	sf::Clock deltaClock;
-	sf::Clock elapsedClock;
 
 	sf::RectangleShape clickRect;
 	clickRect.setSize(sf::Vector2f(256, 256));
@@ -133,10 +131,8 @@ int main() {
 
 		bits += realBitsPerSecond * deltaTime; allBits += realBitsPerSecond * deltaTime;
 
-		updateStar(star, centre, elapsedTime, starScale, allBits);
 		starScale += (1.f - starScale) * 0.1f;
-
-		updateStream(window, centre, deltaTime);
+		updateStar(star, centre, elapsedTime, starScale, allBits);
 
 		bitsText.setString("-" + format(bits) + " Bits");
 		centreText(bitsText, { clickRect.getPosition().x, clickRect.getPosition().y + 400 });
@@ -152,23 +148,29 @@ int main() {
 
 		window.clear(sf::Color::Black);
 
-		if (!reinitialisation && !initialisation) {
-			window.draw(bitsText);
-			window.draw(bitsPerSecondText);
+		if (showStart) {
+			drawStartUI(window, states, star, elapsedTime, deltaTime);
+		}
 
-			updateStream(window, centre, deltaTime);
-			for (auto& d : dataStream) {
-				window.draw(d.bit);
-			}
+		if (!showStart) {
+			if (!reinitialisation && !initialisation) {
+				window.draw(bitsText);
+				window.draw(bitsPerSecondText);
 
-			updateLogicGateUI(window, allBits);
+				updateStream(window, centre, deltaTime);
+				for (auto& d : dataStream) {
+					window.draw(d.bit);
+				}
 
-			window.draw(star.star, states);
+				updateLogicGateUI(window, allBits);
 
-			drawTerminalUI(window, bits, allBits, deltaTime);
+				window.draw(star.star, states);
 
-			if (showConfirmPopup) {
-				drawConfirmPopup(window, reinitialisation);
+				drawTerminalUI(window, bits, allBits, deltaTime);
+
+				if (showConfirmPopup) {
+					drawConfirmPopup(window, reinitialisation);
+				}
 			}
 		}
 
@@ -215,13 +217,13 @@ int main() {
 
 					if (loadingProgress >= 1.0f) {
 						loadingProgress = 1.0f;
-						currentReinitStep = ReinitState::ROOTDIR;
+						currentReinitStep = ReinitState::DIR;
 					}
 
 					drawLoadingUI(window, loadingProgress);
 					break;
 
-				case ReinitState::ROOTDIR:
+				case ReinitState::DIR:
 					window.setView(window.getDefaultView());
 					loadingProgress = 0.0f;
 					initTimer = 0.0f;

@@ -49,28 +49,29 @@ inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit) {
     titleBar.setPosition({ centre.x, centre.y - (boxSize.y / 2.f) });
     titleBar.setFillColor(sf::Color(40, 40, 40));
 
-    sf::Text titleText(jetBrainsMono, "reinit.bat", 14);
-    titleText.setPosition({ titleBar.getPosition().x - (boxSize.x / 2.f) + 10.f, titleBar.getPosition().y + 5.f });
-    titleText.setFillColor(sf::Color(200, 200, 200));
+    sf::Text t(jetBrainsMono, "> void://reinit.bat" + getCursor(), 14);
+    t.setPosition({ titleBar.getPosition().x - (boxSize.x / 2.f) + 10.f, titleBar.getPosition().y + 5.f });
+    t.setFillColor(sf::Color(243, 238, 225));
 
-    sf::Text controls(jetBrainsMono, "- X", 16);
-    controls.setOrigin({ controls.getLocalBounds().size.x, 0.f });
-    controls.setPosition({ titleBar.getPosition().x + (boxSize.x / 2.f) - 10.f, titleBar.getPosition().y + 2.f });
+    sf::Text c(jetBrainsMono, "- X", 14);
+    c.setPosition({ titleBar.getPosition().x + ((boxSize.x / 2.f) * 0.85f), titleBar.getPosition().y + 5.f });
+    c.setFillColor(sf::Color(243, 238, 225));
 
     window.draw(box);
     window.draw(titleBar);
-    window.draw(titleText);
-    window.draw(controls);
+    window.draw(t);
+    window.draw(c);
 
     std::string warningMsg =
         "WARNING: System Re-initialisation Requested.\n"
         "All current data will be wiped.\n"
-        "Unforeseen consequences possible.\n\n"
+        "Unforeseen consequences possible.\n"
+		"You will gain " + format(getPendingBytes(bits)) + " Bytes.\n\n"
         "Proceed with operation? (Y/N) > " + getCursor();
 
     sf::Text warnText(jetBrainsMono, warningMsg, 16);
-    warnText.setOrigin({ warnText.getGlobalBounds().size.x / 2.f, 0.f });
-    warnText.setPosition({ centre.x, centre.y - 40.f });
+    warnText.setOrigin({ warnText.getGlobalBounds().size.x / 2.f, warnText.getGlobalBounds().size.y / 2.f - 10.f });
+    warnText.setPosition({ centre.x, centre.y });
     warnText.setFillColor(sf::Color(200, 200, 200));
 
     window.draw(warnText);
@@ -92,5 +93,5 @@ inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit) {
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Y)) triggerInit();
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::N) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape)) cancelInit();
 
-    if (mouseLeft && controls.getGlobalBounds().contains(mousePos)) cancelInit();
+    if (mouseLeft && c.getGlobalBounds().contains(mousePos)) cancelInit();
 }
