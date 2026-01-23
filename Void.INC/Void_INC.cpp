@@ -37,9 +37,6 @@ int main() {
 
 	time_t timeEnd = 0;
 
-	sf::Clock deltaClock;
-	sf::Clock elapsedClock;
-
 	sf::RectangleShape clickRect;
 	clickRect.setSize(sf::Vector2f(256, 256));
 	clickRect.setOrigin(sf::Vector2f(clickRect.getSize().x / 2, clickRect.getSize().y / 2));
@@ -48,7 +45,9 @@ int main() {
 	clickRect.setOutlineThickness(5);
 	sf::Vector2f clickAreaSize = clickRect.getSize();
 
+	Star star;
 	star.star = sf::VertexArray(sf::PrimitiveType::LineStrip, 4000);
+	float starScale = 1.f;
 
 	sf::VertexArray lines(sf::PrimitiveType::Lines);
 	for (int i = 0; i < window.getSize().y; i += 4) {
@@ -127,11 +126,13 @@ int main() {
 		}
 
 		long double realBitsPerSecond = (bitsPerSecond * hotfixMult * bitMultiplier * patch_1Mult) * patch_3_2Mult;
-		deltaTime = deltaClock.restart().asSeconds();
-		elapsedTime = elapsedClock.getElapsedTime().asSeconds();
+		float deltaTime = deltaClock.restart().asSeconds();
+		float elapsedTime = elapsedClock.getElapsedTime().asSeconds();
 
 		bits += realBitsPerSecond * deltaTime; allBits += realBitsPerSecond * deltaTime;
+
 		starScale += (1.f - starScale) * 0.1f;
+		updateStar(star, centre, elapsedTime, starScale, allBits);
 
 		bitsText.setString("-" + format(bits) + " Bits");
 		centreText(bitsText, { clickRect.getPosition().x, clickRect.getPosition().y + 400 });
@@ -148,10 +149,10 @@ int main() {
 		window.clear(sf::Color::Black);
 
 		if (showStart) {
-			drawStartUI(window);
+			drawStartUI(window, states, star, elapsedTime, deltaTime);
 		}
 
-		else if (!showStart) {
+		if (!showStart) {
 			if (!reinitialisation && !initialisation) {
 				window.draw(bitsText);
 				window.draw(bitsPerSecondText);
@@ -163,7 +164,6 @@ int main() {
 
 				updateLogicGateUI(window, allBits);
 
-				updateStar(star, centre, elapsedTime, starScale, allBits);
 				window.draw(star.star, states);
 
 				drawTerminalUI(window, bits, allBits, deltaTime);
@@ -217,13 +217,13 @@ int main() {
 
 					if (loadingProgress >= 1.0f) {
 						loadingProgress = 1.0f;
-						currentReinitStep = ReinitState::ROOTDIR;
+						currentReinitStep = ReinitState::DIR;
 					}
 
 					drawLoadingUI(window, loadingProgress);
 					break;
 
-				case ReinitState::ROOTDIR:
+				case ReinitState::DIR:
 					window.setView(window.getDefaultView());
 					loadingProgress = 0.0f;
 					initTimer = 0.0f;

@@ -7,11 +7,12 @@ inline std::string voidVersion = "v1.0.6-release"; // Version control for the ga
 inline bool reinitialisation = false;
 inline bool initialisation = false;
 inline bool showStart = true;
+
 inline float loadingProgress = 0.0f;
 inline float initTimer = 0.0f;
 
-inline float elapsedTime = 0.0f;
-inline float deltaTime = 0.0f;
+inline sf::Clock deltaClock;
+inline sf::Clock elapsedClock;
 
 inline sf::Clock cooldown;
 
@@ -20,7 +21,7 @@ enum class ReinitState {
     VORTEX_EXPANSION,
     VORTEX_SHRINK,
     LOADING_BAR,
-    ROOTDIR
+    DIR
 };
 inline ReinitState currentReinitStep = ReinitState::IDLE;
 
@@ -50,7 +51,7 @@ inline float byteMult = 1.0f; // Change the byte gain rate from reinit.bat speci
 
 // Inflation multipliers
 inline float logicGateInflation = 1.135f; // Inflates the cost of logicGate (base*(1.135^amt))
-inline float hotfixGrowth = 1.4f;
+inline float hotfixGrowth = 1.1875f; // Recursive growth mult for hotfixes
 
 // Important (and needed) data
 inline long double bits = 0.0L; // Current bits
