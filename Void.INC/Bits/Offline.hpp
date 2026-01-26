@@ -35,6 +35,19 @@ inline void offline(time_t timestamp, long double& bits, long double& allBits, l
         if (dirTree[14].patched) dirMult *= 60.0L; // !
         if (dirTree[15].patched) dirMult *= 999.0L; // @
         if (dirTree[16].patched) dirMult *= 250.0L; // 6
+        if (dirTree[17].patched) dirMult *= 450.0L; // 7
+        if (dirTree[18].patched) { // 7_1
+            dirMult *= 600.0L; isOffline_3_2 = true;
+        }
+        if (dirTree[19].patched) { // 7_2
+            long double patch7_2Mult = 1.0L + (bytes * 0.01L);
+            dirMult *= std::min(patch7_2Mult, 3500.0L);
+        }
+        if (dirTree[20].patched) dirMult *= 3.5L; // 2_1
+        if (dirTree[21].patched) dirMult *= 6500.0L; // !!
+        if (dirTree[22].patched) dirMult *= 22500.0L; // A
+        if (dirTree[24].patched) dirMult *= 85000.0L; // C
+        if (dirTree[26].patched) dirMult *= 400.0L; // 6_2
 
         if (!isOffline_1) {
             if (dirTree[1].patched) dirMult *= 1.6L; // 1

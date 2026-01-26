@@ -153,7 +153,7 @@ int main() {
 		}
 		if (dirTree[19].patched) { // 7_2
 			long double patch7_2Mult = 1.0L + (bytes * 0.01L);
-			patch_3_2Mult = std::min(patch7_2Mult, 3500.0L);
+			patch_7_2Mult = std::min(patch7_2Mult, 3500.0L);
 		}
 		if (dirTree[20].patched) { // 2_1
 			bitMultiplier *= 3.5L;
