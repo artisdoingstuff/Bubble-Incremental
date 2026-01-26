@@ -66,7 +66,7 @@ inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit) {
         "WARNING: System Re-initialisation Requested.\n"
         "All current data will be wiped.\n"
         "Unforeseen consequences possible.\n"
-		"You will gain " + format(getPendingBytes(bits)) + " Bytes.\n\n"
+		"You will gain -" + format(getPendingBytes(bits), true) + " Bytes.\n\n"
         "Proceed with operation? (Y/N) > " + getCursor();
 
     sf::Text warnText(jetBrainsMono, warningMsg, 16);

@@ -5,24 +5,46 @@
 inline void positionTreeNodes(sf::Vector2u windowSize) {
     if (dirTree.size() < 9) return;
 
-    sf::Vector2f startPos(windowSize.x / 4.f, windowSize.y / 2.f);
-    float horizontalGap = 180.f;
-    float verticalBranch = 120.f;
+    sf::Vector2f startPos(windowSize.x / 4.f, windowSize.y / 2.f + 60.f);  
+    dirTree[0].pos = startPos; // 0
 
-    dirTree[0].pos = startPos;
-    dirTree[1].pos = dirTree[0].pos + sf::Vector2f(horizontalGap, 0.f);
-    dirTree[2].pos = dirTree[1].pos + sf::Vector2f(horizontalGap, 0.f);
+    dirTree[1].pos = dirTree[0].pos + sf::Vector2f(180.f, 0.f); // 1
+    dirTree[12].pos = dirTree[1].pos + sf::Vector2f(0.f, -180.f); // 1_1
+    dirTree[13].pos = dirTree[1].pos + sf::Vector2f(0.f, 180.f); // 1_2
 
-	dirTree[3].pos = dirTree[2].pos + sf::Vector2f(horizontalGap, -verticalBranch); // Path A (Top)
-	dirTree[4].pos = dirTree[2].pos + sf::Vector2f(horizontalGap, verticalBranch); // Path B (Bottom)
+    dirTree[2].pos = dirTree[1].pos + sf::Vector2f(180.f, 0.f); // 2
+    dirTree[20].pos = dirTree[2].pos + sf::Vector2f(0.f, -180.f); // 2_1
 
-    // Path A Continuation
-    dirTree[5].pos = dirTree[3].pos + sf::Vector2f(horizontalGap, 0.f); // 4_1
-    dirTree[7].pos = dirTree[5].pos + sf::Vector2f(horizontalGap, 0.f); // 5_1
+    dirTree[9].pos = dirTree[2].pos + sf::Vector2f(180.f, 0.f); // 3
+    dirTree[3].pos = dirTree[9].pos + sf::Vector2f(0.f, -180.f); // 3_1
+    dirTree[4].pos = dirTree[9].pos + sf::Vector2f(0.f, 180.f); // 3_2
 
-    // Path B Continuation
-    dirTree[6].pos = dirTree[4].pos + sf::Vector2f(horizontalGap, 0.f); // 4_2
-    dirTree[8].pos = dirTree[6].pos + sf::Vector2f(horizontalGap, 0.f); // 5_2
+    dirTree[10].pos = dirTree[9].pos + sf::Vector2f(180.f, 0.f); // 4
+    dirTree[5].pos = dirTree[10].pos + sf::Vector2f(0.f, -180.f); // 4_1
+    dirTree[6].pos = dirTree[10].pos + sf::Vector2f(0.f, 180.f); // 4_2
+
+    dirTree[11].pos = dirTree[10].pos + sf::Vector2f(180.f, 0.f); // 5
+    dirTree[7].pos = dirTree[11].pos + sf::Vector2f(0.f, -180.f); // 5_1
+    dirTree[8].pos = dirTree[11].pos + sf::Vector2f(0.f, 180.f); // 5_2
+
+	dirTree[16].pos = dirTree[11].pos + sf::Vector2f(180.f, 0.f); // 6
+	dirTree[26].pos = dirTree[16].pos + sf::Vector2f(0.f, 180.f); // 6_2
+
+	dirTree[17].pos = dirTree[16].pos + sf::Vector2f(180.f, 0.f); // 7
+    dirTree[18].pos = dirTree[17].pos + sf::Vector2f(0.f, -180.f); // 7_1
+    dirTree[19].pos = dirTree[17].pos + sf::Vector2f(0.f, 180.f); // 7_2
+
+    dirTree[14].pos = dirTree[0].pos + sf::Vector2f(-180.f, 0.f); // !
+    dirTree[21].pos = dirTree[14].pos + sf::Vector2f(0.f, -180.f); // !!
+
+    dirTree[15].pos = dirTree[14].pos + sf::Vector2f(-180.f, 0.f); // @
+
+    dirTree[22].pos = dirTree[0].pos + sf::Vector2f(0.f, -180.f); // A
+
+    dirTree[23].pos = dirTree[22].pos + sf::Vector2f(0.f, -180.f); // B
+    dirTree[25].pos = dirTree[23].pos + sf::Vector2f(180.f, 0.f); // B_1
+
+    dirTree[24].pos = dirTree[23].pos + sf::Vector2f(0.f, -180.f); // C
 
     for (auto& node : dirTree) {
         node.nodeCircle.setPosition(node.pos);
@@ -32,7 +54,7 @@ inline void positionTreeNodes(sf::Vector2u windowSize) {
 inline void drawTreeLines(sf::RenderWindow& window) {
     if (dirTree.size() < 9) return;
 
-    auto drawCable = [&](int parentIdx, int childIdx) {
+    auto drawCable = [&](int parentIdx, int childIdx, bool isOffline = false) {
         if (!dirTree[parentIdx].patched) return;
 
         sf::Vector2f start = dirTree[parentIdx].pos;
@@ -47,30 +69,54 @@ inline void drawTreeLines(sf::RenderWindow& window) {
         cable.setPosition(start);
         cable.setRotation(sf::degrees(angle));
 
-        if (dirTree[childIdx].patched) {
-            cable.setFillColor(sf::Color(0, 255, 150, 200));
-        }
+        if (isOffline) cable.setFillColor(sf::Color(100, 100, 100, 200));
         else {
-            cable.setFillColor(sf::Color(0, 255, 150, 50));
+            if (dirTree[childIdx].patched) {
+                cable.setFillColor(sf::Color(0, 255, 150, 200));
+            }
+            else {
+                cable.setFillColor(sf::Color(0, 255, 150, 50));
+            }
         }
-
         window.draw(cable);
     };
 
-    drawCable(0, 1);
-    drawCable(1, 2);
+    drawCable(0, 1); // 0 to 1
+    drawCable(0, 14); // 0 to !
+    drawCable(0, 15); // 0 to @
+    drawCable(0, 22); // 0 to A
 
-    // Split
-    drawCable(2, 3); // 2 to 3_1
-    drawCable(2, 4); // 2 to 3_2
+    drawCable(1, 2); // 1 to 2
+    drawCable(1, 12, dirTree[1].disabled); // 1 to 1_1
+    drawCable(1, 13, dirTree[1].disabled); // 1 to 1_2
 
-    // Path A (Top)
-    drawCable(3, 5); // 3_1 to 4_1
-    drawCable(5, 7); // 4_1 to 5_1
+    drawCable(2, 9); // 2 to 3
+    drawCable(2, 20); // 2 to 2_1
 
-    // Path B (Bottom)
-    drawCable(4, 6); // 3_2 to 4_2
-    drawCable(6, 8); // 4_2 to 5_2
+    drawCable(9, 10); // 3 to 4
+    drawCable(9, 3); // 3 to 3_1
+    drawCable(9, 4, dirTree[4].disabled); // 3 to 3_2
+
+    drawCable(10, 11); // 4 to 5
+    drawCable(10, 5); // 4 to 4_1
+    drawCable(10, 6); // 4 to 4_2
+
+    drawCable(11, 16); // 5 to 6
+    drawCable(11, 7); // 5 to 5_1
+    drawCable(11, 8); // 5 to 5_2
+
+    drawCable(16, 17); // 6 to 7
+    drawCable(16, 26); // 6 to 6_2
+
+    drawCable(17, 18); // 7 to 7_1
+    drawCable(17, 19); // 7 to 7_2
+
+    drawCable(14, 21); // ! to !!
+
+    drawCable(22, 23); // A to B
+
+    drawCable(23, 24); // B to C
+    drawCable(23, 25); // B to B_1
 }
 
 inline void drawDirTreeUI(sf::RenderWindow& window) {
@@ -82,13 +128,17 @@ inline void drawDirTreeUI(sf::RenderWindow& window) {
     auto isVisible = [&](int idx) -> bool {
         if (idx == 0) return true;
 
-        if (idx == 1) return dirTree[0].patched;
-        if (idx == 2) return dirTree[1].patched;
-        if (idx == 3 || idx == 4) return dirTree[2].patched;
-        if (idx == 5) return dirTree[3].patched;
-        if (idx == 7) return dirTree[5].patched;
-        if (idx == 6) return dirTree[4].patched;
-        if (idx == 8) return dirTree[6].patched;
+        if (idx == 1 || idx == 14 || idx == 22) return dirTree[0].patched; // Unlock 1, !, and A
+        if (idx == 2 || idx == 12 || idx == 13) return dirTree[1].patched; // Unlock 2, 1_1, and 1_2
+        if (idx == 9 || idx == 20) return dirTree[2].patched; // Unlock 3 and 2_1
+		if (idx == 3 || idx == 4 || idx == 10) return dirTree[9].patched; // Unlock 4, 3_1, and 3_2
+		if (idx == 5 || idx == 6 || idx == 11) return dirTree[10].patched; // Unlock 5, 4_1, and 4_2
+        if (idx == 7 || idx == 8 || idx == 16) return dirTree[11].patched; // Unlock 6, 5_1, and 5_2
+		if (idx == 17 || idx == 26) return dirTree[16].patched; // Unlock 7 and 6_2
+		if (idx == 18 || idx == 19) return dirTree[17].patched; // Unlock 7_1 and 7_2
+        if (idx == 15 || idx == 21) return dirTree[14].patched; // Unlock @
+        if (idx == 23) return dirTree[22].patched; // Unlock B
+        if (idx == 24 || idx == 25) return dirTree[23].patched; // Unlock C and B_1
         return false;
         };
 
