@@ -2,7 +2,7 @@
 #include "GIncludes.hpp"
 
 // Global references
-inline std::string voidVersion = "v1.0.6-release"; // Version control for the game (Updater purposes)
+inline std::string voidVersion = "v1.0.7-release"; // Version control for the game (Updater purposes)
 
 inline bool reinitialisation = false;
 inline bool initialisation = false;
@@ -47,7 +47,7 @@ inline float pi = 3.14159f;
 
 // Dynamic shenanigans
 inline float costMult = 1.0f; // Change the cost of all logicGates
-inline float byteMult = 1.0f; // Change the byte gain rate from reinit.bat specifically (does NOT affect conversion)
+inline float byteMultiplier = 1.0f; // Change the byte gain rate from reinit.bat specifically (does NOT affect conversion)
 
 // Inflation multipliers
 inline float logicGateInflation = 1.135f; // Inflates the cost of logicGate (base*(1.135^amt))
@@ -66,11 +66,14 @@ inline long double clickMultiplier = 1.0L; // Click multiplier
 
 inline long double bytes = 0.0L; // Current bytes (from Re-initializing)
 inline long long timesInitialised = 0LL; // Re-initializing is "Ascending"
-inline long double bitsToBytesRate = 1e-8; // Rate of bits to bytes conversion rate
+inline long double bitsToBytesRate = 1e-8L; // Rate of bits to bytes conversion rate
 inline long double bitMultiplier = 1.0L; // Multiplier for bits per second (from root patches)
+
+inline long double bitsFromPatch = 0.0L; // Applies to Patch_!! (currently)
 
 inline float patch_1Mult = 1.0f; // Multiplier from Patch_1
 inline float patch_3_2Mult = 1.0L; // Multiplier from Patch_3_2
+inline float patch_7_2Mult = 1.0L; // Multiplier from Patch_7_2
 inline bool showConfirmPopup = false;
 
 inline long double malbytes = 0.0L; // Malicious bytes (for 1.1 use)

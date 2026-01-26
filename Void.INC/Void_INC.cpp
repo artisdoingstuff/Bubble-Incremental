@@ -75,57 +75,106 @@ int main() {
 	offline(timeEnd, bits, allBits, bitsPerSecond, hotfixMult);
 	
 	while (window.isOpen()) {
-		if (dirTree[1].patched && patch_1Clock.getElapsedTime().asSeconds() >= 30.f && dirTree[1].disabled == 0) {
+		if (dirTree[1].patched && patch_1Clock.getElapsedTime().asSeconds() >= 30.f && dirTree[1].disabled == 0) { // 1
 			patch_1Mult = 1.5f + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (1.7f - 1.5f)));
 			patch_1Clock.restart();
 		}
 
 		bitsToBytesRate = 1e-8L;
-		if (dirTree[0].patched) bitsToBytesRate = 1e-6L;
-		if (dirTree[3].patched) bitsToBytesRate = 3e-7L;
+		if (dirTree[0].patched) bitsToBytesRate = 1e-6L; // 0
 
 		bitMultiplier = 1.0L;
 		patch_3_2Mult = 1.0L;
+		patch_7_2Mult = 1.0L;
 		clickMultiplier = 1.0L;
+		bitsPerClick = 1.0L;
 		costMult = 1.0f;
-		if (dirTree[2].patched && dirTree[2].disabled == 0) {
+		byteMultiplier = 1.0f;
+
+		if (dirTree[2].patched) { // 2
 			bitMultiplier *= 3.0L; clickMultiplier *= 2.0L;
 		}
-		if (dirTree[3].patched) bitMultiplier *= 5.5L;
-		if (dirTree[4].patched) {
+		if (dirTree[3].patched) { // 3_1
+			bitMultiplier *= 5.5L; bitsToBytesRate = 3e-7L;
+		}
+		if (dirTree[4].patched && dirTree[4].disabled == 0) { // 3_2
 			long double patch3_2Mult = 1.0L + (bytes * 0.002L);
 			patch_3_2Mult = std::min(patch3_2Mult, 100.0L);
 		}
-		if (dirTree[5].patched) {
+		if (dirTree[5].patched) { // 4_1
 			bitMultiplier *= 12.0L; clickMultiplier *= 3.0L;
 			for (int i = 0; i < 2; ++i) {
 				logicGateList[i].bps = 0.L;
 			}
 		}
-		if (dirTree[6].patched) {
+		if (dirTree[6].patched) { // 4_2
 			bitsPerSecond = 0.L;
 			for (size_t i = 0; i < logicGateList.size(); ++i) {
 				long double indivMult = 1.0L;
 				if (i < 7) {
 					indivMult = 1.0L + (static_cast<long double>(logicGateList[i].ver) * 0.05L);
-
-					if (indivMult > 50.0L) {
-						indivMult = 50.0L;
-					}
+					if (indivMult > 50.0L) indivMult = 50.0L;
 				}
 
 				bitsPerSecond += (logicGateList[i].bps * logicGateList[i].ver) * indivMult;
 			}
 		}
-		if (dirTree[7].patched) {
-			bitMultiplier *= 50.0L; byteMult *= 1.5f;
-			dirTree[1].disabled = 1; dirTree[2].disabled = 1;
+		if (dirTree[7].patched) { // 5_1
+			bitMultiplier *= 50.0L; byteMultiplier *= 1.5f;
+			dirTree[1].disabled = 1; dirTree[12].disabled = 1; dirTree[13].disabled = 1;
 		}
-		if (dirTree[8].patched) {
+		if (dirTree[8].patched) { // 5_2
 			bitMultiplier *= 100.0L; clickMultiplier *= 5.0L; costMult *= 0.9f;
 		}
+		if (dirTree[9].patched) bitMultiplier *= 4.0L; // 3
+		if (dirTree[10].patched) { // 4
+			bitMultiplier *= 8.0L; clickMultiplier *= 2.0L;
+		}
+		if (dirTree[11].patched) { // 5
+			bitMultiplier *= 35.0L; costMult *= 0.95f;
+		}
+		if (dirTree[12].patched && dirTree[12].disabled == 0) bitMultiplier *= 1.5L; // 1_1
+		if (dirTree[13].patched && dirTree[13].disabled == 0) clickMultiplier *= 1.5L; // 1_2
+		if (dirTree[14].patched) bitMultiplier *= 60.0L; clickMultiplier *= 0.8L; byteMultiplier *= 1.75f; // !
+		if (dirTree[15].patched) { // @
+			bitMultiplier *= 999.0L; clickMultiplier *= 0.5L;
+			for (int i = 0; i < 4; ++i) {
+				logicGateList[i].bps = 0.L;
+			}
+		}
+		if (dirTree[16].patched) { // 6
+			bitMultiplier *= 250.0L; bitsToBytesRate = 5e-7L;
+		}
+		if (dirTree[17].patched) { // 7
+			bitMultiplier *= 450.0L; bitsPerClick += 9.0L;
+		}
+		if (dirTree[18].patched) { // 7_1
+			bitMultiplier *= 600.0L; clickMultiplier *= 0.4L;  dirTree[4].disabled = 1;
+		}
+		if (dirTree[19].patched) { // 7_2
+			long double patch7_2Mult = 1.0L + (bytes * 0.01L);
+			patch_3_2Mult = std::min(patch7_2Mult, 3500.0L);
+		}
+		if (dirTree[20].patched) { // 2_1
+			bitMultiplier *= 3.5L;
+		}
+		if (dirTree[21].patched) { // !!
+			bitMultiplier *= 6500.0L;  bitsFromPatch = 5000.0L;
+			for (int i = 0; i < 7; ++i) {
+				logicGateList[i].bps = 0.L;
+			}
+		}
+		if (dirTree[22].patched) bitMultiplier *= 22500.0L; // A
+		if (dirTree[23].patched) costMult *= 0.85f; // B
+		if (dirTree[24].patched) bitMultiplier *= 85000.0L; // C
+		if (dirTree[25].patched) { // B_1
+			byteMultiplier *= 4.0L; clickMultiplier *= 0.1L; bitsPerClick -= 5.0L;
+		}
+		if (dirTree[26].patched) { // 6_2
+			bitMultiplier *= 400.0L; byteMultiplier *= 2.0L;
+		}
 
-		long double realBitsPerSecond = (bitsPerSecond * hotfixMult * bitMultiplier * patch_1Mult) * patch_3_2Mult;
+		long double realBitsPerSecond = (bitsPerSecond * hotfixMult * bitMultiplier * patch_1Mult) * patch_3_2Mult + bitsFromPatch;
 		float deltaTime = deltaClock.restart().asSeconds();
 		float elapsedTime = elapsedClock.getElapsedTime().asSeconds();
 
@@ -373,28 +422,7 @@ int main() {
 						float distanceSquared = (diff.x * diff.x) + (diff.y * diff.y);
 
 						if (patch.patched == 0 && !patch.disabled && distanceSquared <= (30.f * 30.f)) {
-							bool canBuy = false;
-
-							if (i == 0) {
-								canBuy = true;
-							}
-							else if (i == 1 || i == 2) {
-								if (dirTree[0].patched == 1) canBuy = true;
-							}
-							else if (i == 3 || i == 6) {
-								if (dirTree[1].patched == 1) canBuy = true;
-							}
-							else if (i == 4 || i == 5) {
-								if (dirTree[2].patched == 1) canBuy = true;
-							}
-							else if (i == 7) {
-								if (dirTree[3].patched == 1) canBuy = true;
-							}
-							else if (i == 8) {
-								if (dirTree[4].patched == 1) canBuy = true;
-							}
-
-							if (canBuy && bytes >= patch.bytes) {
+							if (bytes >= patch.bytes) {
 								bytes -= patch.bytes;
 								patch.patched = 1;
 

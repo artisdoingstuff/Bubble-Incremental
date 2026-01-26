@@ -15,7 +15,7 @@ inline sf::Color lerpColour(sf::Color a, sf::Color b, float t) {
     );
 }
 
-inline void updateStar(Star& star, sf::Vector2f centre, float time, float currentScale, long double totalBits) {
+inline void updateStar(Star& star, sf::Vector2f centre, float time, float currentScale, long double allBits) {
     const int numArms = 16;
     const size_t segmentsPerArm = 50;
     const size_t verticesPerArm = segmentsPerArm * 2;
@@ -26,7 +26,7 @@ inline void updateStar(Star& star, sf::Vector2f centre, float time, float curren
         star.star.setPrimitiveType(sf::PrimitiveType::Lines);
     }
 
-    float logVal = (totalBits > 1.0L) ? static_cast<float>(std::log10(totalBits)) : 0.f;
+    float logVal = (allBits > 1.0L) ? static_cast<float>(std::log10(allBits)) : 0.f;
 
     float rotationSpeed = 0.4f + (logVal * 0.02f);
 
