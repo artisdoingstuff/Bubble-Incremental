@@ -38,13 +38,14 @@
 <br>
 
 > #### Releases
-> #### Phase 1
-> **[v1.0.0: 05.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.0-release)**<br>
-> **[v1.0.1: 09.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.1-release)**<br>
-> **[v1.0.2: 11.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.2-release)**<br>
-> **[v1.0.3: 14.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.3-release)**<br>
-> **[v1.0.4: 15.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.4-release)**<br>
-> **[v1.0.5: 16.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.5-release)**<br>
-> **[v1.0.6: 17.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.6-release)**<br>
-> **[v1.0.7: 26.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.7-release)**<br>
-> **[v1.0.8: 27.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.8-release)**<br>
+> | Phase 1 (1.0) | Phase 2 (1.1) |
+> |---|---|
+> |**[v1.0.0: 05.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.0-release)**|
+> |**[v1.0.1: 09.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.1-release)**|
+> |**[v1.0.2: 11.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.2-release)**|
+> |**[v1.0.3: 14.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.3-release)**|
+> |**[v1.0.4: 15.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.4-release)**|
+> |**[v1.0.5: 16.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.5-release)**|
+> |**[v1.0.6: 17.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.6-release)**|
+> |**[v1.0.7: 26.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.7-release)**|
+> |**[v1.0.8: 27.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.8-release)**|
