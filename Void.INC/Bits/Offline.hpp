@@ -1,18 +1,25 @@
 #pragma once
 
 #include "../Misc/GIncludes.hpp"
-#include "../LogicGate/LogicGate.hpp"
+#include "../Hardware/LogicGate.hpp"
 #include "../Initialisation/Initialisation.hpp"
 
 inline void offline(time_t timestamp, long double& bits, long double& allBits, long double bitsPerSecond, long double hotfixMult) {
 	time_t elapsedTime = time(nullptr) - timestamp;
-    bool isOffline_1 = false;
-    bool isOffline_3_2 = false;
+    long double patch3_2Mult = 1.0L + (bytes * 0.002L);
+    long double patch7_2Mult = 1.0L + (bytes * 0.01L);
+
 	if (elapsedTime > 0) {
         long double eBPS = 0.L;
-        for (size_t i = 0; i < logicGateList.size(); ++i) { // 4_2
+        for (size_t i = 0; i < logicGateList.size(); ++i) {
             long double indivMult = 1.0L;
-            if (dirTree[6].patched && i < 7) {
+            if (dirTree[21].patched) { // !!
+                for (int i = 0; i < 7; ++i) {
+                    logicGateList[i].bps = 0.L;
+                }
+            }
+    
+            else if (dirTree[21].patched == 0 && dirTree[6].patched && i < 7) { // 4_2
                 indivMult = 1.0L + (logicGateList[i].ver * 0.05L);
                 if (indivMult > 50.0L) indivMult = 50.0L;
             }
@@ -22,11 +29,11 @@ inline void offline(time_t timestamp, long double& bits, long double& allBits, l
 
         long double dirMult = 1.0L;
 
-        if (dirTree[2].patched) dirMult *= 2.0L; // 2
+        if (dirTree[2].patched) dirMult *= 3.0L; // 2
         if (dirTree[3].patched) dirMult *= 5.5L; // 3_1
         if (dirTree[5].patched) dirMult *= 12.0L; // 4_1
         if (dirTree[7].patched) { // 5_1
-            dirMult *= 50.0L; isOffline_1 = true;
+            dirMult *= 50.0L;
         }
 		if (dirTree[8].patched) dirMult *= 100.0L; // 5_2
         if (dirTree[9].patched) dirMult *= 4.0L; // 3
@@ -37,11 +44,10 @@ inline void offline(time_t timestamp, long double& bits, long double& allBits, l
         if (dirTree[16].patched) dirMult *= 250.0L; // 6
         if (dirTree[17].patched) dirMult *= 450.0L; // 7
         if (dirTree[18].patched) { // 7_1
-            dirMult *= 600.0L; isOffline_3_2 = true;
+            dirMult *= 600.0L;
         }
         if (dirTree[19].patched) { // 7_2
-            long double patch7_2Mult = 1.0L + (bytes * 0.01L);
-            dirMult *= std::min(patch7_2Mult, 3500.0L);
+			dirMult *= std::min(patch7_2Mult, 3500.0L); patch3_2Mult = 1.0L;
         }
         if (dirTree[20].patched) dirMult *= 3.5L; // 2_1
         if (dirTree[21].patched) dirMult *= 6500.0L; // !!
@@ -49,16 +55,11 @@ inline void offline(time_t timestamp, long double& bits, long double& allBits, l
         if (dirTree[24].patched) dirMult *= 85000.0L; // C
         if (dirTree[26].patched) dirMult *= 400.0L; // 6_2
 
-        if (!isOffline_1) {
-            if (dirTree[1].patched) dirMult *= 1.6L; // 1
-            if (dirTree[12].patched) dirMult *= 1.5L; // 1_1
-        }
-        if (!isOffline_3_2) {
-            if (dirTree[4].patched) { // 3_2
-                long double patch3_2Mult = 1.0L + (bytes * 0.002L);
-                dirMult *= std::min(patch3_2Mult, 100.0L);
-            }
-        }
+        if (dirTree[1].patched && dirTree[1].disabled == 0) dirMult *= 1.6L; // 1
+        if (dirTree[12].patched && dirTree[12].disabled == 0) dirMult *= 1.5L; // 1_1
+
+        if (dirTree[4].patched && dirTree[4].disabled == 0) dirMult *= std::min(patch3_2Mult, 100.0L); // 3_2
+
 		
 		long double offlineBits = (elapsedTime * eBPS * hotfixMult * dirMult) * 1;
 		

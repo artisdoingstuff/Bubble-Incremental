@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../Misc/GIncludes.hpp"
-#include "../LogicGate/LogicGate.hpp"
-#include "../LogicGate/Hotfixes.hpp"
+#include "../Hardware/LogicGate.hpp"
+#include "../Hardware/Hotfixes.hpp"
 
 inline void resetProgress() {
     for (auto& lg : logicGateList) {
@@ -17,13 +17,12 @@ inline void resetProgress() {
     bits = 0.0L;
     bitsPerSecond = 0.0L;
     hotfixMult = 1.0L;
-    scrollOffset = 0.0f;
 }
 
 inline long double getPendingBytes(long double bits) {
     auto round = [](long double v) -> long double {return std::round(v * 100.0) / 100.0; };
     if (bits < 5000000.0L) return 0;
-    return round(bits * bitsToBytesRate);
+    return round(bits * bitsToBytesRate * byteMultiplier);
 }
 
 inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit) {
