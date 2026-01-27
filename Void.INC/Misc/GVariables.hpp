@@ -2,18 +2,18 @@
 #include "GIncludes.hpp"
 
 // Global references
-inline std::string voidVersion = "v1.0.7-release"; // Version control for the game (Updater purposes)
+inline std::string voidVersion = "v1.0.8-release"; // Version control for the game (Updater purposes)
 
 inline bool reinitialisation = false;
 inline bool initialisation = false;
 inline bool showStart = true;
+inline bool start = false;
 
 inline float loadingProgress = 0.0f;
-inline float initTimer = 0.0f;
+inline float timer = 0.0f;
 
 inline sf::Clock deltaClock;
 inline sf::Clock elapsedClock;
-
 inline sf::Clock cooldown;
 
 enum class ReinitState {
@@ -32,6 +32,12 @@ enum class InitState {
 };
 inline InitState currentInitStep = InitState::IDLE;;
 
+enum class StartState {
+    IDLE,
+    TRANSITION
+};
+inline StartState currentStartStep = StartState::IDLE;
+
 inline bool canClickStart = true; // Start menu only
 inline bool canClick = false; // Pre-reinitialisation
 inline bool canClickInit = false; // Post-initialisation
@@ -40,8 +46,8 @@ enum class Tab { NONE, LOGIC, HOTFIX, REINIT };
 inline Tab activeTab = Tab::NONE;
 inline float tabProgress = 0.f;
 
-enum class MultBuy { X1, X5, X10, X100, MAX };
-inline MultBuy currentBuy = MultBuy::X1;
+enum class Download { X1, X5, X10, X50, X100, MAX };
+inline Download currentBuy = Download::X1;
 
 inline float pi = 3.14159f;
 

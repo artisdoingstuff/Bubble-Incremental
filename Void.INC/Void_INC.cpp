@@ -7,11 +7,12 @@
 
 #include "Effects/Bits.hpp"
 
+#include "Hardware/Download.hpp"
+#include "Hardware/Hotfixes.hpp"
+#include "Hardware/LogicGate.hpp"
+
 #include "Initialisation/Initialisation.hpp"
 #include "Initialisation/Re-initialisation.hpp"
-
-#include "LogicGate/Hotfixes.hpp"
-#include "LogicGate/LogicGate.hpp"
 
 #include "UI/Directory.hpp"
 #include "UI/Loading.hpp"
@@ -34,6 +35,7 @@ int main() {
 	window.setIcon(sf::Image("icon.png"));
 
 	sf::Vector2f centre = { window.getSize().x / 2.f, window.getSize().y / 2.f };
+	sf::Vector2f sPos = { window.getSize().x * 0.7f, window.getSize().y / 2.f };
 
 	time_t timeEnd = 0;
 
@@ -154,6 +156,7 @@ int main() {
 		if (dirTree[19].patched) { // 7_2
 			long double patch7_2Mult = 1.0L + (bytes * 0.01L);
 			patch_7_2Mult = std::min(patch7_2Mult, 3500.0L);
+			patch_3_2Mult = 1.0L;
 		}
 		if (dirTree[20].patched) { // 2_1
 			bitMultiplier *= 3.5L;
@@ -174,7 +177,7 @@ int main() {
 			bitMultiplier *= 400.0L; byteMultiplier *= 2.0L;
 		}
 
-		long double realBitsPerSecond = (bitsPerSecond * hotfixMult * bitMultiplier * patch_1Mult) * patch_3_2Mult + bitsFromPatch;
+		long double realBitsPerSecond = (bitsPerSecond * hotfixMult * bitMultiplier * patch_1Mult) * patch_3_2Mult * patch_7_2Mult + bitsFromPatch;
 		float deltaTime = deltaClock.restart().asSeconds();
 		float elapsedTime = elapsedClock.getElapsedTime().asSeconds();
 
@@ -198,7 +201,31 @@ int main() {
 		window.clear(sf::Color::Black);
 
 		if (showStart) {
-			drawStartUI(window, states, star, elapsedTime, deltaTime);
+			drawStartUI(window, states, star, elapsedTime, deltaTime, sPos);
+		}
+
+		if (start) {
+			if (currentStartStep == StartState::IDLE) currentStartStep = StartState::TRANSITION;
+			timer += deltaTime;
+			canClickStart = false;
+
+			switch (currentStartStep) {
+			case StartState::TRANSITION: {
+				float t = std::min(1.f, timer / 1.0f);
+				float ease = t * t * (0.5f * t);
+				sPos = sPos + (centre - sPos) * ease;
+
+				if (timer >= 1.0f) {
+					sPos = centre;
+					showStart = false;
+					start = false;
+					canClick = true;
+					timer = 0.0f;
+					currentStartStep = StartState::IDLE;
+				}
+				break;
+			}
+			}
 		}
 
 		if (!showStart) {
@@ -228,62 +255,62 @@ int main() {
 				currentReinitStep = ReinitState::VORTEX_EXPANSION;
 				canClick = false;
 			}
-			initTimer += deltaTime;
+			timer += deltaTime;
 			sf::View shakeView = window.getDefaultView();
 
 			switch (currentReinitStep) {
-				case ReinitState::VORTEX_EXPANSION: {
-					starScale += (20.f - starScale) * 0.05f;
+			case ReinitState::VORTEX_EXPANSION: {
+				starScale += (20.f - starScale) * 0.05f;
 
-					float intensity = (starScale / 20.f) * 15.f;
-					float offsetX = (std::rand() % 100 - 50) / 50.f * intensity;
-					float offsetY = (std::rand() % 100 - 50) / 50.f * intensity;
-					shakeView.move({ offsetX, offsetY });
+				float intensity = (starScale / 20.f) * 15.f;
+				float offsetX = (std::rand() % 100 - 50) / 50.f * intensity;
+				float offsetY = (std::rand() % 100 - 50) / 50.f * intensity;
+				shakeView.move({ offsetX, offsetY });
 
-					window.setView(shakeView);
-					window.draw(star.star, states);
+				window.setView(shakeView);
+				window.draw(star.star, states);
 
-					if (initTimer >= 0.5f) currentReinitStep = ReinitState::VORTEX_SHRINK;
-					break;
+				if (timer >= 0.5f) currentReinitStep = ReinitState::VORTEX_SHRINK;
+				break;
+			}
+
+			case ReinitState::VORTEX_SHRINK: {
+				starScale += (0.f - starScale) * 0.15f;
+				shakeView.move({ (std::rand() % 10 - 5) / 2.f, (std::rand() % 10 - 5) / 2.f });
+
+				window.setView(shakeView);
+				window.draw(star.star, states);
+
+				if (timer >= 0.7f) {
+					starScale = -10.f;
+					currentReinitStep = ReinitState::LOADING_BAR;
+				}
+				break;
+			}
+
+			case ReinitState::LOADING_BAR:
+				loadingProgress = (timer - 0.7f) / 5.0f;
+
+				if (loadingProgress >= 1.0f) {
+					loadingProgress = 1.0f;
+					currentReinitStep = ReinitState::DIR;
 				}
 
-				case ReinitState::VORTEX_SHRINK: {
-					starScale += (0.f - starScale) * 0.15f;
-					shakeView.move({ (std::rand() % 10 - 5) / 2.f, (std::rand() % 10 - 5) / 2.f });
+				drawLoadingUI(window, loadingProgress);
+				break;
 
-					window.setView(shakeView);
-					window.draw(star.star, states);
+			case ReinitState::DIR:
+				window.setView(window.getDefaultView());
+				loadingProgress = 0.0f;
+				timer = 0.0f;
+				canClickInit = true;
 
-					if (initTimer >= 0.7f) {
-						starScale = -10.f;
-						currentReinitStep = ReinitState::LOADING_BAR;
-					}
-					break;
-				}
+				drawTreeLines(window);
+				drawDirTreeUI(window);
 
-				case ReinitState::LOADING_BAR:
-					loadingProgress = (initTimer - 0.7f) / 5.0f;
-
-					if (loadingProgress >= 1.0f) {
-						loadingProgress = 1.0f;
-						currentReinitStep = ReinitState::DIR;
-					}
-
-					drawLoadingUI(window, loadingProgress);
-					break;
-
-				case ReinitState::DIR:
-					window.setView(window.getDefaultView());
-					loadingProgress = 0.0f;
-					initTimer = 0.0f;
-					canClickInit = true;
-
-					drawTreeLines(window);
-					drawDirTreeUI(window);
-
-					drawInitButton(window);
-					window.draw(bytesText);
-					break;
+				drawInitButton(window);
+				window.draw(bytesText);
+				break;
 			}
 		}
 
@@ -292,46 +319,46 @@ int main() {
 				currentInitStep = InitState::LOADING_BAR;
 			}
 
-			initTimer += deltaTime;
+			timer += deltaTime;
 			sf::View shakeView = window.getDefaultView();
 
 			switch (currentInitStep) {
-				case InitState::LOADING_BAR: {
-					loadingProgress = initTimer / 3.0f;
-					drawLoadingUI(window, loadingProgress);
+			case InitState::LOADING_BAR: {
+				loadingProgress = timer / 3.0f;
+				drawLoadingUI(window, loadingProgress);
 
-					if (loadingProgress >= 1.0f) {
-						loadingProgress = 1.0f;
-						currentInitStep = InitState::VORTEX_EXPANSION;
-						starScale = 0.1f;
-					}
-					break;
+				if (loadingProgress >= 1.0f) {
+					loadingProgress = 1.0f;
+					currentInitStep = InitState::VORTEX_EXPANSION;
+					starScale = 0.1f;
 				}
+				break;
+			}
 
-				case InitState::VORTEX_EXPANSION: {
-					starScale += (1.f - starScale) * 0.1f;
+			case InitState::VORTEX_EXPANSION: {
+				starScale += (1.f - starScale) * 0.1f;
 
-					float intensity = (1.f - starScale) * 20.f;
-					float offsetX = (std::rand() % 100 - 50) / 50.f * intensity;
-					float offsetY = (std::rand() % 100 - 50) / 50.f * intensity;
-					shakeView.move({ offsetX, offsetY });
-					window.setView(shakeView);
+				float intensity = (1.f - starScale) * 20.f;
+				float offsetX = (std::rand() % 100 - 50) / 50.f * intensity;
+				float offsetY = (std::rand() % 100 - 50) / 50.f * intensity;
+				shakeView.move({ offsetX, offsetY });
+				window.setView(shakeView);
 
-					window.draw(star.star, states);
+				window.draw(star.star, states);
 
-					if (initTimer >= 3.5f) {
-						window.setView(window.getDefaultView());
-						loadingProgress = 0.0f;
-						initTimer = 0.0f;
-						canClick = true;
+				if (timer >= 3.5f) {
+					window.setView(window.getDefaultView());
+					loadingProgress = 0.0f;
+					timer = 0.0f;
+					canClick = true;
 
-						starScale = 1.f;
+					starScale = 1.f;
 
-						currentInitStep = InitState::IDLE;
-						initialisation = false;
-					}
-					break;
+					currentInitStep = InitState::IDLE;
+					initialisation = false;
 				}
+				break;
+			}
 			}
 		}
 
@@ -345,12 +372,6 @@ int main() {
 				save(timeStart, bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialised, logicGateList, hotfixList, dirTree);
 				versionSave(voidVersion);
 				window.close();
-			}
-
-			if (gameEvent->is<sf::Event::MouseWheelScrolled>()) {
-				const auto& wheel = gameEvent->getIf<sf::Event::MouseWheelScrolled>();
-				scrollOffset -= wheel->delta * 20.f;
-				if (scrollOffset < 0) scrollOffset = 0;
 			}
 
 			if (gameEvent->is<sf::Event::MouseButtonPressed>()) {
@@ -381,10 +402,11 @@ int main() {
 					if (activeTab == Tab::LOGIC) {
 						for (auto& lg : logicGateList) {
 							if (lg.rect.getGlobalBounds().contains(mousePos)) {
-								if (bits >= lg.currentBits) {
-									bits -= lg.currentBits;
-									lg.ver++;
-									bitsPerSecond += lg.bps;
+								auto [totalCost, amount] = getDownload(lg, bits, currentBuy);
+								if (bits >= totalCost && amount > 0) {
+									bits -= totalCost;
+									lg.ver += amount;
+									bitsPerSecond += (lg.bps * amount);
 									lg.currentBits = lg.baseBits * std::pow(logicGateInflation, lg.ver) * costMult;
 								}
 							}

@@ -2,9 +2,8 @@
 
 #include "../Misc/GIncludes.hpp"
 
-inline void drawStartUI(sf::RenderWindow& window, sf::RenderStates& states, Star& star, float et, float dt) {
+inline void drawStartUI(sf::RenderWindow& window, sf::RenderStates& states, Star& star, float et, float dt, sf::Vector2f& pos) {
 	const sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-	sf::Vector2f pos = { window.getSize().x * 0.7f, window.getSize().y / 2.f };
 
 	sf::Text t(jetBrainsMono, "Void.INC", 124);
 	t.setPosition({ 80, window.getSize().y * 0.05f });
@@ -35,17 +34,17 @@ inline void drawStartUI(sf::RenderWindow& window, sf::RenderStates& states, Star
 		window.draw(d.bit);
 	}
 
-	window.draw(t);
-	window.draw(v);
-	window.draw(e);
-	window.draw(s);
-	window.draw(q);
+	if (!start) {
+		window.draw(t);
+		window.draw(v);
+		window.draw(e);
+		window.draw(s);
+		window.draw(q);
+	}
 
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && cooldown.getElapsedTime().asMilliseconds() > 300) {
 		if (pHover && canClickStart) {
-			showStart = false;
-			canClickStart = false;
-			canClick = true;
+			start = true;
 		}
 		if (qHover && canClickStart) {
 			window.close();

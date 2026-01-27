@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Misc/GIncludes.hpp"
+#include "../Hardware/Download.hpp"
 
 inline int hotfixPage = 0;
 const int HF_PER_PAGE = 40;
@@ -121,6 +122,8 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
             float boxW = (moduleWidth - 100.f) / 5.f;
             float boxH = (moduleHeight - 120.f) / 4.f;
             float pad = 10.f;
+            float btnX = 0.f;
+            sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
             for (size_t i = 0; i < logicGateList.size(); ++i) {
                 if (i >= 20) break;
@@ -152,26 +155,56 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
                 n.setPosition(pos + sf::Vector2f(12.f, 10.f));
                 n.setFillColor(sf::Color(243, 238, 225));
 
-                sf::Text d(jetBrainsMono, lg.desc, 9);
+                sf::Text d(jetBrainsMono, lg.desc, 10);
                 d.setPosition(pos + sf::Vector2f(12.f, 32.f));
                 d.setFillColor(sf::Color(140, 140, 140));
 
-                sf::Text c(jetBrainsMono, "-" + format(lg.currentBits) + "_bits.tmp", 11);
+                auto [totalCost, amount] = getDownload(lg, bits, currentBuy);
+
+                sf::Text c(jetBrainsMono, "-" + format(totalCost) + "_bits.tmp - x" + std::to_string(amount), 11);
                 c.setPosition(pos + sf::Vector2f(12.f, boxH - 22.f));
-                c.setFillColor(bits >= lg.currentBits ? sf::Color(243, 238, 225) : sf::Color(140, 140, 140));
+                c.setFillColor(bits >= totalCost ? sf::Color(243, 238, 225) : sf::Color(140, 140, 140));
+                window.draw(c);
 
                 window.draw(n);
                 window.draw(d);
                 window.draw(c);
+            }
+
+            std::vector<std::pair<std::string, Download>> modes = {
+                {"x1", Download::X1}, {"x5", Download::X5}, {"x10", Download::X10},
+                {"x50", Download::X50}, {"x100", Download::X100}, {"MAX", Download::MAX}
+            };
+
+            for (auto& m : modes) {
+                sf::RectangleShape b({ 50.f, 25.f });
+                b.setPosition(start + sf::Vector2f(btnX, moduleHeight - 80.f));
+                bool hovered = b.getGlobalBounds().contains(mousePos);
+
+                b.setFillColor(currentBuy == m.second ? sf::Color(30, 30, 30) : sf::Color::Black);
+                b.setOutlineColor(sf::Color(50, 50, 50));
+                b.setOutlineThickness(1.f);
+
+                sf::Text bt(jetBrainsMono, m.first, 11);
+                bt.setPosition(b.getPosition() + sf::Vector2f(10, 5));
+
+                window.draw(b);
+                window.draw(bt);
+
+                if (hovered && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && cooldown.getElapsedTime().asMilliseconds() > 200) {
+                    currentBuy = m.second;
+                    cooldown.restart();
+                }
+                btnX += 55.f;
             }
             });
     }
 
     else if (activeTab == Tab::HOTFIX) {
         drawTerminalModule(window, "void://hardware/hotfixes.bat" + getCursor(), tabProgress, [&](sf::Vector2f start) {
-            const float size = (moduleWidth - 140.f) / 10.f;
-            const float pad = 8.f;
-            const sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+            float size = (moduleWidth - 140.f) / 10.f;
+            float pad = 8.f;
+            sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
             size_t startIdx = hotfixPage * HF_PER_PAGE;
             size_t endIdx = std::min(startIdx + HF_PER_PAGE, hotfixList.size());
@@ -194,10 +227,10 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
                 n.setPosition(pos + sf::Vector2f(6.f, 6.f));
                 window.draw(n);
 
-                sf::Text status(jetBrainsMono, hf.written ? "[ LOADED ]" : "-" + format(hf.bits) + "_bits.tmp", 9);
-                status.setPosition(pos + sf::Vector2f(6.f, 20.f));
-                status.setFillColor(!hf.written && bits < hf.bits ? sf::Color(140, 140, 140) : sf::Color(243, 238, 225));
-                window.draw(status);
+                sf::Text s(jetBrainsMono, hf.written ? "[ LOADED ]" : "-" + format(hf.bits) + "_bits.tmp", 9);
+                s.setPosition(pos + sf::Vector2f(6.f, 20.f));
+                s.setFillColor(!hf.written && bits < hf.bits ? sf::Color(140, 140, 140) : sf::Color(243, 238, 225));
+                window.draw(s);
             }
 
             auto drawNav = [&](const std::string& str, sf::Vector2f offset, bool isPrev) {
