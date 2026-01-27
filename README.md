@@ -37,7 +37,7 @@
 
 <br>
 
-> #### Timeline
+> #### Releases
 > #### Phase 1
 > **[v1.0.0: 05.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.0-release)**<br>
 > **[v1.0.1: 09.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.1-release)**<br>
