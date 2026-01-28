@@ -6,8 +6,12 @@ inline std::string voidVersion = "v1.0.8-release"; // Version control for the ga
 
 inline bool reinitialisation = false;
 inline bool initialisation = false;
+
 inline bool showStart = true;
 inline bool start = false;
+
+inline bool showOffline = false;
+inline bool rolledWhisper = false;
 
 inline float loadingProgress = 0.0f;
 inline float timer = 0.0f;
@@ -63,6 +67,7 @@ inline float hotfixGrowth = 1.1875f; // Recursive growth mult for hotfixes
 inline long double bits = 0.0L; // Current bits
 inline long double allBits = 0.0L; // Total accumulated bits
 inline long double allClickedBits = 0.0L; // Total accumulated bits from clicks
+inline long double accOfflineBits = 0.0L; // Bits accumulated while offline
 
 inline long double hotfixMult = 1.0L; // Multiplier for hotfixes (upgrades)
 

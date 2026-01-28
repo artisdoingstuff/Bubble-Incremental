@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Misc/GIncludes.hpp"
+#include "../../Misc/Globals/GIncludes.hpp"
 
 inline void drawStartUI(sf::RenderWindow& window, sf::RenderStates& states, Star& star, float et, float dt, sf::Vector2f& pos) {
 	const sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
@@ -28,7 +28,7 @@ inline void drawStartUI(sf::RenderWindow& window, sf::RenderStates& states, Star
 	q.setFillColor(qHover ? sf::Color(200, 200, 30) : sf::Color(243, 238, 225));
 
 	updateStar(star, pos, et, 1.f, allBits);
-	updateStream(window, pos, dt);
+	updateStream(window, pos, dt, 2);
 	window.draw(star.star, states);
 	for (auto& d : dataStream) {
 		window.draw(d.bit);

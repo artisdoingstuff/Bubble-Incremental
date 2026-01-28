@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Misc/GIncludes.hpp"
-#include "../Hardware/Download.hpp"
+#include "../../Misc/Globals/GIncludes.hpp"
+#include "Download.hpp"
 
 inline int hotfixPage = 0;
 const int HF_PER_PAGE = 40;
@@ -85,9 +85,7 @@ inline void drawTerminalModule(sf::RenderWindow& window, std::string title, floa
     bool canClose = c.getGlobalBounds().contains(mousePos);
     window.draw(c);
 
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
-        if (canClose) activeTab = Tab::NONE;
-    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) || sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && canClose) activeTab = Tab::NONE;
 
     contentDraw(frame.getPosition() + sf::Vector2f(20.f, 50.f));
 }
@@ -203,7 +201,7 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
     else if (activeTab == Tab::HOTFIX) {
         drawTerminalModule(window, "void://hardware/hotfixes.bat" + getCursor(), tabProgress, [&](sf::Vector2f start) {
             float size = (moduleWidth - 140.f) / 10.f;
-            float pad = 8.f;
+            float pad = 10.f;
             sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
             size_t startIdx = hotfixPage * HF_PER_PAGE;
@@ -266,7 +264,7 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
                 bool bHover = bBtn.getGlobalBounds().contains(mousePos);
 
                 bBtn.setFillColor(bHover ? sf::Color(30, 30, 30) : sf::Color::Black);
-                bBtn.setOutlineColor(sf::Color(140, 140, 140));
+                bBtn.setOutlineColor(sf::Color(50, 50, 50));
                 bBtn.setOutlineThickness(1.f);
                 window.draw(bBtn);
 

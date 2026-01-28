@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Misc/GIncludes.hpp"
+#include "../../Misc/Globals/GIncludes.hpp"
 
 inline void positionTreeNodes(sf::Vector2u windowSize) {
     if (dirTree.size() < 9) return;

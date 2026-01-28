@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Misc/GIncludes.hpp"
-#include "LogicGate.hpp"
+#include "../../Misc/Globals/GIncludes.hpp"
+#include "../../Hardware/LogicGate.hpp"
 
 inline std::pair<long double, int> getDownload(LogicGate& lg, long double currentBits, Download mode) {
     int n = 0;

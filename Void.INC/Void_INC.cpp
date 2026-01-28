@@ -1,24 +1,26 @@
-﻿#include "Misc/GFunctions.hpp"
-#include "Misc/GIncludes.hpp"
-#include "Misc/GVariables.hpp"
+﻿#include "Misc/Globals/GFunctions.hpp"
+#include "Misc/Globals/GIncludes.hpp"
+#include "Misc/Globals/GVariables.hpp"
 
 #include "Bits/Format.hpp"
 #include "Bits/Offline.hpp"
 
 #include "Effects/Bits.hpp"
 
-#include "Hardware/Download.hpp"
 #include "Hardware/Hotfixes.hpp"
 #include "Hardware/LogicGate.hpp"
 
 #include "Initialisation/Initialisation.hpp"
 #include "Initialisation/Re-initialisation.hpp"
 
-#include "UI/Directory.hpp"
-#include "UI/Loading.hpp"
-#include "UI/Star.hpp"
-#include "UI/Start.hpp"
-#include "UI/Terminal.hpp"
+#include "UI/Core/Directory.hpp"
+#include "UI/Core/Download.hpp"
+#include "UI/Core/Terminal.hpp"
+#include "UI/Extra/Loading.hpp"
+#include "UI/Extra/Offline.hpp"
+#include "UI/Extra/Settings.hpp"
+#include "UI/Extra/Star.hpp"
+#include "UI/Extra/Start.hpp"
 
 #include "UserData/Local/Loading.hpp"
 #include "UserData/Local/Saving.hpp"
@@ -218,6 +220,7 @@ int main() {
 				if (timer >= 1.0f) {
 					sPos = centre;
 					showStart = false;
+					showOffline = true;
 					start = false;
 					canClick = true;
 					timer = 0.0f;
@@ -233,7 +236,7 @@ int main() {
 				window.draw(bitsText);
 				window.draw(bitsPerSecondText);
 
-				updateStream(window, centre, deltaTime);
+				updateStream(window, centre, deltaTime, 2);
 				for (auto& d : dataStream) {
 					window.draw(d.bit);
 				}
@@ -244,9 +247,8 @@ int main() {
 
 				drawTerminalUI(window, bits, allBits, deltaTime);
 
-				if (showConfirmPopup) {
-					drawConfirmPopup(window, reinitialisation);
-				}
+				if (showOffline) drawOfflineUI(window, centre);
+				if (showConfirmPopup) drawConfirmPopup(window, reinitialisation, centre);
 			}
 		}
 
@@ -304,6 +306,11 @@ int main() {
 				loadingProgress = 0.0f;
 				timer = 0.0f;
 				canClickInit = true;
+
+				updateStream(window, centre, deltaTime, 1);
+				for (auto& d : dataStream) {
+					window.draw(d.bit);
+				}
 
 				drawTreeLines(window);
 				drawDirTreeUI(window);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Misc/GIncludes.hpp"
+#include "../../Misc/Globals/GIncludes.hpp"
 
 inline void drawLoadingUI(sf::RenderWindow& window, float actualProgress) {
     float width = 600.f;
