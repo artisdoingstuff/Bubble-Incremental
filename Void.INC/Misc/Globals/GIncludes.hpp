@@ -24,6 +24,7 @@
 #include <vector>
 #include <Windows.h>
 
-#include "json.hpp"
+#include "../ini.h"
+#include "../json.hpp"
 
 using json = nlohmann::json;

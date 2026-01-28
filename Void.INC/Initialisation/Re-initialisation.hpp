@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Misc/GIncludes.hpp"
+#include "../Misc/Globals/GIncludes.hpp"
 #include "../Hardware/LogicGate.hpp"
 #include "../Hardware/Hotfixes.hpp"
 
@@ -25,11 +25,8 @@ inline long double getPendingBytes(long double bits) {
     return round(bits * bitsToBytesRate * byteMultiplier);
 }
 
-inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit) {
+inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit, sf::Vector2f& centre) {
     sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-    bool mouseLeft = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
-
-    sf::Vector2f centre(window.getSize().x / 2.f, window.getSize().y / 2.f);
     sf::Vector2f boxSize(550.f, 220.f);
 
     sf::RectangleShape overlay({ (float)window.getSize().x, (float)window.getSize().y });
@@ -39,7 +36,7 @@ inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit) {
     sf::RectangleShape box(boxSize);
     box.setOrigin(boxSize / 2.f);
     box.setPosition(centre);
-    box.setFillColor(sf::Color(15, 15, 15));
+    box.setFillColor(sf::Color(10, 10, 10));
     box.setOutlineColor(sf::Color(50, 50, 50));
     box.setOutlineThickness(1);
 
@@ -70,7 +67,7 @@ inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit) {
 
     sf::Text warnText(jetBrainsMono, warningMsg, 16);
     warnText.setOrigin({ warnText.getGlobalBounds().size.x / 2.f, warnText.getGlobalBounds().size.y / 2.f - 10.f });
-    warnText.setPosition({ centre.x, centre.y });
+    warnText.setPosition(centre);
     warnText.setFillColor(sf::Color(200, 200, 200));
 
     window.draw(warnText);
@@ -90,7 +87,5 @@ inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit) {
     };
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Y)) triggerInit();
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::N) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape)) cancelInit();
-
-    if (mouseLeft && c.getGlobalBounds().contains(mousePos)) cancelInit();
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::N) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) || sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && c.getGlobalBounds().contains(mousePos)) cancelInit();
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Misc/GIncludes.hpp"
+#include "../Misc/Globals/GIncludes.hpp"
 
 struct BitParticle {
     sf::Text bit;
@@ -25,12 +25,12 @@ struct BitParticle {
 inline std::vector<BitParticle> dataStream;
 inline sf::Clock spawnClock;
 
-inline void updateStream(sf::RenderWindow& window, sf::Vector2f centre, float dt) {
+inline void updateStream(sf::RenderWindow& window, sf::Vector2f centre, float dt, int set) {
     if (spawnClock.getElapsedTime().asSeconds() > 0.02f) {
         sf::Vector2f spawnPos;
         int type = (rand() % 10 < 3) ? 0 : 1;
 
-        if (type == 0) {
+        if (type == 0 && set == 0 || type == 0 && set == 2) {
             int edge = rand() % 4;
             if (edge == 0) spawnPos = { (float)(rand() % window.getSize().x), -50.f };
             else if (edge == 1) spawnPos = { (float)(rand() % window.getSize().x), (float)window.getSize().y + 50.f };
@@ -44,7 +44,7 @@ inline void updateStream(sf::RenderWindow& window, sf::Vector2f centre, float dt
     }
 
     for (auto it = dataStream.begin(); it != dataStream.end();) {
-        if (it->type == 0) {
+        if (it->type == 0 && set == 0 || it->type == 0 && set == 2) {
             sf::Vector2f dir = centre - it->pos;
             float distance = std::sqrt(dir.x * dir.x + dir.y * dir.y);
 
@@ -64,14 +64,16 @@ inline void updateStream(sf::RenderWindow& window, sf::Vector2f centre, float dt
             it->bit.setFillColor(sf::Color(243, 238, 225, (std::uint8_t)alpha));
         }
         else {
-            it->pos.y += it->verticalDir * it->speed * dt;
+            if (set == 1 || set == 2) {
+                it->pos.y += it->verticalDir * it->speed * dt;
 
-            if (it->pos.y < -100.f || it->pos.y > window.getSize().y + 100.f) {
-                it = dataStream.erase(it);
-                continue;
+                if (it->pos.y < -100.f || it->pos.y > window.getSize().y + 100.f) {
+                    it = dataStream.erase(it);
+                    continue;
+                }
+
+                it->bit.setFillColor(sf::Color(243, 238, 225, 30));
             }
-
-            it->bit.setFillColor(sf::Color(243, 238, 225, 30));
         }
 
         it->bit.setPosition(it->pos);

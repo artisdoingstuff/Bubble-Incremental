@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Misc/GIncludes.hpp"
+#include "../Misc/Globals/GIncludes.hpp"
 
 struct Hotfix {
     std::string name;

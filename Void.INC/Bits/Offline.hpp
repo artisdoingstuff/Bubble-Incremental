@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Misc/GIncludes.hpp"
+#include "../Misc/Globals/GIncludes.hpp"
 #include "../Hardware/LogicGate.hpp"
 #include "../Initialisation/Initialisation.hpp"
 
@@ -56,13 +56,11 @@ inline void offline(time_t timestamp, long double& bits, long double& allBits, l
         if (dirTree[26].patched) dirMult *= 400.0L; // 6_2
 
         if (dirTree[1].patched && dirTree[1].disabled == 0) dirMult *= 1.6L; // 1
-        if (dirTree[12].patched && dirTree[12].disabled == 0) dirMult *= 1.5L; // 1_1
-
+        if (dirTree[12].patched && dirTree[12].disabled == 0) dirMult *= 1.5L; // 1_
         if (dirTree[4].patched && dirTree[4].disabled == 0) dirMult *= std::min(patch3_2Mult, 100.0L); // 3_2
-
 		
 		long double offlineBits = (elapsedTime * eBPS * hotfixMult * dirMult) * 1;
 		
-		bits += offlineBits; allBits += offlineBits;
+		bits += offlineBits; allBits += offlineBits; accOfflineBits += offlineBits;
 	}
 }

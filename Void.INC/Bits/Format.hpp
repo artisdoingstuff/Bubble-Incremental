@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Misc/GIncludes.hpp"
+#include "../Misc/Globals/GIncludes.hpp"
 
 inline std::string format(long double bits, bool forceDecimals = false) {
    if (bits < 1000.L) {
