@@ -15,3 +15,8 @@ inline void centreText(sf::Text& text, sf::Vector2f targetPos) {
     text.setOrigin({ textRect.position.x + textRect.size.x / 2.0f, textRect.position.y + textRect.size.y / 2.0f });
     text.setPosition(targetPos);
 }
+
+template<typename T>
+T lerp(T a, T b, T t) {
+    return a + t * (b - a);
+}

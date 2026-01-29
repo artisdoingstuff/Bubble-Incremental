@@ -273,7 +273,7 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
                 bTxt.setFillColor(sf::Color(243, 238, 225));
                 window.draw(bTxt);
 
-                if (bHover && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && cooldown.getElapsedTime().asMilliseconds() > 300) {
+                if (bHover && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && cooldown.getElapsedTime().asMilliseconds() > 200) {
                     for (auto& hf : hotfixList) {
                         if (!hf.written && bits >= hf.bits) {
                             bits -= hf.bits;
