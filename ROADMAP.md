@@ -18,6 +18,6 @@
 
 [/] 1.0.8 - Starting screen animation (transition to actual game) + multi-buy. (Released 27th of January, 2026 @ [Releases](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.8-release))
 
-[ ] 1.0.9 - Settings (limited, no list yet).
+[ ] 1.0.9 - Settings (limited; [list here](https://github.com/artdoesstuff/Void.INC/pull/18)) + other stuff.
 
 [ ] 1.0.10 - Final content rebalancing + Any bug fixes.
