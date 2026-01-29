@@ -7,7 +7,7 @@ inline void drawOfflineUI(sf::RenderWindow& window, sf::Vector2f& centre) {
 	sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 	sf::Vector2f boxSize(550.f, 200.f);
 
-	sf::RectangleShape overlay({ (float)window.getSize().x, (float)window.getSize().y });
+	sf::RectangleShape overlay(sf::Vector2f(window.getSize()));
 	overlay.setFillColor(sf::Color(0, 0, 0, 180));
 	window.draw(overlay);
 

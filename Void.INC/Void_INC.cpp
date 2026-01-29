@@ -18,11 +18,12 @@
 #include "UI/Core/Terminal.hpp"
 #include "UI/Extra/Loading.hpp"
 #include "UI/Extra/Offline.hpp"
-#include "UI/Extra/Settings.hpp"
+#include "UI/Extra/Options.hpp"
 #include "UI/Extra/Star.hpp"
 #include "UI/Extra/Start.hpp"
 
 #include "UserData/Local/Loading.hpp"
+#include "UserData/Local/Options.hpp"
 #include "UserData/Local/Saving.hpp"
 #include "UserData/Local/Version.hpp"
 
@@ -53,6 +54,8 @@ int main() {
 	star.star = sf::VertexArray(sf::PrimitiveType::LineStrip, 4000);
 	float starScale = 1.f;
 
+	Cog cog;
+
 	sf::VertexArray lines(sf::PrimitiveType::Lines);
 	for (int i = 0; i < window.getSize().y; i += 4) {
 		lines.append(sf::Vertex{ sf::Vector2f(0.f, (float)i), sf::Color(255, 255, 255, 40) });
@@ -76,6 +79,7 @@ int main() {
 	initDirTree();
 	positionTreeNodes(window.getSize());
 	load(timeEnd, bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialised, logicGateList, hotfixList, dirTree);
+	loadSettings(renderEffects, quickStart);
 	offline(timeEnd, bits, allBits, bitsPerSecond, hotfixMult);
 	
 	while (window.isOpen()) {
@@ -202,11 +206,11 @@ int main() {
 
 		window.clear(sf::Color::Black);
 
-		if (showStart) {
-			drawStartUI(window, states, star, elapsedTime, deltaTime, sPos);
+		if (showStart && !quickStart) {
+			drawStartUI(window, states, star, elapsedTime, deltaTime, sPos, centre);
 		}
 
-		if (start) {
+		if (start && !quickStart) {
 			if (currentStartStep == StartState::IDLE) currentStartStep = StartState::TRANSITION;
 			timer += deltaTime;
 			canClickStart = false;
@@ -231,14 +235,21 @@ int main() {
 			}
 		}
 
-		if (!showStart) {
+		if (!showStart || quickStart) {
+			if (quickStart) {
+				showStart = false;
+				canClick = true;
+				if (!rolledWhisper) showOffline = true;
+			}
 			if (!reinitialisation && !initialisation) {
 				window.draw(bitsText);
 				window.draw(bitsPerSecondText);
 
-				updateStream(window, centre, deltaTime, 2);
-				for (auto& d : dataStream) {
-					window.draw(d.bit);
+				if (renderEffects) {
+					updateStream(window, centre, deltaTime, 2);
+					for (auto& d : dataStream) {
+						window.draw(d.bit);
+					}
 				}
 
 				updateLogicGateUI(window, allBits);
@@ -307,9 +318,11 @@ int main() {
 				timer = 0.0f;
 				canClickInit = true;
 
-				updateStream(window, centre, deltaTime, 1);
-				for (auto& d : dataStream) {
-					window.draw(d.bit);
+				if (renderEffects) {
+					updateStream(window, centre, deltaTime, 1);
+					for (auto& d : dataStream) {
+						window.draw(d.bit);
+					}
 				}
 
 				drawTreeLines(window);
@@ -368,6 +381,12 @@ int main() {
 			}
 			}
 		}
+		
+		if (!showStart) {
+			updateCog(cog, window, deltaTime, showOptions);
+			window.draw(cog.cog);
+		}
+		if (showOptions) drawOptionsUI(window, showOptions, centre);
 
 		window.draw(lines);
 
@@ -377,6 +396,7 @@ int main() {
 			if (gameEvent->is<sf::Event::Closed>()) {
 				time_t timeStart = time(nullptr);
 				save(timeStart, bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialised, logicGateList, hotfixList, dirTree);
+				saveSettings(renderEffects, quickStart);
 				versionSave(voidVersion);
 				window.close();
 			}

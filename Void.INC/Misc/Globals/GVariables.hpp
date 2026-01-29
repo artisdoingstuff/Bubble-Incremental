@@ -42,11 +42,19 @@ enum class StartState {
 };
 inline StartState currentStartStep = StartState::IDLE;
 
+// Click states
 inline bool canClickStart = true; // Start menu only
 inline bool canClick = false; // Pre-reinitialisation
 inline bool canClickInit = false; // Post-initialisation
+inline bool canClickOptions = false; // Options menu only
 
-enum class Tab { NONE, LOGIC, HOTFIX, REINIT };
+enum class Tab {
+    NONE,
+    LOGIC,
+    HOTFIX,
+    REINIT,
+    STATS
+};
 inline Tab activeTab = Tab::NONE;
 inline float tabProgress = 0.f;
 
@@ -87,6 +95,13 @@ inline float patch_3_2Mult = 1.0L; // Multiplier from Patch_3_2
 inline float patch_7_2Mult = 1.0L; // Multiplier from Patch_7_2
 inline bool showConfirmPopup = false;
 
+inline long double malbits = 0.0L; // Malicious bits (for 1.1 use)
 inline long double malbytes = 0.0L; // Malicious bytes (for 1.1 use)
 
-inline sf::Font jetBrainsMono("Assets/Font/JetBrainsMono.ttf");
+inline sf::Font jetBrainsMono("Assets/Font/JetBrainsMono.ttf"); // Main font (kind of obvious)
+
+// Options variables
+inline bool showOptions = false; // Toggles the options menu
+
+inline bool renderEffects = true; // Toggles rendering effects in the Void.INC/Effects folder
+inline bool quickStart = false; // Toggles the start menu
