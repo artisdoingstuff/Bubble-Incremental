@@ -49,3 +49,4 @@
 > |**[v1.0.6: 17.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.6-release)**|
 > |**[v1.0.7: 26.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.7-release)**|
 > |**[v1.0.8: 27.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.8-release)**|
+> |**[v1.0.9: 30.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.9-release)**|
