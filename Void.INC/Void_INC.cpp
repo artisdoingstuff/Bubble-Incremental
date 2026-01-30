@@ -327,8 +327,9 @@ int main() {
 
 				drawTreeLines(window);
 				drawDirTreeUI(window);
+				
+				drawTerminalUI(window, bits, allBits, deltaTime);
 
-				drawInitButton(window);
 				window.draw(bytesText);
 				break;
 			}
@@ -393,6 +394,7 @@ int main() {
 		window.display();
 
 		while (const std::optional gameEvent = window.pollEvent()) {
+			sf::Vector2f winSize = (sf::Vector2f)window.getSize();
 			if (gameEvent->is<sf::Event::Closed>()) {
 				time_t timeStart = time(nullptr);
 				save(timeStart, bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialised, logicGateList, hotfixList, dirTree);
@@ -401,18 +403,28 @@ int main() {
 				window.close();
 			}
 
+			if (gameEvent->is<sf::Event::TextEntered>()) {
+				const auto& textEvent = gameEvent->getIf<sf::Event::TextEntered>();
+
+				if (activeTab == Tab::LOGS && !logsUnlocked) {
+					if (textEvent->unicode == '\b') {
+						if (!logInput.empty()) logInput.pop_back();
+					}
+					else if (textEvent->unicode < 128 && textEvent->unicode != '\r' && textEvent->unicode != '\n') {
+						logInput += static_cast<char>(textEvent->unicode);
+					}
+				}
+			}
+
 			if (gameEvent->is<sf::Event::MouseButtonPressed>()) {
 				const auto& mouseEvent = gameEvent->getIf<sf::Event::MouseButtonPressed>();
-				sf::Vector2i mousePixelPos = sf::Mouse::getPosition(window);
-				sf::Vector2f mousePos = window.mapPixelToCoords(mousePixelPos);
+				sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
 				if (mouseEvent->button == sf::Mouse::Button::Left && canClick) {
 					if (clickRect.getGlobalBounds().contains(mousePos)) {
 						long double bitsClicked = bitsPerClick * clickMultiplier * (1 + realBitsPerSecond * 0.05f);
 						starScale = 1.1f; bits += bitsClicked; allBits += bitsClicked; allClickedBits += bitsClicked;
 					}
-
-					sf::Vector2f winSize = (sf::Vector2f)window.getSize();
 
 					if (mousePos.y > winSize.y - 60.f) {
 						if (sf::FloatRect({ 10, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
@@ -422,7 +434,13 @@ int main() {
 							activeTab = (activeTab == Tab::HOTFIX) ? Tab::NONE : Tab::HOTFIX;
 						}
 						else if (sf::FloatRect({ 390, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
+							activeTab = (activeTab == Tab::STATS) ? Tab::NONE : Tab::STATS;
+						}
+						else if (sf::FloatRect({ 580, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
 							activeTab = (activeTab == Tab::REINIT) ? Tab::NONE : Tab::REINIT;
+						}
+						else if (sf::FloatRect({ 770, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
+							activeTab = (activeTab == Tab::LOGS) ? Tab::NONE : Tab::LOGS;
 						}
 					}
 
@@ -455,15 +473,26 @@ int main() {
 						}
 						showConfirmPopup = false;
 					}
-					else if (activeTab == Tab::REINIT) {
-						showConfirmPopup = true;
-					}
-					else if (activeTab == Tab::NONE) {
-						showConfirmPopup = false;
-					}
+					else if (activeTab == Tab::STATS) showConfirmPopup = false;
+					else if (activeTab == Tab::REINIT) showConfirmPopup = true;
+					else if (activeTab == Tab::LOGS) showConfirmPopup = false;
+					else if (activeTab == Tab::NONE) showConfirmPopup = false;
 				}
 
 				if (mouseEvent->button == sf::Mouse::Button::Left && canClickInit) {
+					if (mousePos.y > winSize.y - 60.f) {
+						if (sf::FloatRect({ 10, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
+							activeTab = (activeTab == Tab::INIT) ? Tab::NONE : Tab::INIT;
+						}
+					}
+					
+					if (activeTab == Tab::INIT) {
+						currentReinitStep = ReinitState::IDLE;
+						reinitialisation = false;
+						initialisation = true;
+						canClickInit = false;
+					}
+
 					for (size_t i = 0; i < dirTree.size(); ++i) {
 						auto& patch = dirTree[i];
 
@@ -475,12 +504,9 @@ int main() {
 								bytes -= patch.bytes;
 								patch.patched = 1;
 
-								if (patch.name == "Patch_0") {
-									bitsToBytesRate = 1e-6L;
-								}
-								else if (patch.name == "Patch_3_1") {
-									bitsToBytesRate = 3e-7L;
-								}
+								if (patch.name == "Patch_0") bitsToBytesRate = 1e-6L;
+								else if (patch.name == "Patch_3_1") bitsToBytesRate = 3e-7L;
+								else if (patch.name == "Patch_6") bitsToBytesRate = 5e-7L;
 							}
 						}
 					}

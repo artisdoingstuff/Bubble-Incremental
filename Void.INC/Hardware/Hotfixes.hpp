@@ -141,7 +141,8 @@ inline void initHotfixes() {
         "sticky_bit_fix", "setuid_bypass", "chroot_jail_v1", "namespace_v2", "user_ns_fix",
         "mount_ns_v1", "net_ns_v2", "uts_ns_fix", "ipc_ns_v1", "cgroup_ns_v1",
         "neuromorphic_v3", "cryogenic_v3", "spintronics_v3", "topological_v3", "quantum_v3",
-        "photonic_mem_v3", "nano_wire_sync_v3", "bio_interface_v3", "molecular_v3", "vacuum_state_v3"
+        "photonic_mem_v3", "nano_wire_sync_v3", "bio_interface_v3", "molecular_v3", "vacuum_state_v3",
+        // 1.0.10 hotfixes
     };
 
     long double currentBits = 100.0L;

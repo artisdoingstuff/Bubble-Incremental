@@ -45,7 +45,7 @@ inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit, sf::Vect
     titleBar.setPosition({ centre.x, centre.y - (boxSize.y / 2.f) });
     titleBar.setFillColor(sf::Color(40, 40, 40));
 
-    sf::Text t(jetBrainsMono, "> void://reinit.bat" + getCursor(), 14);
+    sf::Text t(jetBrainsMono, "> void://hardware/reinit.bat" + getCursor(), 14);
     t.setPosition({ titleBar.getPosition().x - (boxSize.x / 2.f) + 10.f, titleBar.getPosition().y + 5.f });
     t.setFillColor(sf::Color(243, 238, 225));
 

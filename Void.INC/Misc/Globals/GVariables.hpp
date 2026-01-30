@@ -2,7 +2,7 @@
 #include "GIncludes.hpp"
 
 // Global references
-inline std::string voidVersion = "v1.0.8-release"; // Version control for the game (Updater purposes)
+inline std::string voidVersion = "v1.0.9-release"; // Version control for the game (Updater purposes)
 
 inline bool reinitialisation = false;
 inline bool initialisation = false;
@@ -52,8 +52,10 @@ enum class Tab {
     NONE,
     LOGIC,
     HOTFIX,
+    STATS,
+    INIT,
     REINIT,
-    STATS
+    LOGS
 };
 inline Tab activeTab = Tab::NONE;
 inline float tabProgress = 0.f;
