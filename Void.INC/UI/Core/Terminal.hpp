@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../Misc/Globals/GIncludes.hpp"
+#include "../../Misc/Lore.hpp"
 #include "Download.hpp"
 
 inline int hotfixPage = 0;
@@ -111,9 +112,13 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
         window.draw(txt);
     };
 
-    drawTabButton("logic.bat", 10.f, Tab::LOGIC);
-    drawTabButton("hotfixes.bat", 200.f, Tab::HOTFIX);
-    if (allBits >= 5000000.0L) drawTabButton("reinit.bat", 390.f, Tab::REINIT);
+    if (!reinitialisation) drawTabButton("logic.bat", 10.f, Tab::LOGIC);
+    if (!reinitialisation) drawTabButton("hotfixes.bat", 200.f, Tab::HOTFIX);
+    if (!reinitialisation) drawTabButton("stats.bat", 390.f, Tab::STATS);
+    if (!reinitialisation && allBits >= 5000000.0L) drawTabButton("reinit.bat", 580.f, Tab::REINIT);
+	if (!reinitialisation && allBits >= 1e45L) drawTabButton("logs.bat", 770.f, Tab::LOGS);
+
+    if (reinitialisation) drawTabButton("init.bat", 10.f, Tab::INIT);
 
     if (activeTab == Tab::LOGIC) {
         drawTerminalModule(window, "void://hardware/logic.bat" + getCursor(), tabProgress, [&](sf::Vector2f start) {
@@ -283,6 +288,81 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
                     }
                     cooldown.restart();
                 }
+            }
+            });
+    }
+
+    else if (activeTab == Tab::STATS) {
+        drawTerminalModule(window, "void://hardware/stats.bat" + getCursor(), tabProgress, [&](sf::Vector2f start) {
+            sf::Text s(jetBrainsMono,
+                format(allBits) + "_all_bits.tmp\n\n" +
+                format(allClickedBits) + "_clicked_bits.tmp\n\n" +
+                std::to_string(timesInitialised) + "_times_init.tmp\n\n" +
+                voidVersion + "\n\n" +
+                "U-01-A.bin",
+                14);
+            s.setPosition(start);
+            s.setFillColor(sf::Color(243, 238, 225));
+            window.draw(s);
+
+            sf::Text c(jetBrainsMono, "More coming\nsoon...", 56);
+            c.setPosition(start + sf::Vector2f(moduleWidth * 0.7f, moduleHeight / 2.f - 100.f));
+            c.setFillColor(sf::Color(100, 100, 100));
+            window.draw(c);
+            });
+    }
+
+    else if (activeTab == Tab::LOGS) {
+        drawTerminalModule(window, "void://restricted/logs.bat" + getCursor(), tabProgress, [&](sf::Vector2f start) {
+            sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+
+            if (!logsUnlocked) {
+                sf::Text t(jetBrainsMono, "OMEGA-LEVEL ACCESS CODE REQUIRED:\n> " + logInput + getCursor(), 56);
+				t.setOrigin({ t.getGlobalBounds().size.x / 2.f, 0.f });
+                t.setPosition(start + sf::Vector2f(moduleWidth / 2.f, moduleHeight * 0.35f));
+                t.setFillColor(sf::Color(243, 238, 225));
+                window.draw(t);
+
+                if (logInput == "050126") {
+                    logsUnlocked = true;
+                    logInput = "";
+                }
+            }
+            else {
+                float sidebarWidth = 200.f;
+
+                for (size_t i = 0; i < loreEntries.size(); ++i) {
+                    sf::Text logTitle(jetBrainsMono, "> " + loreEntries[i].title, 13);
+                    logTitle.setPosition(start + sf::Vector2f(10.f, 20.f + (i * 25.f)));
+
+                    bool isHovered = sf::FloatRect(logTitle.getPosition(), { sidebarWidth, 20.f }).contains(mousePos);
+
+                    if (selectedLog == i) logTitle.setFillColor(sf::Color(243, 238, 225));
+                    else if (isHovered) logTitle.setFillColor(sf::Color::White);
+                    else logTitle.setFillColor(sf::Color(100, 100, 100));
+
+                    if (isHovered && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
+                        selectedLog = i;
+                    }
+                    window.draw(logTitle);
+                }
+
+                sf::RectangleShape line({ 1.f, moduleHeight - 100.f });
+                line.setPosition(start + sf::Vector2f(sidebarWidth, 10.f));
+                line.setFillColor(sf::Color(50, 50, 50));
+                window.draw(line);
+
+                auto& entry = loreEntries[selectedLog];
+
+                sf::Text h(jetBrainsMono, entry.title + " - " + entry.cycle, 14);
+                h.setPosition(start + sf::Vector2f(sidebarWidth + 20.f, 20.f));
+                h.setFillColor(sf::Color(243, 238, 225));
+                window.draw(h);
+
+                sf::Text b(jetBrainsMono, entry.content, 12);
+                b.setPosition(start + sf::Vector2f(sidebarWidth + 20.f, 50.f));
+                b.setFillColor(sf::Color(180, 180, 180));
+                window.draw(b);
             }
             });
     }

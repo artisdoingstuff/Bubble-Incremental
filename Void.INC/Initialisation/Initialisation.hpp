@@ -54,39 +54,7 @@ inline void initDirTree() {
     dirTree.emplace_back("Patch_C", "x85,000 BPS.", 17500000000.0L);
     dirTree.emplace_back("Patch_B_1", "x4 Bytes but x0.1 and -5 clicks.", 4500000000.0L);
     dirTree.emplace_back("Patch_6_2", "x400 BPS and x2 Bytes.", 1250000.0L);
-}
-
-inline void drawInitButton(sf::RenderWindow& window) {
-    sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-
-    sf::Vector2f btnPos(30.f, window.getSize().y - 60.f);
-
-    sf::FloatRect hitbox({ btnPos.x, btnPos.y }, { 150.f, 40.f });
-    bool isHovered = hitbox.contains(mousePos);
-
-    std::string prompt = isHovered ? "> init.bat" : "  init.bat";
-    sf::Text initTxt(jetBrainsMono, prompt, 22);
-    initTxt.setPosition(btnPos);
-
-    if (isHovered) {
-        initTxt.setFillColor(sf::Color(243, 238, 225));
-        sf::RectangleShape underline({ 100.f, 2.f });
-        underline.setPosition({ btnPos.x + 28.f, btnPos.y + 28.f });
-        underline.setFillColor(sf::Color(243, 238, 225));
-        window.draw(underline);
-
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && canClickInit) {
-            currentReinitStep = ReinitState::IDLE;
-            reinitialisation = false;
-            initialisation = true;
-            canClickInit = false;
-        }
-    }
-    else {
-        initTxt.setFillColor(sf::Color(180, 180, 180));
-    }
-
-    window.draw(initTxt);
+    // 1.0.10 patches (I gotchu guys, don't worry)
 }
 
 inline void to_json(json& j, const DirNodes& p) {
