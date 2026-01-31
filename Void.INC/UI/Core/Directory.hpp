@@ -14,6 +14,7 @@ inline void positionTreeNodes(sf::Vector2u windowSize) {
 
     dirTree[2].pos = dirTree[1].pos + sf::Vector2f(180.f, 0.f); // 2
     dirTree[20].pos = dirTree[2].pos + sf::Vector2f(0.f, -180.f); // 2_1
+	dirTree[27].pos = dirTree[2].pos + sf::Vector2f(0.f, 180.f); // 2_2
 
     dirTree[9].pos = dirTree[2].pos + sf::Vector2f(180.f, 0.f); // 3
     dirTree[3].pos = dirTree[9].pos + sf::Vector2f(0.f, -180.f); // 3_1
@@ -28,6 +29,7 @@ inline void positionTreeNodes(sf::Vector2u windowSize) {
     dirTree[8].pos = dirTree[11].pos + sf::Vector2f(0.f, 180.f); // 5_2
 
 	dirTree[16].pos = dirTree[11].pos + sf::Vector2f(180.f, 0.f); // 6
+	dirTree[28].pos = dirTree[16].pos + sf::Vector2f(0.f, -180.f); // 6_1
 	dirTree[26].pos = dirTree[16].pos + sf::Vector2f(0.f, 180.f); // 6_2
 
 	dirTree[17].pos = dirTree[16].pos + sf::Vector2f(180.f, 0.f); // 7
@@ -45,6 +47,10 @@ inline void positionTreeNodes(sf::Vector2u windowSize) {
     dirTree[25].pos = dirTree[23].pos + sf::Vector2f(180.f, 0.f); // B_1
 
     dirTree[24].pos = dirTree[23].pos + sf::Vector2f(0.f, -180.f); // C
+	dirTree[29].pos = dirTree[24].pos + sf::Vector2f(180.f, 0.f); // C_1
+	dirTree[30].pos = dirTree[29].pos + sf::Vector2f(180.f, 0.f); // C_2
+	dirTree[31].pos = dirTree[30].pos + sf::Vector2f(180.f, 0.f); // C_3
+	dirTree[32].pos = dirTree[31].pos + sf::Vector2f(180.f, 0.f); // C_4
 
     for (auto& node : dirTree) {
         node.nodeCircle.setPosition(node.pos);
@@ -92,6 +98,7 @@ inline void drawTreeLines(sf::RenderWindow& window) {
 
     drawCable(2, 9); // 2 to 3
     drawCable(2, 20); // 2 to 2_1
+    drawCable(2, 27); // 2 to 2_1
 
     drawCable(9, 10); // 3 to 4
     drawCable(9, 3); // 3 to 3_1
@@ -106,6 +113,7 @@ inline void drawTreeLines(sf::RenderWindow& window) {
     drawCable(11, 8); // 5 to 5_2
 
     drawCable(16, 17); // 6 to 7
+    drawCable(16, 28); // 6 to 6_1
     drawCable(16, 26); // 6 to 6_2
 
     drawCable(17, 18); // 7 to 7_1
@@ -117,6 +125,11 @@ inline void drawTreeLines(sf::RenderWindow& window) {
 
     drawCable(23, 24); // B to C
     drawCable(23, 25); // B to B_1
+
+    drawCable(24, 29); // C to C_1
+    drawCable(29, 30); // C_1 to C_2
+    drawCable(30, 31); // C_2 to C_3
+    drawCable(31, 32); // C_3 to C_4
 }
 
 inline void drawDirTreeUI(sf::RenderWindow& window) {
@@ -130,15 +143,19 @@ inline void drawDirTreeUI(sf::RenderWindow& window) {
 
         if (idx == 1 || idx == 14 || idx == 22) return dirTree[0].patched; // Unlock 1, !, and A
         if (idx == 2 || idx == 12 || idx == 13) return dirTree[1].patched; // Unlock 2, 1_1, and 1_2
-        if (idx == 9 || idx == 20) return dirTree[2].patched; // Unlock 3 and 2_1
+        if (idx == 9 || idx == 20 || idx == 27) return dirTree[2].patched; // Unlock 3, 2_1, and 2_2
 		if (idx == 3 || idx == 4 || idx == 10) return dirTree[9].patched; // Unlock 4, 3_1, and 3_2
 		if (idx == 5 || idx == 6 || idx == 11) return dirTree[10].patched; // Unlock 5, 4_1, and 4_2
         if (idx == 7 || idx == 8 || idx == 16) return dirTree[11].patched; // Unlock 6, 5_1, and 5_2
-		if (idx == 17 || idx == 26) return dirTree[16].patched; // Unlock 7 and 6_2
+		if (idx == 17 || idx == 26 || idx == 28) return dirTree[16].patched; // Unlock 7, 6_2, and 6_1
 		if (idx == 18 || idx == 19) return dirTree[17].patched; // Unlock 7_1 and 7_2
         if (idx == 15 || idx == 21) return dirTree[14].patched; // Unlock @
         if (idx == 23) return dirTree[22].patched; // Unlock B
         if (idx == 24 || idx == 25) return dirTree[23].patched; // Unlock C and B_1
+        if (idx == 29) return dirTree[24].patched; // Unlock C_1
+        if (idx == 30) return dirTree[29].patched; // Unlock C_2
+        if (idx == 31) return dirTree[30].patched; // Unlock C_3
+        if (idx == 32) return dirTree[31].patched; // Unlock C_4
         return false;
         };
 

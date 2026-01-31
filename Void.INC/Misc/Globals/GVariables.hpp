@@ -96,6 +96,7 @@ inline long double bitsFromPatch = 0.0L; // Applies to Patch_!! (currently)
 inline float patch_1Mult = 1.0f; // Multiplier from Patch_1
 inline float patch_3_2Mult = 1.0L; // Multiplier from Patch_3_2
 inline float patch_7_2Mult = 1.0L; // Multiplier from Patch_7_2
+inline float patch_C_4Mult = 1.0L; // Multiplier from Patch_C_4
 inline bool showConfirmPopup = false;
 
 inline long double malbits = 0.0L; // Malicious bits (for 1.1 use)

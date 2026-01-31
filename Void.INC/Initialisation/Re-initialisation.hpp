@@ -7,7 +7,7 @@
 inline void resetProgress() {
     for (auto& lg : logicGateList) {
         lg.ver = 0;
-        lg.currentBits = lg.baseBits;
+        lg.currentBits = lg.baseBits * costMult;
     }
 
     for (auto& hf : hotfixList) {

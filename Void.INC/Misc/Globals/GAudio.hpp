@@ -8,7 +8,7 @@ inline std::map<std::string, sf::Sound> sounds;
 inline std::map<std::string, std::unique_ptr<sf::Music>> music;
 inline std::map<std::string, std::unique_ptr<sf::Music>> ambience;
 
-float bVolSFX = 60.f;
+float bVolSFX = 30.f;
 float bVolMusic = 30.f;
 
 inline void initAudio() {
