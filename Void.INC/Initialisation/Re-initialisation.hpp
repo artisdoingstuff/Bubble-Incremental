@@ -86,6 +86,10 @@ inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit, sf::Vect
         showConfirmPopup = false;
     };
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Y)) triggerInit();
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::N) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) || sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && c.getGlobalBounds().contains(mousePos)) cancelInit();
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Y)) {
+        triggerInit(); playSFX("button");
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::N) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) || sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && c.getGlobalBounds().contains(mousePos)) {
+        cancelInit(); playSFX("button");
+    }
 }

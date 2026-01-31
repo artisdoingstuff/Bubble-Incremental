@@ -68,5 +68,7 @@ inline void drawOfflineUI(sf::RenderWindow& window, sf::Vector2f& centre) {
     o.setFillColor(sf::Color(200, 200, 200));
 	window.draw(o);
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) || sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && c.getGlobalBounds().contains(mousePos)) showOffline = false;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) || sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && c.getGlobalBounds().contains(mousePos)) {
+        showOffline = false; playSFX("button");
+    }
 }

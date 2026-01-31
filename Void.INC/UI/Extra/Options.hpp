@@ -26,8 +26,7 @@ inline void updateCog(Cog& cog, sf::RenderWindow& window, float dt, bool& showOp
 
     sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
-    cog.bounds = sf::FloatRect({ topRightPos.x - outerRadius, topRightPos.y - outerRadius },
-        { outerRadius * 2.f, outerRadius * 2.f });
+    cog.bounds = sf::FloatRect({ topRightPos.x - outerRadius, topRightPos.y - outerRadius }, { outerRadius * 2.f, outerRadius * 2.f });
 
     bool cHover = cog.bounds.contains(mousePos);
 
@@ -55,6 +54,7 @@ inline void updateCog(Cog& cog, sf::RenderWindow& window, float dt, bool& showOp
         showOptions = true;
         canClickOptions = true;
         cooldown.restart();
+        playSFX("button");
 
 		if (showStart) canClickStart = false;
         if (!showStart) canClick = false;
@@ -71,8 +71,11 @@ inline void drawOptionsUI(sf::RenderWindow& window, bool& showOptions, sf::Vecto
     sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
     static std::vector<ConfigOption> options = {
-        {"RENDER_EFFECTS", &renderEffects},
-        {"QUICK_START", &quickStart}
+        {"RENDER_FX", &renderEffects},
+        {"QUICK_START", &quickStart},
+        {"MUTE_ALL", &muteAll},
+        {"MUTE_SFX", &muteSFX},
+        {"MUTE_AMB", &muteAmbience}
     };
 
     float linePadding = 30.f;
@@ -126,6 +129,7 @@ inline void drawOptionsUI(sf::RenderWindow& window, bool& showOptions, sf::Vecto
 
         if (isHovered && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && canClickOptions && cooldown.getElapsedTime().asMilliseconds() > 200) {
             *options[i].toggle = !(*options[i].toggle);
+            playSFX("button");
             cooldown.restart();
         }
 
@@ -140,6 +144,7 @@ inline void drawOptionsUI(sf::RenderWindow& window, bool& showOptions, sf::Vecto
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) || sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && c.getGlobalBounds().contains(mousePos)) {
         showOptions = false;
         canClickOptions = false;
+        playSFX("button");
 
         if (showStart) canClickStart = true;
         if (!showStart) canClick = true;

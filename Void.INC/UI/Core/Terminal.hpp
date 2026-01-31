@@ -86,7 +86,10 @@ inline void drawTerminalModule(sf::RenderWindow& window, std::string title, floa
     bool canClose = c.getGlobalBounds().contains(mousePos);
     window.draw(c);
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) || sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && canClose) activeTab = Tab::NONE;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) || sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && canClose) {
+        activeTab = Tab::NONE;
+        playSFX("button");
+    }
 
     contentDraw(frame.getPosition() + sf::Vector2f(20.f, 50.f));
 }
@@ -196,6 +199,7 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
 
                 if (hovered && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && cooldown.getElapsedTime().asMilliseconds() > 200) {
                     currentBuy = m.second;
+                    playSFX("button");
                     cooldown.restart();
                 }
                 btnX += 55.f;
@@ -244,8 +248,8 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
                 window.draw(t);
 
                 if (hovered && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && cooldown.getElapsedTime().asMilliseconds() > 200) {
-                    if (isPrev && hotfixPage > 0) { hotfixPage--; cooldown.restart(); }
-                    if (!isPrev && (hotfixPage + 1) * HF_PER_PAGE < (int)hotfixList.size()) { hotfixPage++; cooldown.restart(); }
+                    if (isPrev && hotfixPage > 0) { hotfixPage--; playSFX("button"); cooldown.restart(); }
+                    if (!isPrev && (hotfixPage + 1) * HF_PER_PAGE < (int)hotfixList.size()) { hotfixPage++; playSFX("button"); cooldown.restart(); }
                 }
                 };
 
@@ -286,6 +290,7 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
                             hotfixMult += hf.bitMult;
                         }
                     }
+                    playSFX("button");
                     cooldown.restart();
                 }
             }
@@ -341,7 +346,8 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
                     else if (isHovered) logTitle.setFillColor(sf::Color::White);
                     else logTitle.setFillColor(sf::Color(100, 100, 100));
 
-                    if (isHovered && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
+                    if (isHovered && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && cooldown.getElapsedTime().asMilliseconds() > 200) {
+                        if (selectedLog != i) playSFX("button");
                         selectedLog = i;
                     }
                     window.draw(logTitle);

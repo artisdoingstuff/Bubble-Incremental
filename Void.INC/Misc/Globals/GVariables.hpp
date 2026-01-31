@@ -19,6 +19,7 @@ inline float timer = 0.0f;
 inline sf::Clock deltaClock;
 inline sf::Clock elapsedClock;
 inline sf::Clock cooldown;
+inline sf::Clock ambienceClock;
 
 enum class ReinitState {
     IDLE,
@@ -107,3 +108,6 @@ inline bool showOptions = false; // Toggles the options menu
 
 inline bool renderEffects = true; // Toggles rendering effects in the Void.INC/Effects folder
 inline bool quickStart = false; // Toggles the start menu
+inline bool muteAll = false; // Toggles all in-game sounds
+inline bool muteSFX = false; // Toggles sound effects
+inline bool muteAmbience = false; // Toggles all ambient sounds
