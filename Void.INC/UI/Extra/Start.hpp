@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../Misc/Globals/GIncludes.hpp"
+#include "../../Misc/Globals/GAudio.hpp"
 
 inline void drawStartUI(sf::RenderWindow& window, sf::RenderStates& states, Star& star, float et, float dt, sf::Vector2f& sPos, sf::Vector2f& centre) {
 	sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
@@ -49,14 +50,17 @@ inline void drawStartUI(sf::RenderWindow& window, sf::RenderStates& states, Star
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && cooldown.getElapsedTime().asMilliseconds() > 200) {
 		if (pHover && canClickStart) {
 			start = true;
+			playSFX("button");
 		}
 		if (oHover && canClickStart) {
 			showOptions = true;
 			canClickStart = false;
 			canClickOptions = true;
+			playSFX("button");
 		}
 		if (showOptions) drawOptionsUI(window, showOptions, centre);
 		if (qHover && canClickStart) {
+			playSFX("button");
 			window.close();
 		}
 		cooldown.restart();

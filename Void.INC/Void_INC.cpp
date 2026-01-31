@@ -1,4 +1,5 @@
-﻿#include "Misc/Globals/GFunctions.hpp"
+﻿#include "Misc/Globals/GAudio.hpp"
+#include "Misc/Globals/GFunctions.hpp"
 #include "Misc/Globals/GIncludes.hpp"
 #include "Misc/Globals/GVariables.hpp"
 
@@ -77,6 +78,7 @@ int main() {
 	initLogicGates();
 	initHotfixes();
 	initDirTree();
+	initAudio();
 	positionTreeNodes(window.getSize());
 	load(timeEnd, bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialised, logicGateList, hotfixList, dirTree);
 	loadSettings(renderEffects, quickStart);
@@ -204,9 +206,13 @@ int main() {
 		sf::RenderStates states;
 		states.blendMode = sf::BlendAdd;
 
+		ambienceRandom();
+		updateVolume();
+
 		window.clear(sf::Color::Black);
 
 		if (showStart && !quickStart) {
+			playMusic("menu");
 			drawStartUI(window, states, star, elapsedTime, deltaTime, sPos, centre);
 		}
 
@@ -242,6 +248,7 @@ int main() {
 				if (!rolledWhisper) showOffline = true;
 			}
 			if (!reinitialisation && !initialisation) {
+				playMusic("main");
 				window.draw(bitsText);
 				window.draw(bitsPerSecondText);
 
@@ -297,6 +304,7 @@ int main() {
 				if (timer >= 0.7f) {
 					starScale = -10.f;
 					currentReinitStep = ReinitState::LOADING_BAR;
+					playMusic("loading");
 				}
 				break;
 			}
@@ -307,6 +315,7 @@ int main() {
 				if (loadingProgress >= 1.0f) {
 					loadingProgress = 1.0f;
 					currentReinitStep = ReinitState::DIR;
+					playMusic("directory");
 				}
 
 				drawLoadingUI(window, loadingProgress);
@@ -338,6 +347,7 @@ int main() {
 		if (initialisation) {
 			if (currentInitStep == InitState::IDLE) {
 				currentInitStep = InitState::LOADING_BAR;
+				playMusic("loading");
 			}
 
 			timer += deltaTime;
@@ -409,9 +419,11 @@ int main() {
 				if (activeTab == Tab::LOGS && !logsUnlocked) {
 					if (textEvent->unicode == '\b') {
 						if (!logInput.empty()) logInput.pop_back();
+						playSFX("button");
 					}
 					else if (textEvent->unicode < 128 && textEvent->unicode != '\r' && textEvent->unicode != '\n') {
 						logInput += static_cast<char>(textEvent->unicode);
+						playSFX("button");
 					}
 				}
 			}
@@ -424,23 +436,24 @@ int main() {
 					if (clickRect.getGlobalBounds().contains(mousePos)) {
 						long double bitsClicked = bitsPerClick * clickMultiplier * (1 + realBitsPerSecond * 0.05f);
 						starScale = 1.1f; bits += bitsClicked; allBits += bitsClicked; allClickedBits += bitsClicked;
+						playSFX("heartbeat");
 					}
 
 					if (mousePos.y > winSize.y - 60.f) {
 						if (sf::FloatRect({ 10, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
-							activeTab = (activeTab == Tab::LOGIC) ? Tab::NONE : Tab::LOGIC;
+							activeTab = (activeTab == Tab::LOGIC) ? Tab::NONE : Tab::LOGIC; playSFX("button");
 						}
 						else if (sf::FloatRect({ 200, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
-							activeTab = (activeTab == Tab::HOTFIX) ? Tab::NONE : Tab::HOTFIX;
+							activeTab = (activeTab == Tab::HOTFIX) ? Tab::NONE : Tab::HOTFIX; playSFX("button");
 						}
 						else if (sf::FloatRect({ 390, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
-							activeTab = (activeTab == Tab::STATS) ? Tab::NONE : Tab::STATS;
+							activeTab = (activeTab == Tab::STATS) ? Tab::NONE : Tab::STATS; playSFX("button");
 						}
 						else if (sf::FloatRect({ 580, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
-							activeTab = (activeTab == Tab::REINIT) ? Tab::NONE : Tab::REINIT;
+							activeTab = (activeTab == Tab::REINIT) ? Tab::NONE : Tab::REINIT; playSFX("button");
 						}
 						else if (sf::FloatRect({ 770, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
-							activeTab = (activeTab == Tab::LOGS) ? Tab::NONE : Tab::LOGS;
+							activeTab = (activeTab == Tab::LOGS) ? Tab::NONE : Tab::LOGS; playSFX("button");
 						}
 					}
 
@@ -453,6 +466,8 @@ int main() {
 									lg.ver += amount;
 									bitsPerSecond += (lg.bps * amount);
 									lg.currentBits = lg.baseBits * std::pow(logicGateInflation, lg.ver) * costMult;
+									playSFX("installed");
+
 								}
 							}
 						}
@@ -468,6 +483,7 @@ int main() {
 									bits -= hf.bits;
 									hf.written = 1;
 									hotfixMult += hf.bitMult;
+									playSFX("installed");
 								}
 							}
 						}
@@ -482,7 +498,7 @@ int main() {
 				if (mouseEvent->button == sf::Mouse::Button::Left && canClickInit) {
 					if (mousePos.y > winSize.y - 60.f) {
 						if (sf::FloatRect({ 10, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
-							activeTab = (activeTab == Tab::INIT) ? Tab::NONE : Tab::INIT;
+							activeTab = (activeTab == Tab::INIT) ? Tab::NONE : Tab::INIT; playSFX("button");
 						}
 					}
 					
@@ -491,6 +507,7 @@ int main() {
 						reinitialisation = false;
 						initialisation = true;
 						canClickInit = false;
+						playSFX("button");
 					}
 
 					for (size_t i = 0; i < dirTree.size(); ++i) {
@@ -503,6 +520,7 @@ int main() {
 							if (bytes >= patch.bytes) {
 								bytes -= patch.bytes;
 								patch.patched = 1;
+								playSFX("patched");
 
 								if (patch.name == "Patch_0") bitsToBytesRate = 1e-6L;
 								else if (patch.name == "Patch_3_1") bitsToBytesRate = 3e-7L;
