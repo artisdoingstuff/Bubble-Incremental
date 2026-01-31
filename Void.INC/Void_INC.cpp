@@ -161,7 +161,7 @@ int main() {
 		if (dirTree[18].patched) { // 7_1
 			bitMultiplier *= 600.0L; clickMultiplier *= 0.4L;  dirTree[4].disabled = 1;
 		}
-		if (dirTree[19].patched) { // 7_2
+		if (dirTree[19].patched && dirTree[19].disabled == 0) { // 7_2
 			long double patch7_2Mult = 1.0L + (bytes * 0.01L);
 			patch_7_2Mult = std::min(patch7_2Mult, 3500.0L);
 			patch_3_2Mult = 1.0L;
@@ -183,6 +183,37 @@ int main() {
 		}
 		if (dirTree[26].patched) { // 6_2
 			bitMultiplier *= 400.0L; byteMultiplier *= 2.0L;
+		}
+		if (dirTree[27].patched) { // 2_2
+			bitMultiplier *= 4.5L;
+		}
+		if (dirTree[28].patched) { // 6_1
+			bitsPerSecond = 0.L;
+			for (size_t i = 6; i < logicGateList.size(); ++i) {
+				long double indivMult = 1.0L;
+				if (i < 14) {
+					indivMult = 1.0L + (static_cast<long double>(logicGateList[i].ver) * 0.2L);
+					if (indivMult > 100.0L) indivMult = 100.0L;
+				}
+
+				bitsPerSecond += (logicGateList[i].bps * logicGateList[i].ver) * indivMult;
+			}
+			byteMultiplier *= 0.8f;
+		}
+		if (dirTree[29].patched) { // C_1
+			bitMultiplier *= 175000.0L; clickMultiplier *= 1.1L;
+		}
+		if (dirTree[30].patched) { // C_2
+			bitMultiplier *= 950000.0L; byteMultiplier *= 2.0L;
+		}
+		if (dirTree[31].patched) { // C_3
+			bitMultiplier *= 5500000.0L; costMult *= 0.85f;
+		}
+		if (dirTree[32].patched) { // C_4
+			long double patch7_2Mult = 1.0L + (bytes * 0.1L);
+			patch_C_4Mult = std::min(patch7_2Mult, 10000000.0L);
+			patch_7_2Mult = 1.0L;
+			dirTree[19].disabled = 1;
 		}
 
 		long double realBitsPerSecond = (bitsPerSecond * hotfixMult * bitMultiplier * patch_1Mult) * patch_3_2Mult * patch_7_2Mult + bitsFromPatch;
@@ -467,7 +498,6 @@ int main() {
 									bitsPerSecond += (lg.bps * amount);
 									lg.currentBits = lg.baseBits * std::pow(logicGateInflation, lg.ver) * costMult;
 									playSFX("installed");
-
 								}
 							}
 						}

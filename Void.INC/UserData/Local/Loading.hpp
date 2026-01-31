@@ -44,7 +44,10 @@ inline void load(
 	}
 
 	costMult = 1.0L;
-	if (dirTree[8].patched) costMult = 0.9f;
+	if (dirTree[8].patched) costMult *= 0.9f;
+	if (dirTree[11].patched) costMult *= 0.95f;
+	if (dirTree[23].patched) costMult *= 0.85f;
+	if (dirTree[31].patched) costMult *= 0.85f;
 
 	std::vector<json> savedLogicArray = saveData["LOGIC"];
 	for (const auto& item : savedLogicArray) {
