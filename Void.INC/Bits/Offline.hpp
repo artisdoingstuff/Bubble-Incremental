@@ -63,7 +63,7 @@ inline void offline(time_t timestamp, long double& bits, long double& allBits, l
         if (dirTree[30].patched) dirMult *= 950000.0L; // C_2
         if (dirTree[31].patched) dirMult *= 5500000.0L; // C_3
         if (dirTree[32].patched) { // C_4
-            dirMult *= std::min(patchC_4Mult, 10000000.0L); patch3_2Mult = 1.0L;
+            dirMult *= std::min(patchC_4Mult, 10000000.0L); patch7_2Mult = 1.0L;
         }
 
         if (dirTree[1].patched && dirTree[1].disabled == 0) dirMult *= 1.6L; // 1

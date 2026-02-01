@@ -2,7 +2,7 @@
 #include "GIncludes.hpp"
 
 // Global references
-inline std::string voidVersion = "v1.0.9-release"; // Version control for the game (Updater purposes)
+inline std::string voidVersion = "v1.0.10-release"; // Version control for the game (Updater purposes)
 
 inline bool reinitialisation = false;
 inline bool initialisation = false;
@@ -94,9 +94,9 @@ inline long double bitMultiplier = 1.0L; // Multiplier for bits per second (from
 inline long double bitsFromPatch = 0.0L; // Applies to Patch_!! (currently)
 
 inline float patch_1Mult = 1.0f; // Multiplier from Patch_1
-inline float patch_3_2Mult = 1.0L; // Multiplier from Patch_3_2
-inline float patch_7_2Mult = 1.0L; // Multiplier from Patch_7_2
-inline float patch_C_4Mult = 1.0L; // Multiplier from Patch_C_4
+inline long double patch_3_2Mult = 1.0L; // Multiplier from Patch_3_2
+inline long double patch_7_2Mult = 1.0L; // Multiplier from Patch_7_2
+inline long double patch_C_4Mult = 1.0L; // Multiplier from Patch_C_4
 inline bool showConfirmPopup = false;
 
 inline long double malbits = 0.0L; // Malicious bits (for 1.1 use)
