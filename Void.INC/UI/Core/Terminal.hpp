@@ -338,7 +338,7 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
 
                 for (size_t i = 0; i < loreEntries.size(); ++i) {
                     sf::Text logTitle(jetBrainsMono, "> " + loreEntries[i].title, 13);
-                    logTitle.setPosition(start + sf::Vector2f(10.f, 20.f + (i * 25.f)));
+                    logTitle.setPosition(start + sf::Vector2f(-5.f, 20.f + (i * 25.f)));
 
                     bool isHovered = sf::FloatRect(logTitle.getPosition(), { sidebarWidth, 20.f }).contains(mousePos);
 
@@ -366,7 +366,7 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
                 window.draw(h);
 
                 sf::Text b(jetBrainsMono, entry.content, 12);
-                b.setPosition(start + sf::Vector2f(sidebarWidth + 20.f, 50.f));
+                b.setPosition(start + sf::Vector2f(sidebarWidth + 20.f, 40.f));
                 b.setFillColor(sf::Color(180, 180, 180));
                 window.draw(b);
             }

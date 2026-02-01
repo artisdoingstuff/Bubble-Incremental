@@ -117,7 +117,7 @@ inline void drawTreeLines(sf::RenderWindow& window) {
     drawCable(16, 26); // 6 to 6_2
 
     drawCable(17, 18); // 7 to 7_1
-    drawCable(17, 19); // 7 to 7_2
+    drawCable(17, 19, dirTree[19].disabled); // 7 to 7_2
 
     drawCable(14, 21); // ! to !!
 

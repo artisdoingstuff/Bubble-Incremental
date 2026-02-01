@@ -81,7 +81,7 @@ int main() {
 	initAudio();
 	positionTreeNodes(window.getSize());
 	load(timeEnd, bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialised, logicGateList, hotfixList, dirTree);
-	loadSettings(renderEffects, quickStart);
+	loadOptions(renderEffects, quickStart, muteAll, muteSFX, muteAmbience);
 	offline(timeEnd, bits, allBits, bitsPerSecond, hotfixMult);
 	
 	while (window.isOpen()) {
@@ -210,13 +210,13 @@ int main() {
 			bitMultiplier *= 5500000.0L; costMult *= 0.85f;
 		}
 		if (dirTree[32].patched) { // C_4
-			long double patch7_2Mult = 1.0L + (bytes * 0.1L);
-			patch_C_4Mult = std::min(patch7_2Mult, 10000000.0L);
+			long double patchC_4Mult = 1.0L + (bytes * 0.1L);
+			patch_C_4Mult = std::min(patchC_4Mult, 10000000.0L);
 			patch_7_2Mult = 1.0L;
 			dirTree[19].disabled = 1;
 		}
 
-		long double realBitsPerSecond = (bitsPerSecond * hotfixMult * bitMultiplier * patch_1Mult) * patch_3_2Mult * patch_7_2Mult + bitsFromPatch;
+		long double realBitsPerSecond = (bitsPerSecond * hotfixMult * bitMultiplier * patch_1Mult) * patch_3_2Mult * patch_7_2Mult * patch_C_4Mult + bitsFromPatch;
 		float deltaTime = deltaClock.restart().asSeconds();
 		float elapsedTime = elapsedClock.getElapsedTime().asSeconds();
 
@@ -304,6 +304,7 @@ int main() {
 		if (reinitialisation) {
 			if (currentReinitStep == ReinitState::IDLE) {
 				currentReinitStep = ReinitState::VORTEX_EXPANSION;
+				playMusic("loading");
 				canClick = false;
 			}
 			timer += deltaTime;
@@ -335,7 +336,6 @@ int main() {
 				if (timer >= 0.7f) {
 					starScale = -10.f;
 					currentReinitStep = ReinitState::LOADING_BAR;
-					playMusic("loading");
 				}
 				break;
 			}
@@ -439,7 +439,7 @@ int main() {
 			if (gameEvent->is<sf::Event::Closed>()) {
 				time_t timeStart = time(nullptr);
 				save(timeStart, bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialised, logicGateList, hotfixList, dirTree);
-				saveSettings(renderEffects, quickStart);
+				saveOptions(renderEffects, quickStart, muteAll, muteSFX, muteAmbience);
 				versionSave(voidVersion);
 				window.close();
 			}
