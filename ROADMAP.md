@@ -20,4 +20,4 @@
 
 [/] 1.0.9 - Settings (limited; [list here](https://github.com/artdoesstuff/Void.INC/pull/18)) + Other stuff. (Released 30th of January, 2026 @ [Releases](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.9-release))
 
-[ ] 1.0.10 - Final content rebalancing + Any bug fixes + Final content drop.
+[/] 1.0.10 - Final content rebalancing + Any bug fixes + Final content drop. (Released 2nd of February, 2026 @ [Releases](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.10-release))
