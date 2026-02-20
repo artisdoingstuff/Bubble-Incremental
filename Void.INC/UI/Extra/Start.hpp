@@ -2,6 +2,8 @@
 
 #include "../../Misc/Globals/GIncludes.hpp"
 #include "../../Misc/Globals/GAudio.hpp"
+#include "../../UserData/Local/Saving.hpp"
+#include "../../UserData/Local/Options.hpp"
 
 inline void drawStartUI(sf::RenderWindow& window, sf::RenderStates& states, Star& star, float et, float dt, sf::Vector2f& sPos, sf::Vector2f& centre) {
 	sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
@@ -60,6 +62,8 @@ inline void drawStartUI(sf::RenderWindow& window, sf::RenderStates& states, Star
 		}
 		if (showOptions) drawOptionsUI(window, showOptions, centre);
 		if (qHover && canClickStart) {
+			save(time(nullptr), bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialised, malbits, malbytes, allMalbits, allMalbytes, timesCorrupted, currentCorruption, logicGateList, hotfixList, dirTree);
+			saveOptions(renderEffects, quickStart, muteAll, muteSFX, muteAmbience);
 			playSFX("button");
 			window.close();
 		}

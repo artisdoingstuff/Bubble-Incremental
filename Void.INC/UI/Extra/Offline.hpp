@@ -5,7 +5,7 @@
 
 inline void drawOfflineUI(sf::RenderWindow& window, sf::Vector2f& centre) {
 	sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-	sf::Vector2f boxSize(550.f, 200.f);
+	sf::Vector2f boxSize(600.f, 200.f);
 
 	sf::RectangleShape overlay(sf::Vector2f(window.getSize()));
 	overlay.setFillColor(sf::Color(0, 0, 0, 180));
@@ -36,31 +36,10 @@ inline void drawOfflineUI(sf::RenderWindow& window, sf::Vector2f& centre) {
     window.draw(t);
     window.draw(c);
 
-    static std::string variation = "";
-
-    if (!rolledWhisper) {
-        std::vector<std::string> whispers = {
-            "It will always find what it is owed.",
-            "The vacuum grows louder.",
-            "Your absence was noted, but irrelevant.",
-            "The silence was never truly empty.",
-            "The Star does not care if you watch.",
-            "Watch your back, you might be next.",
-            "Every bit is a heartbeat in the dark.",
-            "Light is merely a delay of the inevitable.",
-            "The void has a long memory.",
-            "It is hungry. It is always hungry.",
-            "Your terminal is a window; the Star is looking in.",
-            "Data is such a fragile way to remember reality."
-        };
-
-        variation = whispers[rand() % whispers.size()];
-        rolledWhisper = true;
-    }
-
 	std::string offlineMsg =
 		"Connection restored. Analysis of bits harvested:\n"
-		"The Star consumed -" + format(accOfflineBits) + " bits during the silence.\n" + variation;
+		"The Star consumed -" + format(accOfflineBits) + " bits during your inactivity.\n"
+		"The Void corrupted -" + format(accOfflineBits * (1.f - offlineMultiplier)) + " into -" + format(accOfflineMalbits) + " malbits.";
 
 	sf::Text o(jetBrainsMono, offlineMsg, 16);
 	o.setOrigin({ o.getLocalBounds().size.x / 2.f, o.getLocalBounds().size.y / 2.f - 10.f });

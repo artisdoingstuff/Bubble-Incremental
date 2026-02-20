@@ -4,6 +4,7 @@
 
 inline void load(
 	time_t& timestamp,
+	// 1.0.x stuff
 	long double& bits,
 	long double& bytes,
 	long double& allBits,
@@ -11,7 +12,15 @@ inline void load(
 	long double& bitsPerSecond,
 	long double& hotfixMult,
 	long long& timesInitialised,
-	std::vector<LogicGate>& logicGate,
+	// 1.1.x stuff
+	long double& malbits,
+	long double& malbytes,
+	long double& allMalbits,
+	long double& allMalbytes,
+	long long& timesCorrupted,
+	CorruptionLevel& corruption,
+
+	std::vector<Logic>& logicGate,
 	std::vector<Hotfix>& hotfix,
 	std::vector<DirNodes>& root
 ) {
@@ -24,12 +33,26 @@ inline void load(
 
 	json saveData; file >> saveData;
 
-	timestamp = saveData["T"];
-	bits = saveData["B"];
-	bytes = saveData["BY"];
-	allBits = saveData["AB"];
-	allClickedBits = saveData["ACB"];
-	timesInitialised = saveData["TINIT"];
+	timestamp = saveData.value("T", time(nullptr));
+	bits = saveData.value("B", 0.0L);;
+	bytes = saveData.value("BY", 0.0L);
+	allBits = saveData.value("AB", 0.0L);
+	allClickedBits = saveData.value("ACB", 0.0L);
+	timesInitialised = saveData.value("TINIT", 0LL);
+
+	malbits = saveData.value("MB", 0.L);
+	malbytes = saveData.value("MBY", 0.L);
+	allMalbits = saveData.value("AMB", 0.L);
+	allMalbytes = saveData.value("AMBY", 0.L);
+	timesCorrupted = saveData.value("TCRPT", 0LL);
+	int rawCorruption = saveData.value("CRPTL", 0);
+
+	if (rawCorruption >= 0 && rawCorruption < static_cast<int>(CorruptionLevel::COUNT)) {
+		corruption = static_cast<CorruptionLevel>(rawCorruption);
+	}
+	else {
+		corruption = CorruptionLevel::C5;
+	}
 
 	bitsPerSecond = 0.0L;
 	hotfixMult = 1.0L;
@@ -57,7 +80,7 @@ inline void load(
 		for (auto& lg : logicGate) {
 			if (lg.name == name) {
 				lg.ver = ver;
-				lg.currentBits = lg.baseBits * std::pow(logicGateInflation, lg.ver) * costMult;
+				lg.currentCost = lg.baseCost * std::pow(logicGateInflation, lg.ver) * costMult;
 				bitsPerSecond += (lg.ver * lg.bps);
 				break;
 			}
