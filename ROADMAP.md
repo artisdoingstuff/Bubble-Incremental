@@ -21,3 +21,24 @@
 [/] 1.0.9 - Settings (limited; [list here](https://github.com/artdoesstuff/Void.INC/pull/18)) + Other stuff. (Released 30th of January, 2026 @ [Releases](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.9-release))
 
 [/] 1.0.10 - Final content rebalancing + Any bug fixes + Final content drop. (Released 2nd of February, 2026 @ [Releases](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.10-release))
+
+
+### Development Roadmap for 1.1.0 - 1.1.8
+
+[ ] 1.1.0 - Initial introduction of Malbits, Malbytes, and Corrupting + Content drop.
+
+[ ] 1.1.1 - 
+
+[ ] 1.1.2 - 
+
+[ ] 1.1.3 - 
+
+[ ] 1.1.4 - Design freedom + Content drop.
+
+[ ] 1.1.5 - 
+
+[ ] 1.1.6 - 
+
+[ ] 1.1.7 - 
+
+[ ] 1.1.8 - 
