@@ -11,7 +11,6 @@ inline bool showStart = true;
 inline bool start = false;
 
 inline bool showOffline = false;
-inline bool rolledWhisper = false;
 
 inline float loadingProgress = 0.0f;
 inline float timer = 0.0f;
@@ -89,7 +88,7 @@ inline long double clickMultiplier = 1.0L; // Click multiplier
 inline long double bytes = 0.0L; // Current bytes (from Re-initializing)
 inline long long timesInitialised = 0LL; // Re-initializing is "Ascending"
 inline long double bitsToBytesRate = 1e-8L; // Rate of bits to bytes conversion rate
-inline long double bitMultiplier = 1.0L; // Multiplier for bits per second (from root patches)
+inline long double bitMultiplier = 1.0L; // Multiplier for bits per second (from Directory patches)
 
 inline long double bitsFromPatch = 0.0L; // Applies to Patch_!! (currently)
 
@@ -100,7 +99,32 @@ inline long double patch_C_4Mult = 1.0L; // Multiplier from Patch_C_4
 inline bool showConfirmPopup = false;
 
 inline long double malbits = 0.0L; // Malicious bits (for 1.1 use)
+inline long double allMalbits = 0.0L; // Total accumulated malbits
+inline long double accOfflineMalbits = 0.0L; // Malbits accumulated while offline
+
 inline long double malbytes = 0.0L; // Malicious bytes (for 1.1 use)
+inline long long timesCorrupted = 0LL; // Corrupting is "Transcending"
+inline long double allMalbytes = 0.0L; // Total accumulated malbytes
+
+inline long double bitsToMalbitsRate = 1e-33L; // Rate of bits to malbits conversion
+
+enum class CorruptionLevel { C5, C10, C15, C20, C25, C50, COUNT };
+inline CorruptionLevel currentCorruption = CorruptionLevel::C5;
+
+inline float getCorruptionValue(CorruptionLevel level) {
+    switch (level) {
+        case CorruptionLevel::C5:  return 0.05f;
+        case CorruptionLevel::C10: return 0.10f;
+        case CorruptionLevel::C15: return 0.15f;
+        case CorruptionLevel::C20: return 0.20f;
+        case CorruptionLevel::C25: return 0.25f;
+        case CorruptionLevel::C50: return 0.50f;
+        default: return 0.05f;
+    }
+}
+
+inline float corruptOffline = getCorruptionValue(currentCorruption); // Base conversion for offline (Malbits)
+inline float offlineMultiplier = 1.f - corruptOffline; // How much earned offline
 
 inline sf::Font jetBrainsMono("Assets/Font/JetBrainsMono.ttf"); // Main font (kind of obvious)
 

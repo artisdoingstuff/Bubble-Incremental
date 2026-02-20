@@ -9,7 +9,7 @@
 #include "Effects/Bits.hpp"
 
 #include "Hardware/Hotfixes.hpp"
-#include "Hardware/LogicGate.hpp"
+#include "Hardware/Logic.hpp"
 
 #include "Initialisation/Initialisation.hpp"
 #include "Initialisation/Re-initialisation.hpp"
@@ -29,8 +29,6 @@
 #include "UserData/Local/Version.hpp"
 
 int main() {
-	hideConsole();
-	
 	if (std::filesystem::exists("updater.exe")) std::system("updater.exe");
 	if (!std::filesystem::exists("updater.exe")) std::cout << "updater.exe not detected, skipping..." << std::endl;
 
@@ -75,12 +73,16 @@ int main() {
 	bytesText.setCharacterSize(36);
 	bytesText.setFillColor(sf::Color(0, 255, 150));
 
+	sf::Text malbitsText(jetBrainsMono);
+	malbitsText.setCharacterSize(20);
+	malbitsText.setFillColor(sf::Color(255, 50, 0));
+
 	initLogicGates();
 	initHotfixes();
 	initDirTree();
 	initAudio();
 	positionTreeNodes(window.getSize());
-	load(timeEnd, bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialised, logicGateList, hotfixList, dirTree);
+	load(timeEnd, bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialised, malbits, malbytes, allMalbits, allMalbytes, timesCorrupted, currentCorruption, logicGateList, hotfixList, dirTree);
 	loadOptions(renderEffects, quickStart, muteAll, muteSFX, muteAmbience);
 	offline(timeEnd, bits, allBits, bitsPerSecond, hotfixMult);
 	
@@ -234,10 +236,14 @@ int main() {
 		bytesText.setString("-" + format(bytes, true) + " Bytes");
 		centreText(bytesText, { clickRect.getPosition().x, clickRect.getPosition().y + 400 });
 
+		if (allBits >= 1e30) {
+			malbitsText.setString("-" + format(malbits) + " Malbits");
+			centreText(malbitsText, { clickRect.getPosition().x, clickRect.getPosition().y + 470 });
+		}
+
 		sf::RenderStates states;
 		states.blendMode = sf::BlendAdd;
 
-		ambienceRandom();
 		updateVolume();
 
 		window.clear(sf::Color::Black);
@@ -273,15 +279,16 @@ int main() {
 		}
 
 		if (!showStart || quickStart) {
+			ambienceRandom();
 			if (quickStart) {
 				showStart = false;
 				canClick = true;
-				if (!rolledWhisper) showOffline = true;
 			}
 			if (!reinitialisation && !initialisation) {
 				playMusic("main");
 				window.draw(bitsText);
 				window.draw(bitsPerSecondText);
+				window.draw(malbitsText);
 
 				if (renderEffects) {
 					updateStream(window, centre, deltaTime, 2);
@@ -357,6 +364,8 @@ int main() {
 				loadingProgress = 0.0f;
 				timer = 0.0f;
 				canClickInit = true;
+
+				ambienceRandom();
 
 				if (renderEffects) {
 					updateStream(window, centre, deltaTime, 1);
@@ -437,8 +446,7 @@ int main() {
 		while (const std::optional gameEvent = window.pollEvent()) {
 			sf::Vector2f winSize = (sf::Vector2f)window.getSize();
 			if (gameEvent->is<sf::Event::Closed>()) {
-				time_t timeStart = time(nullptr);
-				save(timeStart, bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialised, logicGateList, hotfixList, dirTree);
+				save(time(nullptr), bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialised, malbits, malbytes, allMalbits, allMalbytes, timesCorrupted, currentCorruption, logicGateList, hotfixList, dirTree);
 				saveOptions(renderEffects, quickStart, muteAll, muteSFX, muteAmbience);
 				versionSave(voidVersion);
 				window.close();
@@ -490,13 +498,14 @@ int main() {
 
 					if (activeTab == Tab::LOGIC) {
 						for (auto& lg : logicGateList) {
-							if (lg.rect.getGlobalBounds().contains(mousePos)) {
-								auto [totalCost, amount] = getDownload(lg, bits, currentBuy);
-								if (bits >= totalCost && amount > 0) {
-									bits -= totalCost;
+							if (lg.costType == currentLogicMode && lg.rect.getGlobalBounds().contains(mousePos)) {
+								long double& activeCurrency = (lg.costType == Currency::BIT) ? bits : malbits;
+								auto [totalCost, amount] = getDownload(lg, activeCurrency, currentBuy);
+								if (activeCurrency >= totalCost && amount > 0) {
+									activeCurrency -= totalCost;
 									lg.ver += amount;
 									bitsPerSecond += (lg.bps * amount);
-									lg.currentBits = lg.baseBits * std::pow(logicGateInflation, lg.ver) * costMult;
+									lg.currentCost = lg.baseCost * std::pow(logicGateInflation, lg.ver) * costMult;
 									playSFX("installed");
 								}
 							}

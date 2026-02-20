@@ -1,13 +1,13 @@
 #pragma once
 
 #include "../Misc/Globals/GIncludes.hpp"
-#include "../Hardware/LogicGate.hpp"
+#include "../Hardware/Logic.hpp"
 #include "../Hardware/Hotfixes.hpp"
 
 inline void resetProgress() {
     for (auto& lg : logicGateList) {
         lg.ver = 0;
-        lg.currentBits = lg.baseBits * costMult;
+        lg.currentCost = lg.baseCost * costMult;
     }
 
     for (auto& hf : hotfixList) {

@@ -79,7 +79,7 @@ inline void drawOptionsUI(sf::RenderWindow& window, bool& showOptions, sf::Vecto
     };
 
     float linePadding = 30.f;
-    sf::Vector2f boxSize(550.f, 60.f + (options.size() * linePadding));
+    sf::Vector2f boxSize(550.f, 90.f + (options.size() * linePadding));
 
     sf::RectangleShape overlay(sf::Vector2f(window.getSize()));
     overlay.setFillColor(sf::Color(0, 0, 0, 180));
@@ -111,28 +111,22 @@ inline void drawOptionsUI(sf::RenderWindow& window, bool& showOptions, sf::Vecto
     window.draw(c);
 
     float startY = titleBar.getPosition().y + 45.f;
+
     for (size_t i = 0; i < options.size(); ++i) {
         sf::Vector2f linePos = { titleBar.getPosition().x - (boxSize.x / 2.f) + 20.f, startY + (i * linePadding) };
-
         sf::Text optText(jetBrainsMono, options[i].option + ".sys", 13);
         optText.setPosition(linePos);
 
         bool isHovered = optText.getGlobalBounds().contains(mousePos);
         bool isActive = *options[i].toggle;
 
-        if (isHovered) {
-            optText.setFillColor(sf::Color(243, 238, 225));
-        }
-        else {
-            optText.setFillColor(isActive ? sf::Color(140, 140, 140) : sf::Color(80, 80, 80));
-        }
+        optText.setFillColor(isHovered ? sf::Color(243, 238, 225) : (isActive ? sf::Color(140, 140, 140) : sf::Color(80, 80, 80)));
 
         if (isHovered && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && canClickOptions && cooldown.getElapsedTime().asMilliseconds() > 200) {
             *options[i].toggle = !(*options[i].toggle);
             playSFX("button");
             cooldown.restart();
         }
-
         window.draw(optText);
 
         sf::Text indicator(jetBrainsMono, isActive ? "[x]" : "[ ]", 13);
@@ -140,6 +134,28 @@ inline void drawOptionsUI(sf::RenderWindow& window, bool& showOptions, sf::Vecto
         indicator.setFillColor(optText.getFillColor());
         window.draw(indicator);
     }
+
+    float cyclerY = startY + (options.size() * linePadding);
+    sf::Vector2f cyclerPos = { titleBar.getPosition().x - (boxSize.x / 2.f) + 20.f, cyclerY };
+
+    int percent = static_cast<int>(getCorruptionValue(currentCorruption) * 100);
+    sf::Text cyclerText(jetBrainsMono, "OFFLINE_CORRUPTION = " + std::to_string(percent) + "%", 13);
+    cyclerText.setPosition(cyclerPos);
+
+    bool cyclerHover = cyclerText.getGlobalBounds().contains(mousePos);
+    cyclerText.setFillColor(cyclerHover ? sf::Color(243, 238, 225) : sf::Color(80, 80, 80));
+
+    if (cyclerHover && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && canClickOptions && cooldown.getElapsedTime().asMilliseconds() > 200) {
+        int next = (static_cast<int>(currentCorruption) + 1) % static_cast<int>(CorruptionLevel::COUNT);
+        currentCorruption = static_cast<CorruptionLevel>(next);
+
+        corruptOffline = getCorruptionValue(currentCorruption);
+        offlineMultiplier = 1.f - corruptOffline;
+
+        playSFX("button");
+        cooldown.restart();
+    }
+    window.draw(cyclerText);
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) || sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && c.getGlobalBounds().contains(mousePos)) {
         showOptions = false;

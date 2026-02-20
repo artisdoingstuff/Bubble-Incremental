@@ -7,6 +7,9 @@
 inline int hotfixPage = 0;
 const int HF_PER_PAGE = 40;
 
+inline int logicPage = 0;
+const int LOGIC_PER_PAGE = 20;
+
 inline void backgroundDeco(sf::RenderWindow& window, sf::Vector2f pos, sf::Vector2f size, bool buy) {
     sf::Color traceColor = buy ? sf::Color(243, 238, 225, 50) : sf::Color(140, 140, 140, 30);
 
@@ -124,29 +127,58 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
     if (reinitialisation) drawTabButton("init.bat", 10.f, Tab::INIT);
 
     if (activeTab == Tab::LOGIC) {
-        drawTerminalModule(window, "void://hardware/logic.bat" + getCursor(), tabProgress, [&](sf::Vector2f start) {
+        drawTerminalModule(window, (currentLogicMode == Currency::BIT ? "void://hardware/logic.bat" : "void://hardware/mal_logic.bat") + getCursor(), tabProgress, [&](sf::Vector2f start) {
             float boxW = (moduleWidth - 100.f) / 5.f;
             float boxH = (moduleHeight - 120.f) / 4.f;
             float pad = 10.f;
-            float btnX = 0.f;
             sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
-            for (size_t i = 0; i < logicGateList.size(); ++i) {
-                if (i >= 20) break;
-                auto& lg = logicGateList[i];
+            std::vector<Logic*> filtered;
+            for (auto& lg : logicGateList) {
+                if (lg.costType == currentLogicMode) filtered.push_back(&lg);
+            }
 
-                int col = i % 5;
-                int row = i / 5;
+            size_t startIdx = logicPage * LOGIC_PER_PAGE;
+            size_t endIdx = std::min(startIdx + LOGIC_PER_PAGE, filtered.size());
+
+            for (size_t i = startIdx; i < endIdx; ++i) {
+                auto& lg = *filtered[i];
+                int localIdx = static_cast<int>(i - startIdx);
+                int col = localIdx % 5;
+                int row = localIdx / 5;
                 sf::Vector2f pos = start + sf::Vector2f(col * (boxW + pad), row * (boxH + pad));
+
+                bool isHovered = sf::FloatRect(pos, {boxW, boxH}).contains(mousePos);
+                long double currency = (currentLogicMode == Currency::BIT) ? bits : malbits;
+                auto [totalCost, amount] = getDownload(lg, currency, currentBuy);
 
                 lg.rect.setSize({ boxW, boxH });
                 lg.rect.setPosition(pos);
-                lg.rect.setFillColor(sf::Color::Black);
-                lg.rect.setOutlineColor(sf::Color(50, 50, 50));
+
+                if (isHovered) {
+                    lg.rect.setFillColor(sf::Color(25, 25, 25));
+                    lg.rect.setOutlineColor(currency >= totalCost ? sf::Color(243, 238, 225) : sf::Color(120, 120, 120));
+                }
+                else {
+                    lg.rect.setFillColor(sf::Color::Black);
+                    lg.rect.setOutlineColor(currency >= totalCost ? sf::Color(100, 100, 100) : sf::Color(50, 50, 50));
+                }
+
                 lg.rect.setOutlineThickness(1.f);
                 window.draw(lg.rect);
 
-                backgroundDeco(window, pos, { boxW, boxH }, (bits >= lg.currentBits));
+                if (isHovered && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && cooldown.getElapsedTime().asMilliseconds() > 200) {
+                    if (currency >= totalCost && amount > 0) {
+                        if (currentLogicMode == Currency::BIT) bits -= totalCost;
+                        else malbits -= totalCost;
+
+                        lg.ver += amount;
+                        playSFX("buy");
+                        cooldown.restart();
+                    }
+                }
+
+                backgroundDeco(window, pos, { boxW, boxH }, (currency >= totalCost));
 
                 for (int p = 0; p < 4; ++p) {
                     sf::RectangleShape pin({ 4.f, 2.f });
@@ -160,23 +192,68 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
                 sf::Text n(jetBrainsMono, lg.name + "_" + std::to_string(lg.ver) + ".bin", 13);
                 n.setPosition(pos + sf::Vector2f(12.f, 10.f));
                 n.setFillColor(sf::Color(243, 238, 225));
+                window.draw(n);
 
                 sf::Text d(jetBrainsMono, lg.desc, 10);
                 d.setPosition(pos + sf::Vector2f(12.f, 32.f));
                 d.setFillColor(sf::Color(140, 140, 140));
-
-                auto [totalCost, amount] = getDownload(lg, bits, currentBuy);
-
-                sf::Text c(jetBrainsMono, "-" + format(totalCost) + "_bits.tmp - x" + std::to_string(amount), 11);
-                c.setPosition(pos + sf::Vector2f(12.f, boxH - 22.f));
-                c.setFillColor(bits >= totalCost ? sf::Color(243, 238, 225) : sf::Color(140, 140, 140));
-                window.draw(c);
-
-                window.draw(n);
                 window.draw(d);
+
+                std::string label = (currentLogicMode == Currency::BIT) ? "_bits.tmp -" : "_malbits.tmp -";
+                sf::Text c(jetBrainsMono, "-" + format(totalCost) + label + " x" + std::to_string(amount), 11);
+                c.setPosition(pos + sf::Vector2f(12.f, boxH - 22.f));
+                c.setFillColor(currency >= totalCost ? sf::Color(243, 238, 225) : sf::Color(140, 140, 140));
                 window.draw(c);
             }
 
+            auto drawNav = [&](const std::string& str, sf::Vector2f offset, bool isPrev) {
+                sf::Text t(jetBrainsMono, str, 14);
+                t.setPosition(start + sf::Vector2f(moduleWidth / 2.f + offset.x, moduleHeight - 80.f));
+                bool hovered = t.getGlobalBounds().contains(mousePos);
+                t.setFillColor(hovered ? sf::Color(243, 238, 225) : sf::Color(100, 100, 100));
+                window.draw(t);
+
+                if (hovered && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && cooldown.getElapsedTime().asMilliseconds() > 200) {
+                    if (isPrev && logicPage > 0) { logicPage--; playSFX("button"); cooldown.restart(); }
+                    if (!isPrev && (logicPage + 1) * LOGIC_PER_PAGE < (int)filtered.size()) { logicPage++; playSFX("button"); cooldown.restart(); }
+                }
+            };
+
+            drawNav("<< ", { -45.f, 0.f }, true);
+            drawNav(" >>", { 20.f, 0.f }, false);
+
+            sf::Text pgNum(jetBrainsMono, "PAGE " + std::to_string(logicPage + 1), 14);
+            pgNum.setOrigin({ pgNum.getLocalBounds().size.x / 2.f, 0.f });
+            pgNum.setPosition(start + sf::Vector2f(moduleWidth / 2.f, moduleHeight - 80.f));
+            window.draw(pgNum);
+
+            auto drawModeBtn = [&](std::string label, sf::Vector2f pos, Currency mode) {
+                sf::RectangleShape b({ 140.f, 25.f });
+                b.setPosition(start + pos);
+                bool hovered = b.getGlobalBounds().contains(mousePos);
+
+                b.setFillColor(currentLogicMode == mode ? sf::Color(30, 30, 30) : sf::Color::Black);
+                b.setOutlineColor(currentLogicMode == mode ? sf::Color(243, 238, 225) : sf::Color(50, 50, 50));
+                b.setOutlineThickness(1.f);
+                window.draw(b);
+
+                sf::Text mt(jetBrainsMono, label, 11);
+                mt.setPosition(b.getPosition() + sf::Vector2f(10.f, 5.f));
+                mt.setFillColor(currentLogicMode == mode ? sf::Color(243, 238, 225) : (hovered ? sf::Color(243, 238, 225) : sf::Color(100, 100, 100)));
+                window.draw(mt);
+
+                if (hovered && currentLogicMode != mode && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && cooldown.getElapsedTime().asMilliseconds() > 200) {
+                    currentLogicMode = mode;
+                    logicPage = 0;
+                    playSFX("button");
+                    cooldown.restart();
+                }
+            };
+
+            drawModeBtn("STANDARD", { 0.f, moduleHeight - 82.f }, Currency::BIT);
+            drawModeBtn("MALICIOUS", { 150.f, moduleHeight - 82.f }, Currency::MALBIT);
+
+            float btnX = moduleWidth - 330.f;
             std::vector<std::pair<std::string, Download>> modes = {
                 {"x1", Download::X1}, {"x5", Download::X5}, {"x10", Download::X10},
                 {"x50", Download::X50}, {"x100", Download::X100}, {"MAX", Download::MAX}
@@ -184,11 +261,11 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
 
             for (auto& m : modes) {
                 sf::RectangleShape b({ 50.f, 25.f });
-                b.setPosition(start + sf::Vector2f(btnX, moduleHeight - 80.f));
+                b.setPosition(start + sf::Vector2f(btnX - 55.f, moduleHeight - 82.f));
                 bool hovered = b.getGlobalBounds().contains(mousePos);
 
                 b.setFillColor(currentBuy == m.second ? sf::Color(30, 30, 30) : sf::Color::Black);
-                b.setOutlineColor(sf::Color(50, 50, 50));
+                b.setOutlineColor(currentBuy == m.second ? sf::Color(243, 238, 225) : sf::Color(50, 50, 50));
                 b.setOutlineThickness(1.f);
 
                 sf::Text bt(jetBrainsMono, m.first, 11);
@@ -197,14 +274,14 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
                 window.draw(b);
                 window.draw(bt);
 
-                if (hovered && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && cooldown.getElapsedTime().asMilliseconds() > 200) {
+                if (hovered && m.second != currentBuy && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && cooldown.getElapsedTime().asMilliseconds() > 200) {
                     currentBuy = m.second;
                     playSFX("button");
                     cooldown.restart();
                 }
                 btnX += 55.f;
             }
-            });
+        });
     }
 
     else if (activeTab == Tab::HOTFIX) {

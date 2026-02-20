@@ -4,6 +4,7 @@
 
 inline void save(
 	time_t timestamp,
+	// 1.0.x stuff
 	long double bits,
 	long double bytes,
 	long double allBits,
@@ -11,7 +12,15 @@ inline void save(
 	long double bitsPerSecond,
 	long double hotfixMult,
 	long long timesInitialised,
-	std::vector<LogicGate>& logicGate,
+	// 1.1.x stuff
+	long double malbits,
+	long double malbytes,
+	long double allMalbits,
+	long double allMalbytes,
+	long long timesCorrupted,
+	CorruptionLevel corruption,
+
+	std::vector<Logic>& logicGate,
 	std::vector<Hotfix>& hotfix,
 	std::vector<DirNodes>& root
 ) {
@@ -27,6 +36,14 @@ inline void save(
 	saveData["BPS"] = round(bitsPerSecond);
 	saveData["HFM"] = round(hotfixMult);
 	saveData["TINIT"] = timesInitialised;
+
+	saveData["MB"] = round(malbits);
+	saveData["MBY"] = round(malbytes);
+	saveData["AMB"] = round(allMalbits);
+	saveData["AMBY"] = round(allMalbytes);
+	saveData["TCRPT"] = timesCorrupted;
+	saveData["CRPTL"] = corruption;
+
 	saveData["LOGIC"] = logicGate;
 	saveData["HOTFIX"] = hotfix;
 	saveData["ROOT"] = root;

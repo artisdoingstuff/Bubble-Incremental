@@ -1,8 +1,9 @@
 #pragma once
 
 #include "../Misc/Globals/GIncludes.hpp"
-#include "../Hardware/LogicGate.hpp"
+#include "../Hardware/Logic.hpp"
 #include "../Initialisation/Initialisation.hpp"
+#include "../Misc/Globals/GVariables.hpp"
 
 inline void offline(time_t timestamp, long double& bits, long double& allBits, long double bitsPerSecond, long double hotfixMult) {
 	time_t elapsedTime = time(nullptr) - timestamp;
@@ -73,8 +74,11 @@ inline void offline(time_t timestamp, long double& bits, long double& allBits, l
         }
         if (dirTree[4].patched && dirTree[4].disabled == 0) dirMult *= std::min(patch3_2Mult, 100.0L); // 3_2
 		
-		long double offlineBits = (elapsedTime * eBPS * hotfixMult * dirMult) * 1;
+		long double offlineBits = (elapsedTime * eBPS * hotfixMult * dirMult) * offlineMultiplier;
+	    long double offlineMalbits = (offlineBits * bitsToMalbitsRate) * (1.f - offlineMultiplier);
 		
 		bits += offlineBits; allBits += offlineBits; accOfflineBits += offlineBits;
+
+	    if (offlineBits >= 1e30L) malbits += offlineMalbits; allMalbits += offlineMalbits; accOfflineMalbits += offlineMalbits;
 	}
 }
