@@ -6,6 +6,8 @@
 #include "Bits/Format.hpp"
 #include "Bits/Offline.hpp"
 
+#include "Corruption/Corruption.hpp"
+
 #include "Effects/Bits.hpp"
 
 #include "Hardware/Hotfixes.hpp"
@@ -17,6 +19,7 @@
 #include "UI/Core/Directory.hpp"
 #include "UI/Core/Download.hpp"
 #include "UI/Core/Terminal.hpp"
+#include "UI/Core/Kernel.hpp"
 #include "UI/Extra/Loading.hpp"
 #include "UI/Extra/Offline.hpp"
 #include "UI/Extra/Options.hpp"
@@ -82,7 +85,7 @@ int main() {
 	initDirTree();
 	initAudio();
 	positionTreeNodes(window.getSize());
-	load(timeEnd, bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialised, malbits, malbytes, allMalbits, allMalbytes, timesCorrupted, currentCorruption, logicGateList, hotfixList, dirTree);
+	load(timeEnd, bits, bytes, allBits, allClickedBits, allBytes, bitsPerSecond, hotfixMult, timesInitialised, malbits, malbytes, allMalbits, allMalbytes, timesCorrupted, currentCorruption, logicGateList, hotfixList, dirTree);
 	loadOptions(renderEffects, quickStart, muteAll, muteSFX, muteAmbience);
 	offline(timeEnd, bits, allBits, bitsPerSecond, hotfixMult);
 	
@@ -446,7 +449,7 @@ int main() {
 		while (const std::optional gameEvent = window.pollEvent()) {
 			sf::Vector2f winSize = (sf::Vector2f)window.getSize();
 			if (gameEvent->is<sf::Event::Closed>()) {
-				save(time(nullptr), bits, bytes, allBits, allClickedBits, bitsPerSecond, hotfixMult, timesInitialised, malbits, malbytes, allMalbits, allMalbytes, timesCorrupted, currentCorruption, logicGateList, hotfixList, dirTree);
+				save(time(nullptr), bits, bytes, allBits, allClickedBits, allBytes, bitsPerSecond, hotfixMult, timesInitialised, malbits, malbytes, allMalbits, allMalbytes, timesCorrupted, currentCorruption, logicGateList, hotfixList, dirTree);
 				saveOptions(renderEffects, quickStart, muteAll, muteSFX, muteAmbience);
 				versionSave(voidVersion);
 				window.close();

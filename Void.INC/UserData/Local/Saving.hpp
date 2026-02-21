@@ -9,6 +9,7 @@ inline void save(
 	long double bytes,
 	long double allBits,
 	long double allClickedBits,
+	long double allBytes,
 	long double bitsPerSecond,
 	long double hotfixMult,
 	long long timesInitialised,
@@ -33,6 +34,7 @@ inline void save(
 	saveData["BY"] = round(bytes);
 	saveData["AB"] = round(allBits);
 	saveData["ACB"] = round(allClickedBits);
+	saveData["ABY"] = round(allBytes);
 	saveData["BPS"] = round(bitsPerSecond);
 	saveData["HFM"] = round(hotfixMult);
 	saveData["TINIT"] = timesInitialised;

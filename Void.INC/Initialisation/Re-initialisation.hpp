@@ -4,15 +4,13 @@
 #include "../Hardware/Logic.hpp"
 #include "../Hardware/Hotfixes.hpp"
 
-inline void resetProgress() {
+inline void reinitialise() {
     for (auto& lg : logicGateList) {
         lg.ver = 0;
         lg.currentCost = lg.baseCost * costMult;
     }
 
-    for (auto& hf : hotfixList) {
-        hf.written = 0;
-    }
+    for (auto& hf : hotfixList) hf.written = 0;
 
     bits = 0.0L;
     bitsPerSecond = 0.0L;
@@ -20,9 +18,8 @@ inline void resetProgress() {
 }
 
 inline long double getPendingBytes(long double bits) {
-    auto round = [](long double v) -> long double {return std::round(v * 100.0) / 100.0; };
-    if (bits < 5000000.0L) return 0;
-    return round(bits * bitsToBytesRate * byteMultiplier);
+    if (bits < 5000000.0L) return 0.0L;
+    return std::round(((std::pow(bits / 5000000.0L, 0.85L) * (5000000.0L * bitsToBytesRate)) * byteMultiplier) * 100.0L) / 100.0L;
 }
 
 inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit, sf::Vector2f& centre) {
@@ -75,7 +72,7 @@ inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit, sf::Vect
     auto triggerInit = [&]() {
         startInit = true;
         bytes += getPendingBytes(bits);
-        resetProgress();
+        reinitialise();
         timesInitialised++;
         activeTab = Tab::NONE;
         showConfirmPopup = false;

@@ -9,6 +9,7 @@ inline void load(
 	long double& bytes,
 	long double& allBits,
 	long double& allClickedBits,
+	long double& allBytes,
 	long double& bitsPerSecond,
 	long double& hotfixMult,
 	long long& timesInitialised,
@@ -38,6 +39,7 @@ inline void load(
 	bytes = saveData.value("BY", 0.0L);
 	allBits = saveData.value("AB", 0.0L);
 	allClickedBits = saveData.value("ACB", 0.0L);
+	allBytes = saveData.value("ABY", 0.0L);
 	timesInitialised = saveData.value("TINIT", 0LL);
 
 	malbits = saveData.value("MB", 0.L);

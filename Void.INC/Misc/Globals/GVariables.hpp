@@ -86,6 +86,7 @@ inline long double bitsPerClick = 1.0L; // Bits per click
 inline long double clickMultiplier = 1.0L; // Click multiplier
 
 inline long double bytes = 0.0L; // Current bytes (from Re-initializing)
+inline long double allBytes = 0.0L; // Total accumulated bytes
 inline long long timesInitialised = 0LL; // Re-initializing is "Ascending"
 inline long double bitsToBytesRate = 1e-8L; // Rate of bits to bytes conversion rate
 inline long double bitMultiplier = 1.0L; // Multiplier for bits per second (from Directory patches)
@@ -100,13 +101,14 @@ inline bool showConfirmPopup = false;
 
 inline long double malbits = 0.0L; // Malicious bits (for 1.1 use)
 inline long double allMalbits = 0.0L; // Total accumulated malbits
+inline long double bitsToMalbitsRate = 1e-33L; // Rate of bits to malbits conversion
 inline long double accOfflineMalbits = 0.0L; // Malbits accumulated while offline
 
 inline long double malbytes = 0.0L; // Malicious bytes (for 1.1 use)
-inline long long timesCorrupted = 0LL; // Corrupting is "Transcending"
 inline long double allMalbytes = 0.0L; // Total accumulated malbytes
-
-inline long double bitsToMalbitsRate = 1e-33L; // Rate of bits to malbits conversion
+inline long long timesCorrupted = 0LL; // Corrupting is "Transcending"
+inline long double allToMalbytesRate = 1e-33L; // Rate of bits to malbits conversion
+inline long double malbyteMultiplier = 1.0L; // Multiplier for bits per second (from Corrupting the kernel)
 
 enum class CorruptionLevel { C5, C10, C15, C20, C25, C50, COUNT };
 inline CorruptionLevel currentCorruption = CorruptionLevel::C5;
