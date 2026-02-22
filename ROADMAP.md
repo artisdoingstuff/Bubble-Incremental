@@ -27,7 +27,7 @@
 
 [ ] 1.1.0 - Initial introduction of Malbits, Malbytes, and Corrupting + Content drop.
 
-[ ] 1.1.1 - 
+[ ] 1.1.1 - Codebase cleanup (send help).
 
 [ ] 1.1.2 - 
 
