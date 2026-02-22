@@ -22,4 +22,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Void-INC-Windows-Phase2
-        path: ${{github.workspace}}/build/Release/Void.INC.exe
+        path: ${{github.workspace}}/build/**/*.exe
