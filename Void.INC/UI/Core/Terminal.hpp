@@ -118,13 +118,20 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
         window.draw(txt);
     };
 
-    if (!reinitialisation) drawTabButton("logic.bat", 10.f, Tab::LOGIC);
-    if (!reinitialisation) drawTabButton("hotfixes.bat", 200.f, Tab::HOTFIX);
-    if (!reinitialisation) drawTabButton("stats.bat", 390.f, Tab::STATS);
-    if (!reinitialisation && allBits >= 5000000.0L) drawTabButton("reinit.bat", 580.f, Tab::REINIT);
-	if (!reinitialisation && allBits >= 1e45L) drawTabButton("logs.bat", 770.f, Tab::LOGS);
+    if (!reinitialisation && !corrupting) {
+        drawTabButton("logic.bat", 10.f, Tab::LOGIC);
+        drawTabButton("hotfixes.bat", 200.f, Tab::HOTFIX);
+        drawTabButton("stats.bat", 390.f, Tab::STATS);
+        if (allBits >= 5000000.0L) drawTabButton("reinit.bat", 580.f, Tab::REINIT);
+        if (allBits >= 1e45L) drawTabButton("logs.bat", 770.f, Tab::LOGS);
+    }
 
-    if (reinitialisation) drawTabButton("init.bat", 10.f, Tab::INIT);
+    if (reinitialisation) {
+        drawTabButton("init.bat", 10.f, Tab::INIT);
+        if (allBits >= 1e63) drawTabButton("not_sus.bat", 200.f, Tab::CORRUPT);
+    }
+
+    if (corrupting) drawTabButton("reboot.bat", 10.f, Tab::REBOOT);
 
     if (activeTab == Tab::LOGIC) {
         drawTerminalModule(window, (currentLogicMode == Currency::BIT ? "void://hardware/logic.bat" : "void://hardware/mal_logic.bat") + getCursor(), tabProgress, [&](sf::Vector2f start) {
@@ -166,17 +173,6 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
 
                 lg.rect.setOutlineThickness(1.f);
                 window.draw(lg.rect);
-
-                if (isHovered && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && cooldown.getElapsedTime().asMilliseconds() > 200) {
-                    if (currency >= totalCost && amount > 0) {
-                        if (currentLogicMode == Currency::BIT) bits -= totalCost;
-                        else malbits -= totalCost;
-
-                        lg.ver += amount;
-                        playSFX("buy");
-                        cooldown.restart();
-                    }
-                }
 
                 backgroundDeco(window, pos, { boxW, boxH }, (currency >= totalCost));
 
@@ -232,7 +228,7 @@ inline void drawTerminalUI(sf::RenderWindow& window, long double& bits, long dou
                 b.setPosition(start + pos);
                 bool hovered = b.getGlobalBounds().contains(mousePos);
 
-                b.setFillColor(currentLogicMode == mode ? sf::Color(30, 30, 30) : sf::Color::Black);
+                b.setFillColor(currentLogicMode == mode ? sf::Color(100, 100, 100) : (hovered ? sf::Color(50, 50, 50) : sf::Color::Black));
                 b.setOutlineColor(currentLogicMode == mode ? sf::Color(243, 238, 225) : sf::Color(50, 50, 50));
                 b.setOutlineThickness(1.f);
                 window.draw(b);

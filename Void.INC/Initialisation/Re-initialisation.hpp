@@ -22,7 +22,7 @@ inline long double getPendingBytes(long double bits) {
     return std::round(((std::pow(bits / 5000000.0L, 0.85L) * (5000000.0L * bitsToBytesRate)) * byteMultiplier) * 100.0L) / 100.0L;
 }
 
-inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit, sf::Vector2f& centre) {
+inline void drawReinitialisationPopup(sf::RenderWindow& window, bool& startInit, sf::Vector2f& centre) {
     sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
     sf::Vector2f boxSize(550.f, 220.f);
 
@@ -55,32 +55,33 @@ inline void drawConfirmPopup(sf::RenderWindow& window, bool& startInit, sf::Vect
     window.draw(t);
     window.draw(c);
 
-    std::string warningMsg =
+    std::string warning =
         "WARNING: System Re-initialisation Requested.\n"
         "All current data will be wiped.\n"
         "Unforeseen consequences possible.\n"
 		"You will gain -" + format(getPendingBytes(bits), true) + " Bytes.\n\n"
         "Proceed with operation? (Y/N) > " + getCursor();
 
-    sf::Text warnText(jetBrainsMono, warningMsg, 16);
-    warnText.setOrigin({ warnText.getGlobalBounds().size.x / 2.f, warnText.getGlobalBounds().size.y / 2.f - 10.f });
-    warnText.setPosition(centre);
-    warnText.setFillColor(sf::Color(200, 200, 200));
+    sf::Text w(jetBrainsMono, warning, 16);
+    w.setOrigin({ w.getGlobalBounds().size.x / 2.f, w.getGlobalBounds().size.y / 2.f - 10.f });
+    w.setPosition(centre);
+    w.setFillColor(sf::Color(200, 200, 200));
 
-    window.draw(warnText);
+    window.draw(w);
 
     auto triggerInit = [&]() {
         startInit = true;
         bytes += getPendingBytes(bits);
+        allBytes += getPendingBytes(bits);
         reinitialise();
-        timesInitialised++;
+		timesInitialised++;
         activeTab = Tab::NONE;
-        showConfirmPopup = false;
+        showReinitialisationPopup = false;
     };
 
     auto cancelInit = [&]() {
         activeTab = Tab::NONE;
-        showConfirmPopup = false;
+        showReinitialisationPopup = false;
     };
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Y)) {

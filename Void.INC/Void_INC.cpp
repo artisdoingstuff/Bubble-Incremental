@@ -80,18 +80,24 @@ int main() {
 	malbitsText.setCharacterSize(20);
 	malbitsText.setFillColor(sf::Color(255, 50, 0));
 
+	sf::Text malbytesText(jetBrainsMono);
+	malbytesText.setCharacterSize(36);
+	malbytesText.setFillColor(sf::Color(255, 50, 50));
+
 	initLogicGates();
 	initHotfixes();
 	initDirTree();
+	initKernelTree();
 	initAudio();
 	positionTreeNodes(window.getSize());
-	load(timeEnd, bits, bytes, allBits, allClickedBits, allBytes, bitsPerSecond, hotfixMult, timesInitialised, malbits, malbytes, allMalbits, allMalbytes, timesCorrupted, currentCorruption, logicGateList, hotfixList, dirTree);
+	positionKernelNodes(window.getSize());
+	load(timeEnd, bits, bytes, allBits, allClickedBits, allBytes, bitsPerSecond, hotfixMult, timesInitialised, malbits, malbytes, allMalbits, allMalbytes, timesCorrupted, currentCorruption, logicGateList, hotfixList, dirTree, kernelTree);
 	loadOptions(renderEffects, quickStart, muteAll, muteSFX, muteAmbience);
 	offline(timeEnd, bits, allBits, bitsPerSecond, hotfixMult);
 	
 	while (window.isOpen()) {
 		if (dirTree[1].patched && patch_1Clock.getElapsedTime().asSeconds() >= 30.f && dirTree[1].disabled == 0) { // 1
-			patch_1Mult = 1.5f + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (1.7f - 1.5f)));
+			patch_1Mult = 1.5f + static_cast<float>(rand()) / (RAND_MAX / (1.7f - 1.5f));
 			patch_1Clock.restart();
 		}
 
@@ -244,6 +250,9 @@ int main() {
 			centreText(malbitsText, { clickRect.getPosition().x, clickRect.getPosition().y + 470 });
 		}
 
+		malbytesText.setString("-" + format(malbytes, true) + " Malbytes");
+		centreText(malbytesText, { clickRect.getPosition().x, clickRect.getPosition().y + 400 });
+
 		sf::RenderStates states;
 		states.blendMode = sf::BlendAdd;
 
@@ -287,7 +296,7 @@ int main() {
 				showStart = false;
 				canClick = true;
 			}
-			if (!reinitialisation && !initialisation) {
+			if (!reinitialisation && !initialisation && !corrupting) {
 				playMusic("main");
 				window.draw(bitsText);
 				window.draw(bitsPerSecondText);
@@ -307,7 +316,7 @@ int main() {
 				drawTerminalUI(window, bits, allBits, deltaTime);
 
 				if (showOffline) drawOfflineUI(window, centre);
-				if (showConfirmPopup) drawConfirmPopup(window, reinitialisation, centre);
+				if (showReinitialisationPopup) drawReinitialisationPopup(window, reinitialisation, centre);
 			}
 		}
 
@@ -321,118 +330,186 @@ int main() {
 			sf::View shakeView = window.getDefaultView();
 
 			switch (currentReinitStep) {
-			case ReinitState::VORTEX_EXPANSION: {
-				starScale += (20.f - starScale) * 0.05f;
+				case ReinitState::VORTEX_EXPANSION: {
+					starScale += (20.f - starScale) * 0.05f;
 
-				float intensity = (starScale / 20.f) * 15.f;
-				float offsetX = (std::rand() % 100 - 50) / 50.f * intensity;
-				float offsetY = (std::rand() % 100 - 50) / 50.f * intensity;
-				shakeView.move({ offsetX, offsetY });
+					float intensity = (starScale / 20.f) * 15.f;
+					float offsetX = (std::rand() % 100 - 50) / 50.f * intensity;
+					float offsetY = (std::rand() % 100 - 50) / 50.f * intensity;
+					shakeView.move({ offsetX, offsetY });
 
-				window.setView(shakeView);
-				window.draw(star.star, states);
+					window.setView(shakeView);
+					window.draw(star.star, states);
 
-				if (timer >= 0.5f) currentReinitStep = ReinitState::VORTEX_SHRINK;
-				break;
-			}
-
-			case ReinitState::VORTEX_SHRINK: {
-				starScale += (0.f - starScale) * 0.15f;
-				shakeView.move({ (std::rand() % 10 - 5) / 2.f, (std::rand() % 10 - 5) / 2.f });
-
-				window.setView(shakeView);
-				window.draw(star.star, states);
-
-				if (timer >= 0.7f) {
-					starScale = -10.f;
-					currentReinitStep = ReinitState::LOADING_BAR;
-				}
-				break;
-			}
-
-			case ReinitState::LOADING_BAR:
-				loadingProgress = (timer - 0.7f) / 5.0f;
-
-				if (loadingProgress >= 1.0f) {
-					loadingProgress = 1.0f;
-					currentReinitStep = ReinitState::DIR;
-					playMusic("directory");
+					if (timer >= 0.5f) currentReinitStep = ReinitState::VORTEX_SHRINK;
+					break;
 				}
 
-				drawLoadingUI(window, loadingProgress);
-				break;
+				case ReinitState::VORTEX_SHRINK: {
+					starScale += (0.f - starScale) * 0.15f;
+					shakeView.move({ (std::rand() % 10 - 5) / 2.f, (std::rand() % 10 - 5) / 2.f });
 
-			case ReinitState::DIR:
-				window.setView(window.getDefaultView());
-				loadingProgress = 0.0f;
-				timer = 0.0f;
-				canClickInit = true;
+					window.setView(shakeView);
+					window.draw(star.star, states);
 
-				ambienceRandom();
-
-				if (renderEffects) {
-					updateStream(window, centre, deltaTime, 1);
-					for (auto& d : dataStream) {
-						window.draw(d.bit);
+					if (timer >= 0.7f) {
+						starScale = -10.f;
+						currentReinitStep = ReinitState::LOADING_BAR;
 					}
+					break;
 				}
 
-				drawTreeLines(window);
-				drawDirTreeUI(window);
-				
-				drawTerminalUI(window, bits, allBits, deltaTime);
+				case ReinitState::LOADING_BAR:
+					loadingProgress = (timer - 0.7f) / 5.0f;
+					drawLoadingUI(window, loadingProgress);
 
-				window.draw(bytesText);
-				break;
+					if (loadingProgress >= 1.0f) {
+						loadingProgress = 1.0f;
+						currentReinitStep = ReinitState::DIR;
+						playMusic("directory");
+					}
+					break;
+
+				case ReinitState::DIR:
+					window.setView(window.getDefaultView());
+					loadingProgress = 0.0f;
+					timer = 0.0f;
+					canClickInit = true;
+
+					ambienceRandom();
+
+					if (renderEffects) {
+						updateStream(window, centre, deltaTime, 1);
+						for (auto& d : dataStream) {
+							window.draw(d.bit);
+						}
+					}
+
+					drawTreeLines(window);
+					drawDirTreeUI(window);
+
+					drawTerminalUI(window, bits, allBits, deltaTime);
+
+					if (showCorruptPopup) drawCorruptPopup(window, corrupting, centre);
+
+					window.draw(bytesText);
+					break;
 			}
 		}
 
 		if (initialisation) {
 			if (currentInitStep == InitState::IDLE) {
 				currentInitStep = InitState::LOADING_BAR;
+				currentCorruptStep = CorruptState::IDLE;
 				playMusic("loading");
-			}
 
+				loadingProgress = 0.0f;
+				timer = 0.0f;
+
+				corrupting = false;
+				canClickCorrupt = false;
+			}
 			timer += deltaTime;
 			sf::View shakeView = window.getDefaultView();
 
 			switch (currentInitStep) {
-			case InitState::LOADING_BAR: {
-				loadingProgress = timer / 3.0f;
-				drawLoadingUI(window, loadingProgress);
+				case InitState::LOADING_BAR: {
+					loadingProgress = timer / 3.0f;
+					drawLoadingUI(window, loadingProgress);
 
-				if (loadingProgress >= 1.0f) {
-					loadingProgress = 1.0f;
-					currentInitStep = InitState::VORTEX_EXPANSION;
-					starScale = 0.1f;
+					if (loadingProgress >= 1.0f) {
+						loadingProgress = 1.0f;
+						currentInitStep = InitState::VORTEX_EXPANSION;
+						starScale = 0.1f;
+					}
+					break;
 				}
-				break;
-			}
 
-			case InitState::VORTEX_EXPANSION: {
-				starScale += (1.f - starScale) * 0.1f;
+				case InitState::VORTEX_EXPANSION: {
+					starScale += (1.f - starScale) * 0.1f;
 
-				float intensity = (1.f - starScale) * 20.f;
-				float offsetX = (std::rand() % 100 - 50) / 50.f * intensity;
-				float offsetY = (std::rand() % 100 - 50) / 50.f * intensity;
-				shakeView.move({ offsetX, offsetY });
-				window.setView(shakeView);
+					float intensity = (1.f - starScale) * 20.f;
+					float offsetX = (std::rand() % 100 - 50) / 50.f * intensity;
+					float offsetY = (std::rand() % 100 - 50) / 50.f * intensity;
+					shakeView.move({ offsetX, offsetY });
+					window.setView(shakeView);
 
-				window.draw(star.star, states);
+					window.draw(star.star, states);
 
-				if (timer >= 3.5f) {
-					window.setView(window.getDefaultView());
-					loadingProgress = 0.0f;
-					timer = 0.0f;
-					canClick = true;
+					if (timer >= 3.5f) {
+						window.setView(window.getDefaultView());
+						loadingProgress = 0.0f;
+						timer = 0.0f;
+						canClick = true;
 
-					starScale = 1.f;
+						starScale = 1.f;
 
-					currentInitStep = InitState::IDLE;
-					initialisation = false;
+						currentInitStep = InitState::IDLE;
+
+						initialisation = false;
+					}
+					break;
 				}
-				break;
 			}
+		}
+
+		if (corrupting) {
+			if (currentCorruptStep == CorruptState::IDLE) {
+				currentCorruptStep = CorruptState::CORRUPT;
+				playMusic("loading");
+			}
+			timer += deltaTime;
+
+			switch (currentCorruptStep) {
+				case CorruptState::CORRUPT:
+					if (!snapshotTaken) {
+						screenSnapshot.resize(window.getSize());
+						screenSnapshot.update(window);
+						snapshotTaken = true;
+					}
+					{
+						int slices = 30;
+						float sliceH = static_cast<float>(window.getSize().y) / slices;
+
+						for (int i = 0; i < slices; ++i) {
+							sf::Sprite slice(screenSnapshot);
+							sf::IntRect area({0, static_cast<int>(i * sliceH)}, {static_cast<int>(window.getSize().x), static_cast<int>(sliceH)});
+							slice.setTextureRect(area);
+
+							float offset = (std::rand() % 100 - 50) * (timer / 2.0f);
+							slice.setPosition({ offset, i * sliceH });
+
+							if (i % 4 == 0) slice.setColor(sf::Color(255, 100, 100, 180));
+							if (i % 7 == 0) slice.setColor(sf::Color(100, 255, 255, 180));
+
+							window.draw(slice);
+						}
+					}
+
+					if (timer > 2.0f) {
+						currentCorruptStep = CorruptState::LOADING_BAR;
+						snapshotTaken = false;
+					}
+					break;
+
+				case CorruptState::LOADING_BAR:
+					loadingProgress = timer / 5.0f;
+					drawLoadingUI(window, loadingProgress);
+
+					if (loadingProgress >= 1.0f) {
+						loadingProgress = 1.0f;
+						currentCorruptStep = CorruptState::KERNEL;
+					}
+					break;
+
+				case CorruptState::KERNEL:
+					drawTerminalUI(window, bits, allBits, deltaTime);
+
+					drawKernelLines(window);
+					drawKernelUI(window);
+
+					window.draw(malbytesText);
+					break;
 			}
 		}
 		
@@ -449,7 +526,7 @@ int main() {
 		while (const std::optional gameEvent = window.pollEvent()) {
 			sf::Vector2f winSize = (sf::Vector2f)window.getSize();
 			if (gameEvent->is<sf::Event::Closed>()) {
-				save(time(nullptr), bits, bytes, allBits, allClickedBits, allBytes, bitsPerSecond, hotfixMult, timesInitialised, malbits, malbytes, allMalbits, allMalbytes, timesCorrupted, currentCorruption, logicGateList, hotfixList, dirTree);
+				save(time(nullptr), bits, bytes, allBits, allClickedBits, allBytes, bitsPerSecond, hotfixMult, timesInitialised, malbits, malbytes, allMalbits, allMalbytes, timesCorrupted, currentCorruption, logicGateList, hotfixList, dirTree, kernelTree);
 				saveOptions(renderEffects, quickStart, muteAll, muteSFX, muteAmbience);
 				versionSave(voidVersion);
 				window.close();
@@ -513,7 +590,7 @@ int main() {
 								}
 							}
 						}
-						showConfirmPopup = false;
+						showReinitialisationPopup = false;
 					}
 					else if (activeTab == Tab::HOTFIX) {
 						size_t startIdx = hotfixPage * HF_PER_PAGE;
@@ -529,18 +606,21 @@ int main() {
 								}
 							}
 						}
-						showConfirmPopup = false;
+						showReinitialisationPopup = false;
 					}
-					else if (activeTab == Tab::STATS) showConfirmPopup = false;
-					else if (activeTab == Tab::REINIT) showConfirmPopup = true;
-					else if (activeTab == Tab::LOGS) showConfirmPopup = false;
-					else if (activeTab == Tab::NONE) showConfirmPopup = false;
+					else if (activeTab == Tab::STATS) showReinitialisationPopup = false;
+					else if (activeTab == Tab::REINIT) showReinitialisationPopup = true;
+					else if (activeTab == Tab::LOGS) showReinitialisationPopup = false;
+					else if (activeTab == Tab::NONE) showReinitialisationPopup = false;
 				}
 
 				if (mouseEvent->button == sf::Mouse::Button::Left && canClickInit) {
 					if (mousePos.y > winSize.y - 60.f) {
 						if (sf::FloatRect({ 10, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
 							activeTab = (activeTab == Tab::INIT) ? Tab::NONE : Tab::INIT; playSFX("button");
+						}
+						if (sf::FloatRect({ 200, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
+							activeTab = (activeTab == Tab::CORRUPT) ? Tab::NONE : Tab::CORRUPT; playSFX("button");
 						}
 					}
 					
@@ -549,7 +629,12 @@ int main() {
 						reinitialisation = false;
 						initialisation = true;
 						canClickInit = false;
-						playSFX("button");
+						showCorruptPopup = false;
+					}
+
+					else if (activeTab == Tab::CORRUPT) {
+						canClickInit = false;
+						showCorruptPopup = true;
 					}
 
 					for (size_t i = 0; i < dirTree.size(); ++i) {
@@ -567,6 +652,33 @@ int main() {
 								if (patch.name == "Patch_0") bitsToBytesRate = 1e-6L;
 								else if (patch.name == "Patch_3_1") bitsToBytesRate = 3e-7L;
 								else if (patch.name == "Patch_6") bitsToBytesRate = 5e-7L;
+							}
+						}
+					}
+				}
+
+				if (mouseEvent->button == sf::Mouse::Button::Left && canClickCorrupt) {
+					if (mousePos.y > winSize.y - 60.f) {
+						if (sf::FloatRect({ 10, winSize.y - 50.f }, { 180, 40 }).contains(mousePos)) {
+							activeTab = (activeTab == Tab::REBOOT) ? Tab::NONE : Tab::REBOOT; playSFX("button");
+						}
+					}
+
+					if (activeTab == Tab::REBOOT) {
+						initialisation = true;
+					}
+
+					for (size_t i = 0; i < kernelTree.size(); ++i) {
+						auto& overwrites = kernelTree[i];
+
+						sf::Vector2f diff = mousePos - overwrites.pos;
+						float distanceSquared = (diff.x * diff.x) + (diff.y * diff.y);
+
+						if (overwrites.overwritten == 0 && distanceSquared <= (30.f * 30.f)) {
+							if (malbytes >= overwrites.malbytes) {
+								malbytes -= overwrites.malbytes;
+								overwrites.overwritten = 1;
+								playSFX("patched");
 							}
 						}
 					}

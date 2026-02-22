@@ -62,7 +62,7 @@ inline void drawStartUI(sf::RenderWindow& window, sf::RenderStates& states, Star
 		}
 		if (showOptions) drawOptionsUI(window, showOptions, centre);
 		if (qHover && canClickStart) {
-			save(time(nullptr), bits, bytes, allBits, allClickedBits, allBytes, bitsPerSecond, hotfixMult, timesInitialised, malbits, malbytes, allMalbits, allMalbytes, timesCorrupted, currentCorruption, logicGateList, hotfixList, dirTree);
+			save(time(nullptr), bits, bytes, allBits, allClickedBits, allBytes, bitsPerSecond, hotfixMult, timesInitialised, malbits, malbytes, allMalbits, allMalbytes, timesCorrupted, currentCorruption, logicGateList, hotfixList, dirTree, kernelTree);
 			saveOptions(renderEffects, quickStart, muteAll, muteSFX, muteAmbience);
 			playSFX("button");
 			window.close();
