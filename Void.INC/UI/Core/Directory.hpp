@@ -58,8 +58,6 @@ inline void positionTreeNodes(sf::Vector2u windowSize) {
 }
 
 inline void drawTreeLines(sf::RenderWindow& window) {
-    if (dirTree.size() < 9) return;
-
     auto drawCable = [&](int parentIdx, int childIdx, bool isOffline = false) {
         if (!dirTree[parentIdx].patched) return;
 
@@ -89,7 +87,6 @@ inline void drawTreeLines(sf::RenderWindow& window) {
 
     drawCable(0, 1); // 0 to 1
     drawCable(0, 14); // 0 to !
-    drawCable(0, 15); // 0 to @
     drawCable(0, 22); // 0 to A
 
     drawCable(1, 2); // 1 to 2
@@ -120,6 +117,7 @@ inline void drawTreeLines(sf::RenderWindow& window) {
     drawCable(17, 19, dirTree[19].disabled); // 7 to 7_2
 
     drawCable(14, 21); // ! to !!
+    drawCable(14, 15); // ! to @
 
     drawCable(22, 23); // A to B
 
@@ -134,7 +132,6 @@ inline void drawTreeLines(sf::RenderWindow& window) {
 
 inline void drawDirTreeUI(sf::RenderWindow& window) {
     drawTreeLines(window);
-
     sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
     int hoveredIdx = -1;
 
@@ -211,21 +208,21 @@ inline void drawDirTreeUI(sf::RenderWindow& window) {
         desc.setFillColor(sf::Color::White);
 
         sf::FloatRect textBounds = desc.getLocalBounds();
-        sf::RectangleShape tooltBox({ textBounds.size.x + 20.f, textBounds.size.y + 25.f });
-        tooltBox.setFillColor(sf::Color(5, 10, 5, 230));
-        tooltBox.setOutlineColor(sf::Color(100, 100, 100));
-        tooltBox.setOutlineThickness(1.f);
+        sf::RectangleShape box({ textBounds.size.x + 20.f, textBounds.size.y + 25.f });
+        box.setFillColor(sf::Color(5, 10, 5, 230));
+        box.setOutlineColor(sf::Color(100, 100, 100));
+        box.setOutlineThickness(1.f);
 
-        sf::Vector2f tooltPos = mousePos + sf::Vector2f(15.f, 15.f);
+        sf::Vector2f tPos = mousePos + sf::Vector2f(15.f, 15.f);
 
-        if (tooltPos.x + tooltBox.getSize().x > window.getSize().x) {
-            tooltPos.x -= (tooltBox.getSize().x + 20.f);
+        if (tPos.x + box.getSize().x > window.getSize().x) {
+            tPos.x -= (box.getSize().x + 20.f);
         }
 
-        tooltBox.setPosition(tooltPos);
-        desc.setPosition(tooltPos + sf::Vector2f(10.f, 5.f));
+        box.setPosition(tPos);
+        desc.setPosition(tPos + sf::Vector2f(10.f, 5.f));
 
-        window.draw(tooltBox);
+        window.draw(box);
         window.draw(desc);
     }
 }

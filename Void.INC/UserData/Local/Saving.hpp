@@ -23,7 +23,8 @@ inline void save(
 
 	std::vector<Logic>& logicGate,
 	std::vector<Hotfix>& hotfix,
-	std::vector<DirNodes>& root
+	std::vector<DirNodes>& root,
+	std::vector<KernelNodes>& kernel
 ) {
 	json saveData;
 
@@ -49,6 +50,7 @@ inline void save(
 	saveData["LOGIC"] = logicGate;
 	saveData["HOTFIX"] = hotfix;
 	saveData["ROOT"] = root;
+	saveData["KRNL"] = kernel;
 
 	std::ofstream file("save.json");
 

@@ -18,27 +18,13 @@ inline void drawLoadingUI(sf::RenderWindow& window, float actualProgress) {
         visualProgress -= 0.05f;
     }
 
-    static std::string currentStatus = "Initializing...";
-    static float lastUpdate = 0.f;
+    static std::string currentStatus = "Initialising...";
 
-    std::vector<std::string> messages = {
-        "Purging Bits...", "Realigning Star...", "Cleaning Cache...",
-        "Defragmenting Void...", "Recalculating Reality...", "Patching Void.INC.exe...",
-        "Formatting Logic...", "Flushing Memory...", "Bypassing Hotfixes...", "Destroying V-1D..."
-    };
-
-    if (actualProgress < 0.85f) {
-        if (!reinitialisation) currentStatus = "Closing Root.dir...";
-        else {
-            if (time - lastUpdate > 2.f) {
-                currentStatus = messages[std::rand() % messages.size()];
-                lastUpdate = time;
-            }
-        }
-    }
+    if (actualProgress < 0.5f && !reinitialisation) currentStatus = "Closing Root.dir...";
     else {
         if (reinitialisation) currentStatus = "Opening Root.dir...";
         if (initialisation) currentStatus = "Initialising...";
+        if (corrupting) currentStatus = "Executing not_sus.bat";
     }
 
     sf::RectangleShape bg({ width, height });

@@ -23,7 +23,8 @@ inline void load(
 
 	std::vector<Logic>& logicGate,
 	std::vector<Hotfix>& hotfix,
-	std::vector<DirNodes>& root
+	std::vector<DirNodes>& root,
+	std::vector<KernelNodes>& kernel
 ) {
 	std::ifstream file("save.json", std::ios::in);
 	if (!file.is_open()) {
@@ -59,49 +60,60 @@ inline void load(
 	bitsPerSecond = 0.0L;
 	hotfixMult = 1.0L;
 
-	std::vector<json> savedRoot = saveData["ROOT"];
-	for (const auto& item : savedRoot) {
-		for (auto& actualPatch : dirTree) {
-			if (actualPatch.name == item["n"]) {
-				actualPatch.patched = item["p"];
-			}
-		}
-	}
+	if (saveData.contains("ROOT") && saveData["ROOT"].is_array()) {
+        for (const auto& item : saveData["ROOT"]) {
+            for (auto& actualPatch : dirTree) {
+                if (item.contains("n") && actualPatch.name == item["n"]) {
+                    actualPatch.patched = item.value("p", 0);
+                }
+            }
+        }
+    }
 
-	costMult = 1.0L;
-	if (dirTree[8].patched) costMult *= 0.9f;
-	if (dirTree[11].patched) costMult *= 0.95f;
-	if (dirTree[23].patched) costMult *= 0.85f;
-	if (dirTree[31].patched) costMult *= 0.85f;
+    if (saveData.contains("KRNL") && saveData["KRNL"].is_array()) {
+        for (const auto& item : saveData["KRNL"]) {
+            for (auto& actualOverwrite : kernelTree) {
+                if (item.contains("n") && actualOverwrite.name == item["n"]) {
+                    actualOverwrite.overwritten = item.value("o", 0);
+                }
+            }
+        }
+    }
 
-	std::vector<json> savedLogicArray = saveData["LOGIC"];
-	for (const auto& item : savedLogicArray) {
-		std::string name = item["n"];
-		int ver = item["v"];
+    costMult = 1.0L;
+    if (dirTree[8].patched)  costMult *= 0.90f;
+    if (dirTree[11].patched) costMult *= 0.95f;
+    if (dirTree[23].patched) costMult *= 0.85f;
+    if (dirTree[31].patched) costMult *= 0.85f;
 
-		for (auto& lg : logicGate) {
-			if (lg.name == name) {
-				lg.ver = ver;
-				lg.currentCost = lg.baseCost * std::pow(logicGateInflation, lg.ver) * costMult;
-				bitsPerSecond += (lg.ver * lg.bps);
-				break;
-			}
-		}
-	}
+    if (saveData.contains("LOGIC") && saveData["LOGIC"].is_array()) {
+        for (const auto& item : saveData["LOGIC"]) {
+            std::string name = item.value("n", "");
+            int ver = item.value("v", 0);
 
-	std::vector<json> savedHotfixArray = saveData["HOTFIX"];
-	for (const auto& item : savedHotfixArray) {
-		std::string name = item["n"];
-		int isWritten = item["w"];
+            for (auto& lg : logicGate) {
+                if (lg.name == name) {
+                    lg.ver = ver;
+                    lg.currentCost = lg.baseCost * std::pow(logicGateInflation, lg.ver) * costMult;
+                    bitsPerSecond += (lg.ver * lg.bps);
+                    break;
+                }
+            }
+        }
+    }
 
-		for (auto& hf : hotfix) {
-			if (hf.name == name) {
-				hf.written = isWritten;
-				if (hf.written == 1) {
-					hotfixMult += hf.bitMult;
-				}
-				break;
-			}
-		}
-	}
+    if (saveData.contains("HOTFIX") && saveData["HOTFIX"].is_array()) {
+        for (const auto& item : saveData["HOTFIX"]) {
+            std::string name = item.value("n", "");
+            int isWritten = item.value("w", 0);
+
+            for (auto& hf : hotfix) {
+                if (hf.name == name) {
+                    hf.written = isWritten;
+                    if (hf.written == 1) hotfixMult += hf.bitMult;
+                    break;
+                }
+            }
+        }
+    }
 }

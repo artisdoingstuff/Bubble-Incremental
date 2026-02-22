@@ -4,11 +4,18 @@
 // Global references
 inline std::string voidVersion = "v1.0.10-release"; // Version control for the game (Updater purposes)
 
-inline bool reinitialisation = false;
-inline bool initialisation = false;
+inline sf::Texture screenSnapshot;
+inline bool snapshotTaken = false;
 
 inline bool showStart = true;
 inline bool start = false;
+
+inline bool reinitialisation = false;
+inline bool initialisation = false;
+inline bool showReinitialisationPopup = false;
+
+inline bool corrupting = false;
+inline bool showCorruptPopup = false;
 
 inline bool showOffline = false;
 
@@ -19,6 +26,12 @@ inline sf::Clock deltaClock;
 inline sf::Clock elapsedClock;
 inline sf::Clock cooldown;
 inline sf::Clock ambienceClock;
+
+enum class StartState {
+    IDLE,
+    TRANSITION
+};
+inline StartState currentStartStep = StartState::IDLE;
 
 enum class ReinitState {
     IDLE,
@@ -34,28 +47,36 @@ enum class InitState {
     LOADING_BAR,
 	VORTEX_EXPANSION
 };
-inline InitState currentInitStep = InitState::IDLE;;
+inline InitState currentInitStep = InitState::IDLE;
 
-enum class StartState {
+enum class CorruptState {
     IDLE,
-    TRANSITION
+    CORRUPT,
+    LOADING_BAR,
+    KERNEL
 };
-inline StartState currentStartStep = StartState::IDLE;
+inline CorruptState currentCorruptStep = CorruptState::IDLE;
 
 // Click states
 inline bool canClickStart = true; // Start menu only
 inline bool canClick = false; // Pre-reinitialisation
 inline bool canClickInit = false; // Post-initialisation
 inline bool canClickOptions = false; // Options menu only
+inline bool canClickCorrupt = false; // Post-corruption
 
 enum class Tab {
     NONE,
+    // Main screen Tabs
     LOGIC,
     HOTFIX,
     STATS,
     INIT,
+    LOGS,
+    // Directory Tabs
     REINIT,
-    LOGS
+    CORRUPT,
+    // Root Tabs
+    REBOOT
 };
 inline Tab activeTab = Tab::NONE;
 inline float tabProgress = 0.f;
@@ -97,7 +118,6 @@ inline float patch_1Mult = 1.0f; // Multiplier from Patch_1
 inline long double patch_3_2Mult = 1.0L; // Multiplier from Patch_3_2
 inline long double patch_7_2Mult = 1.0L; // Multiplier from Patch_7_2
 inline long double patch_C_4Mult = 1.0L; // Multiplier from Patch_C_4
-inline bool showConfirmPopup = false;
 
 inline long double malbits = 0.0L; // Malicious bits (for 1.1 use)
 inline long double allMalbits = 0.0L; // Total accumulated malbits
@@ -107,7 +127,6 @@ inline long double accOfflineMalbits = 0.0L; // Malbits accumulated while offlin
 inline long double malbytes = 0.0L; // Malicious bytes (for 1.1 use)
 inline long double allMalbytes = 0.0L; // Total accumulated malbytes
 inline long long timesCorrupted = 0LL; // Corrupting is "Transcending"
-inline long double allToMalbytesRate = 1e-33L; // Rate of bits to malbits conversion
 inline long double malbyteMultiplier = 1.0L; // Multiplier for bits per second (from Corrupting the kernel)
 
 enum class CorruptionLevel { C5, C10, C15, C20, C25, C50, COUNT };
