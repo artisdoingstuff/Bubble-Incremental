@@ -119,6 +119,8 @@ inline long double patch_3_2Mult = 1.0L; // Multiplier from Patch_3_2
 inline long double patch_7_2Mult = 1.0L; // Multiplier from Patch_7_2
 inline long double patch_C_4Mult = 1.0L; // Multiplier from Patch_C_4
 
+inline long double mal_synergyMult = 1.0L; // Multiplier from MAL_SYNERGY
+
 inline long double malbits = 0.0L; // Malicious bits (for 1.1 use)
 inline long double allMalbits = 0.0L; // Total accumulated malbits
 inline long double bitsToMalbitsRate = 1e-33L; // Rate of bits to malbits conversion

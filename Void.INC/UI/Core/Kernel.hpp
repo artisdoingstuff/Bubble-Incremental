@@ -11,9 +11,8 @@ inline void positionKernelNodes(sf::Vector2u windowSize) {
 
     kernelTree[1].pos = kernelTree[0].pos + sf::Vector2f(-180.f, -180.f);
     kernelTree[2].pos = kernelTree[0].pos + sf::Vector2f(180.f, -180.f);
-
-    kernelTree[3].pos = kernelTree[1].pos + sf::Vector2f(0.f, -180.f);
-    kernelTree[4].pos = kernelTree[2].pos + sf::Vector2f(0.f, -180.f);
+    kernelTree[3].pos = kernelTree[0].pos + sf::Vector2f(-180.f, 180.f);
+    kernelTree[4].pos = kernelTree[0].pos + sf::Vector2f(180.f, 180.f);
 
     for (auto& node : kernelTree) {
         node.nodeCircle.setPosition(node.pos);
@@ -43,8 +42,8 @@ inline void drawKernelLines(sf::RenderWindow& window) {
 
     drawCable(0, 1);
     drawCable(0, 2);
-    drawCable(1, 3);
-    drawCable(2, 4);
+    drawCable(0, 3);
+    drawCable(0, 4);
 }
 
 inline void drawKernelUI(sf::RenderWindow& window) {
