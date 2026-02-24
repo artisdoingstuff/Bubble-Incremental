@@ -58,9 +58,9 @@ inline void initDirTree() {
     dirTree.emplace_back("Patch_2_2", "x4.5 BPS.", 350.0L);
     dirTree.emplace_back("Patch_6_1", "Mid-level Hardware Refactor (+20% per Logic Gate @ 10,000% Cap), but x0.8 Bytes.", 7.5e6L);
     dirTree.emplace_back("Patch_C_1", "x175,000 BPS and x1.1 clicks.", 1e22L);
-    dirTree.emplace_back("Patch_C_2", "x950,000 BPS and x2 Bytes", 1e45L);
-    dirTree.emplace_back("Patch_C_3", "x5.5M BPS and 15% discount", 1e63L);
-    dirTree.emplace_back("Patch_C_4", "Byte-scaled loop (+10% per Byte @ 1B% Cap)", 1e75L);
+    dirTree.emplace_back("Patch_C_2", "x950,000 BPS and x2 Bytes.", 1e45L);
+    dirTree.emplace_back("Patch_C_3", "x5.5M BPS and 15% discount.", 1e63L);
+    dirTree.emplace_back("Patch_C_4", "Byte-scaled loop (+10% per Byte @ 1B% Cap).", 1e75L);
 }
 
 inline void to_json(json& j, const DirNodes& p) {

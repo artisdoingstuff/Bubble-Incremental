@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Corruption/Corruption.hpp"
 #include "../Misc/Globals/GIncludes.hpp"
 #include "../Hardware/Logic.hpp"
 #include "../Initialisation/Initialisation.hpp"
@@ -36,6 +37,7 @@ inline void offline(time_t timestamp, long double& bits, long double& allBits, l
         }
 
         long double dirMult = 1.0L;
+	    long double malbitMult = 1.0L;
 
         if (dirTree[2].patched) dirMult *= 3.0L; // 2
         if (dirTree[3].patched) dirMult *= 5.5L; // 3_1
@@ -72,10 +74,12 @@ inline void offline(time_t timestamp, long double& bits, long double& allBits, l
         if (dirTree[19].patched && dirTree[19].disabled == 0) { // 7_2
             dirMult *= std::min(patch7_2Mult, 3500.0L); patch3_2Mult = 1.0L;
         }
-        if (dirTree[4].patched && dirTree[4].disabled == 0) dirMult *= std::min(patch3_2Mult, 100.0L); // 3_2
+        if (dirTree[1].patched && dirTree[4].disabled == 0) dirMult *= std::min(patch3_2Mult, 100.0L); // 3_2
+
+	    if (kernelTree[4].overwritten) malbitMult *= 2.0L;
 		
 		long double offlineBits = (elapsedTime * eBPS * hotfixMult * dirMult) * offlineMultiplier;
-	    long double offlineMalbits = (std::pow(offlineBits / 1e30L, 0.5L)) * (1.f - offlineMultiplier);
+	    long double offlineMalbits = ((std::pow(offlineBits / 1e30L, 0.5L)) * (1.f - offlineMultiplier)) * malbitMult;
 
 	    bits += offlineBits; allBits += offlineBits; accOfflineBits += offlineBits;
 	    if (offlineBits >= 1e30L) malbits += offlineMalbits; allMalbits += offlineMalbits; accOfflineMalbits += offlineMalbits;

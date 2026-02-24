@@ -227,7 +227,12 @@ int main() {
 			dirTree[19].disabled = 1;
 		}
 
-		long double realBitsPerSecond = (bitsPerSecond * hotfixMult * bitMultiplier * patch_1Mult) * patch_3_2Mult * patch_7_2Mult * patch_C_4Mult + bitsFromPatch;
+		if (kernelTree[1].overwritten) {
+			long double mal_synergyMult = 1.0L + (malbits * 0.01);
+			mal_synergyMult = std::min(mal_synergyMult, 100000000.0L);
+		}
+
+		long double realBitsPerSecond = (bitsPerSecond * hotfixMult * bitMultiplier * patch_1Mult) * patch_3_2Mult * patch_7_2Mult * patch_C_4Mult * mal_synergyMult + bitsFromPatch;
 		float deltaTime = deltaClock.restart().asSeconds();
 		float elapsedTime = elapsedClock.getElapsedTime().asSeconds();
 

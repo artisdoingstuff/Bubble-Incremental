@@ -12,7 +12,7 @@ inline void reinitialise() {
 
     for (auto& hf : hotfixList) hf.written = 0;
 
-    bits = 0.0L;
+    bits = kernelTree[4].overwritten ? 1e9L : 0.0L;
     bitsPerSecond = 0.0L;
     hotfixMult = 1.0L;
 }
@@ -73,7 +73,7 @@ inline void drawReinitialisationPopup(sf::RenderWindow& window, bool& startInit,
         startInit = true;
         bytes += getPendingBytes(bits);
         allBytes += getPendingBytes(bits);
-        reinitialise();
+        if (!kernelTree[2].overwritten) reinitialise();
 		timesInitialised++;
         activeTab = Tab::NONE;
         showReinitialisationPopup = false;

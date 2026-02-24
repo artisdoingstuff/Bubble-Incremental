@@ -7,6 +7,35 @@
 #include "../Initialisation/Initialisation.hpp"
 #include "../UI/Core/Directory.hpp"
 
+struct KernelNodes {
+    std::string name;
+    std::string desc;
+    long double malbytes;
+    int overwritten = 0;
+    sf::CircleShape nodeCircle;
+    sf::Vector2f pos;
+
+    KernelNodes(std::string n, std::string t, long double c)
+        : name(n), desc(t), malbytes(c) {
+        nodeCircle.setRadius(25.f);
+        nodeCircle.setOrigin({ 25.f, 25.f });
+        nodeCircle.setPosition(pos);
+        nodeCircle.setFillColor(sf::Color(20, 5, 5));
+        nodeCircle.setOutlineColor(sf::Color(255, 50, 50));
+        nodeCircle.setOutlineThickness(2.f);
+    }
+};
+
+inline std::vector<KernelNodes> kernelTree;
+
+inline void initKernelTree() {
+    kernelTree.emplace_back("SYS_BREACH", "Gain full access to the kernel.", 10000.0L);
+    kernelTree.emplace_back("NULL_THREAD", "x2 Malbits.", 50000L);
+    kernelTree.emplace_back("DATA_SCAVENGER", "Logic don't reset on Reinitialisation.", 1e6L);
+    kernelTree.emplace_back("MAL_SYNERGY", "Malbit-scaled loop (+1% per Malbit @ 10B% Cap.", 5e12L);
+    kernelTree.emplace_back("INIT_OVERRIDE", "Start with 1B Bits.", 25000.0L);
+}
+
 inline void corrupt(sf::RenderWindow& window) {
     logicGateList.clear();
     hotfixList.clear();
@@ -18,7 +47,7 @@ inline void corrupt(sf::RenderWindow& window) {
 
 	positionTreeNodes(window.getSize());
 
-    bits = 0.0L;
+    bits = kernelTree[4].overwritten ? 1e9L : 0.0L;
     bytes = 0.0L;
     malbits = 0.0L;
 
@@ -109,37 +138,6 @@ inline void drawCorruptPopup(sf::RenderWindow& window, bool& startCorrupt, sf::V
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::N) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) || sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && c.getGlobalBounds().contains(mousePos)) {
         cancelCorrupt(); playSFX("button");
     }
-}
-
-struct KernelNodes {
-    std::string name;
-    std::string desc;
-    long double malbytes;
-    int overwritten = 0;
-    sf::CircleShape nodeCircle;
-    sf::Vector2f pos;
-
-    KernelNodes(std::string n, std::string t, long double c)
-        : name(n), desc(t), malbytes(c) {
-        nodeCircle.setRadius(25.f);
-        nodeCircle.setOrigin({ 25.f, 25.f });
-        nodeCircle.setPosition(pos);
-        nodeCircle.setFillColor(sf::Color(20, 5, 5));
-        nodeCircle.setOutlineColor(sf::Color(255, 50, 50));
-        nodeCircle.setOutlineThickness(2.f);
-    }
-};
-
-inline std::vector<KernelNodes> kernelTree;
-
-inline void initKernelTree() {
-    kernelTree.emplace_back("A", "...", 1.0L);
-
-    kernelTree.emplace_back("B", "...", 5.0L);
-    kernelTree.emplace_back("C", "...", 12.0L);
-
-    kernelTree.emplace_back("D", "...", 50.0L);
-    kernelTree.emplace_back("E", "...", 150.0L);
 }
 
 inline void to_json(json& j, const KernelNodes& kn) {
