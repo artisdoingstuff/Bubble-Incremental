@@ -25,19 +25,19 @@
 
 ### Development Roadmap for 1.1.0 - 1.1.8
 
-[ ] 1.1.0 - Initial introduction of Malbits, Malbytes, and Corrupting + Content drop.
+[/] 1.1.0 - Initial introduction of Malbits, Malbytes, and Corrupting + Content drop. (Released 24th of February, 2026 @ [Releases](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.1.0-release))
 
-[ ] 1.1.1 - Codebase cleanup (send help).
+[ ] 1.1.1 - Codebase cleanup (send help) + Content Drop.
 
-[ ] 1.1.2 - 
+[ ] 1.1.2 - Stats.bat and Hotfix.bat redesign.
 
-[ ] 1.1.3 - 
+[ ] 1.1.3 - Design freedom.
 
 [ ] 1.1.4 - Design freedom + Content drop.
 
-[ ] 1.1.5 - 
+[ ] 1.1.5 - Directory redesign (layout) + [Wave 1](link when budget gets increased /s).
 
-[ ] 1.1.6 - 
+[ ] 1.1.6 -
 
 [ ] 1.1.7 - 
 
