@@ -10,11 +10,11 @@ inline void reinitialise() {
             lg.ver = 0;
             lg.currentCost = lg.baseCost * costMult;
         }
+        bitsPerSecond = 0.0L;
     }
     for (auto& hf : hotfixList) hf.written = 0;
 
     bits = kernelTree[4].overwritten ? 1e9L : 0.0L;
-    bitsPerSecond = 0.0L;
     hotfixMult = 1.0L;
 }
 
