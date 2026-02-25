@@ -40,7 +40,7 @@
 > #### Releases
 > | Phase 1 (1.0) | Phase 2 (1.1) |
 > |---|---|
-> |**[v1.0.0: 05.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.0-release)**|
+> |**[v1.0.0: 05.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.0-release)**| **[v1.1.0: 24.02](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.1.0-release)**|
 > |**[v1.0.1: 09.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.1-release)**|
 > |**[v1.0.2: 11.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.2-release)**|
 > |**[v1.0.3: 14.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.3-release)**|
