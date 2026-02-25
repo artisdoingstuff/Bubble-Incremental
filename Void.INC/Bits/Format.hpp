@@ -3,16 +3,14 @@
 #include "../Misc/Globals/GIncludes.hpp"
 
 inline std::string format(long double bits, bool forceDecimals = false) {
-   if (bits < 1000.L) {
-       if (forceDecimals) {
-           std::ostringstream oss;
-           oss << std::fixed << std::setprecision(2) << bits;
-           return oss.str();
-       }
-       else return std::to_string(static_cast<long> (bits));
+    if (bits < 1000.L) {
+        std::ostringstream oss;
+        if (forceDecimals) oss << std::fixed << std::setprecision(2) << bits;
+        else oss << static_cast<long>(bits);
+        return oss.str();
     }
 
-    const std::string bitsSuffix[] = {
+    static const std::string suffix[] = {
         "", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc",
         "Ud", "Dd", "Td", "Qad", "Qid", "Sxd", "Spd", "Ocd", "Nvd", "Vg",
         "Uvg", "Dvg", "Tvg", "Qavg", "Qivg", "Sxvg", "Spvg", "Ocvg", "Nvvg", "Tg",
@@ -23,12 +21,9 @@ inline std::string format(long double bits, bool forceDecimals = false) {
     };
 
     int tier = static_cast<int>(std::floor(std::log10(bits) / 3));
-
-    if (tier >= std::size(bitsSuffix)) return "Infinity";
-
-    long double val = bits / std::pow(10, tier * 3);
+    if (tier >= static_cast<int>(std::size(suffix))) return "Infinity";
 
     std::ostringstream oss;
-    oss << std::fixed << std::setprecision(2) << val << bitsSuffix[tier];
+    oss << std::fixed << std::setprecision(2) << (bits / std::pow(10, tier * 3)) << suffix[tier];
     return oss.str();
 }

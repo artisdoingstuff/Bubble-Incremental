@@ -12,6 +12,56 @@ inline void centreText(sf::Text& text, sf::Vector2f targetPos) {
     text.setPosition(targetPos);
 }
 
+inline void drawTabBox(sf::RenderWindow& window, sf::Vector2f mousePos, sf::Vector2f boxSize, std::string text, std::function<void()> trigger = nullptr, std::function<void()> cancel = nullptr) {
+    sf::Vector2f centre(window.getSize().x / 2.f, window.getSize().y / 2.f);
+
+    sf::RectangleShape overlay(sf::Vector2f(window.getSize()));
+    overlay.setFillColor(sf::Color(0, 0, 0, 180));
+    window.draw(overlay);
+
+    sf::RectangleShape box(boxSize);
+    box.setOrigin(boxSize / 2.f);
+    box.setPosition(centre);
+    box.setFillColor(sf::Color(10, 10, 10));
+    box.setOutlineColor(sf::Color(50, 50, 50));
+    box.setOutlineThickness(1);
+
+    sf::RectangleShape titleBar({ boxSize.x, 30.f });
+    titleBar.setOrigin({ boxSize.x / 2.f, 0.f });
+    titleBar.setPosition({ centre.x, centre.y - (boxSize.y / 2.f) });
+    titleBar.setFillColor(sf::Color(40, 40, 40));
+
+    sf::Text t(jetBrainsMono, "> void://root/not_sus.bat" + getCursor(), 14);
+    t.setPosition({ titleBar.getPosition().x - (boxSize.x / 2.f) + 10.f, titleBar.getPosition().y + 5.f });
+    t.setFillColor(sf::Color(243, 238, 225));
+
+    sf::Text c(jetBrainsMono, "- X", 14);
+    c.setPosition({ titleBar.getPosition().x + ((boxSize.x / 2.f) * 0.85f), titleBar.getPosition().y + 5.f });
+    c.setFillColor(sf::Color(243, 238, 225));
+
+    window.draw(box);
+    window.draw(titleBar);
+    window.draw(t);
+    window.draw(c);
+
+    std::string body =
+         text + getCursor();
+
+    sf::Text w(jetBrainsMono, body, 16);
+    w.setOrigin({ w.getGlobalBounds().size.x / 2.f, w.getGlobalBounds().size.y / 2.f - 10.f });
+    w.setPosition(centre);
+    w.setFillColor(sf::Color(200, 200, 200));
+
+    window.draw(w);
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Y)) {
+        trigger(); playSFX("button");
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::N) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) || sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && c.getGlobalBounds().contains(mousePos)) {
+        cancel(); playSFX("button");
+    }
+}
+
 template<typename T>
 T lerp(T a, T b, T t) {
     return a + t * (b - a);

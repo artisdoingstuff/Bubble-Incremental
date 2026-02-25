@@ -2,54 +2,35 @@
 
 #include "../../Misc/Globals/GIncludes.hpp"
 
-inline void saveOptions(
-	bool renderEffects,
-	bool quickStart,
-	bool muteAll,
-	bool muteSFX,
-	bool muteAmbience
-) {
+inline void saveOptions(bool renderEffects, bool quickStart, bool muteAll, bool muteSFX, bool muteAmbience) {
 	std::ofstream file("options.txt");
+	if (!file.is_open()) { std::cerr << "Unable to open options.txt.\n"; return; }
 
-	if (file.is_open()) {
-		file << (renderEffects ? "1" : "0") << std::endl;
-		file << (quickStart ? "1" : "0") << std::endl;
-		file << (muteAll ? "1" : "0") << std::endl;
-		file << (muteSFX ? "1" : "0") << std::endl;
-		file << (muteAmbience ? "1" : "0") << std::endl;
-		file.close();
-	}
-	if (!file.is_open()) std::cerr << "Unable to open options.txt." << std::endl;
+	file << renderEffects << '\n'
+		 << quickStart << '\n'
+		 << muteAll << '\n'
+		 << muteSFX << '\n'
+		 << muteAmbience << '\n';
 }
 
-inline void loadOptions(
-	bool& renderEffects,
-	bool& quickStart,
-	bool& muteAll,
-	bool& muteSFX,
-	bool& muteAmbience
-) {
+inline void loadOptions(bool& renderEffects, bool& quickStart, bool& muteAll, bool& muteSFX, bool& muteAmbience) {
 	std::ifstream file("options.txt");
 	if (!file.is_open()) {
-		std::cerr << "No options file found." << std::endl;
+		std::cerr << "No options file found.\n";
 		renderEffects = true;
-		quickStart = false;
-		muteAll = false;
-		muteSFX = false;
-		muteAmbience = false;
+		quickStart = muteAll = muteSFX = muteAmbience = false;
 		return;
 	}
 
-	std::string line;
-	std::getline(file, line);
-	renderEffects = (line == "1");
-	std::getline(file, line);
-	quickStart = (line == "1");
-	std::getline(file, line);
-	muteAll = (line == "1");
-	std::getline(file, line);
-	muteSFX = (line == "1");
-	std::getline(file, line);
-	muteAmbience = (line == "1");
-	file.close();
+	auto readBool = [&](bool& b) {
+		std::string line;
+		std::getline(file, line);
+		b = (line == "1");
+	};
+
+	readBool(renderEffects);
+	readBool(quickStart);
+	readBool(muteAll);
+	readBool(muteSFX);
+	readBool(muteAmbience);
 }

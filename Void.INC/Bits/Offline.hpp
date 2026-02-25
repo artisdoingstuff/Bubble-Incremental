@@ -11,6 +11,7 @@ inline void offline(time_t timestamp, long double& bits, long double& allBits, l
     long double patch3_2Mult = 1.0L + (bytes * 0.002L);
     long double patch7_2Mult = 1.0L + (bytes * 0.01L);
     long double patchC_4Mult = 1.0L + (bytes * 0.1L);
+    long double mal_synergyMult = 1.0L + (malbits * 0.01L);
 
 	if (elapsedTime > 0) {
         long double eBPS = 0.L;
@@ -76,6 +77,7 @@ inline void offline(time_t timestamp, long double& bits, long double& allBits, l
         }
         if (dirTree[1].patched && dirTree[4].disabled == 0) dirMult *= std::min(patch3_2Mult, 100.0L); // 3_2
 
+	    if (kernelTree[1].overwritten) dirMult *= std::min(mal_synergyMult, 100000000.0L);
 	    if (kernelTree[4].overwritten) malbitMult *= 2.0L;
 		
 		long double offlineBits = (elapsedTime * eBPS * hotfixMult * dirMult) * offlineMultiplier;
