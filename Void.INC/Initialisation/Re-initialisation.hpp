@@ -14,7 +14,7 @@ inline void reinitialise() {
     }
     for (auto& hf : hotfixList) hf.written = 0;
 
-    bits = kernelTree[4].overwritten ? 1e9L : 0.0L;
+    bits = kernelTree[4].overwritten ? 1e8L : 0.0L;
     hotfixMult = 1.0L;
 }
 
@@ -24,17 +24,18 @@ inline long double getPendingBytes(long double bits) {
 }
 
 inline void drawReinitialisationPopup(sf::RenderWindow& window, bool& startInit, sf::Vector2f& centre) {
-    sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
     sf::Vector2f boxSize(550.f, 220.f);
 
     long double pending = getPendingBytes(bits);
 
     auto triggerInit = [&]() {
         startInit = true;
+
         bytes += pending;
         allBytes += pending;
         reinitialise();
-		timesInitialised++;
+        timesInitialised++;
+
         activeTab = Tab::NONE;
         showReinitialisationPopup = false;
     };
@@ -44,10 +45,14 @@ inline void drawReinitialisationPopup(sf::RenderWindow& window, bool& startInit,
         showReinitialisationPopup = false;
     };
 
-    drawTabBox(window, mousePos, boxSize,
-        "WARNING: System Re-initialisation Requested.\n"
+    std::string text = "WARNING: System Re-initialisation Requested.\n"
         "All current data will be wiped.\n"
         "Unforeseen consequences possible.\n"
-        "You will gain -" + format(getPendingBytes(bits), true) + " Bytes.\n\n"
-        "Proceed with operation? (Y/N) > ", triggerInit, cancelInit);
+        "You will gain -" + format(pending, true) + " Bytes.\n\n"
+        "Proceed with operation? (Y/N) > ";
+
+    drawTabBox(window, boxSize, "> void://root/not_sus.bat", text, [&](sf::Vector2f startPos) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Y)) { triggerInit(); playSFX("button"); }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::N)) { cancelInit(); playSFX("button"); }
+    }, [&](){ cancelInit(); });
 }

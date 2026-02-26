@@ -1,5 +1,6 @@
 #pragma once
 #include "GIncludes.hpp"
+#include "GVariables.hpp"
 
 inline sf::Clock cursorClock;
 inline std::string getCursor() {
@@ -12,8 +13,9 @@ inline void centreText(sf::Text& text, sf::Vector2f targetPos) {
     text.setPosition(targetPos);
 }
 
-inline void drawTabBox(sf::RenderWindow& window, sf::Vector2f mousePos, sf::Vector2f boxSize, std::string text, std::function<void()> trigger = nullptr, std::function<void()> cancel = nullptr) {
+inline void drawTabBox(sf::RenderWindow& window, sf::Vector2f boxSize, std::string title, std::string text, std::function<void(sf::Vector2f innerPos)> drawContent, std::function<void()> onClose) {
     sf::Vector2f centre(window.getSize().x / 2.f, window.getSize().y / 2.f);
+    sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
 
     sf::RectangleShape overlay(sf::Vector2f(window.getSize()));
     overlay.setFillColor(sf::Color(0, 0, 0, 180));
@@ -31,7 +33,7 @@ inline void drawTabBox(sf::RenderWindow& window, sf::Vector2f mousePos, sf::Vect
     titleBar.setPosition({ centre.x, centre.y - (boxSize.y / 2.f) });
     titleBar.setFillColor(sf::Color(40, 40, 40));
 
-    sf::Text t(jetBrainsMono, "> void://root/not_sus.bat" + getCursor(), 14);
+    sf::Text t(jetBrainsMono, title + getCursor(), 14);
     t.setPosition({ titleBar.getPosition().x - (boxSize.x / 2.f) + 10.f, titleBar.getPosition().y + 5.f });
     t.setFillColor(sf::Color(243, 238, 225));
 
@@ -45,7 +47,7 @@ inline void drawTabBox(sf::RenderWindow& window, sf::Vector2f mousePos, sf::Vect
     window.draw(c);
 
     std::string body =
-         text + getCursor();
+        text + getCursor();
 
     sf::Text w(jetBrainsMono, body, 16);
     w.setOrigin({ w.getGlobalBounds().size.x / 2.f, w.getGlobalBounds().size.y / 2.f - 10.f });
@@ -54,12 +56,13 @@ inline void drawTabBox(sf::RenderWindow& window, sf::Vector2f mousePos, sf::Vect
 
     window.draw(w);
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Y)) {
-        trigger(); playSFX("button");
-    }
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::N) || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) || sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && c.getGlobalBounds().contains(mousePos)) {
-        cancel(); playSFX("button");
-    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Escape) || (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && c.getGlobalBounds().contains(mousePos) && cooldown.getElapsedTime().asMilliseconds() > 200)) {
+        onClose();
+        playSFX("button");
+        cooldown.restart();
+       }
+
+    drawContent({ titleBar.getPosition().x - (boxSize.x / 2.f) + 20.f, titleBar.getPosition().y + 45.f });
 }
 
 template<typename T>

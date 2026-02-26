@@ -103,6 +103,7 @@ inline long double accOfflineBits = 0.0L; // Bits accumulated while offline
 inline long double hotfixMult = 1.0L; // Multiplier for hotfixes (upgrades)
 
 inline long double bitsPerSecond = 0.0L; // Current bits per second
+inline long double realBitsPerSecond = 0.0L;
 inline long double bitsPerClick = 1.0L; // Bits per click
 inline long double clickMultiplier = 1.0L; // Click multiplier
 

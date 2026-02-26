@@ -246,7 +246,32 @@ inline void initHotfixes() {
         "scsi_scan_fix", "nvme_poll_v1", "pcie_link_v2", "sata_ahci_opt", "usb_xhci_v1",
         "hid_report_fix", "ps2_legacy_v1", "serio_raw_v1", "tty_flush_v1", "pty_alloc_fix",
         "iommu_map_v1", "vfio_dma_v1", "vga_arb_fix", "fb_con_v1", "backlight_v1",
-        "edid_read_fix", "dp_aux_tweak", "hdcp_hand_v1", "cec_bus_fix", "pwm_fan_v1"
+        "edid_read_fix", "dp_aux_tweak", "hdcp_hand_v1", "cec_bus_fix", "pwm_fan_v1",
+        // 1.1.1 hotfixes (120)
+        "thermal_zone_v1", "fan_curve_fix", "volt_rail_v1", "amp_limit_fix", "watt_calc_v1",
+        "batt_cycle_v1", "charge_rate_v1", "temp_throt_v2", "soc_idle_fix", "p_state_v1",
+        "c_state_v2", "turbo_boost_v1", "speedstep_v1", "cool_n_quiet", "power_gate_v1",
+        "sleep_state_v1", "wake_event_v1", "rtc_alarm_v1", "hpet_timer_v2", "pit_gate_fix",
+        "pic_mask_v1", "apic_flat_v1", "io_apic_v1", "msi_irq_v2", "lpc_bus_fix",
+        "smbus_poll_v1", "spd_read_v1", "dimm_slot_fix", "vrm_phase_v1", "choke_coil_v1",
+        "cap_leak_fix", "pcb_trace_v1", "signal_integ", "emi_shield_v1", "ground_loop",
+        "db9_serial_v1", "rs232_flow", "rs485_half", "can_bus_v1", "lin_bus_v1",
+        "flexray_sync", "most_bus_fix", "lvds_link_v1", "mipi_csi_v1", "mipi_dsi_v1",
+        "hdmi_cec_v2", "spdif_out_v1", "i2s_audio_v1", "dac_range_v1", "adc_scale_v1",
+        "op_amp_tweak", "low_pass_v1", "high_pass_v1", "band_stop_v1", "notch_filt_v1",
+        "fir_filter_v1", "iir_filter_v1", "fft_bin_v1", "dct_coeff_v1", "huffman_fix",
+        "lzw_table_v1", "zlib_level", "lz4_stream", "zstd_dict_v1", "brotli_opt",
+        "tar_header_v1", "cpio_magic", "iso_9660_fix", "udf_mount_v1", "hfs_plus_v1",
+        "apfs_trim_v1", "f2fs_gc_v1", "btrfs_scrub", "reiserfs_v1", "jfs_log_fix",
+        "xfs_quota_v2", "fat32_lfn_v1", "exfat_v2_fix", "vfat_sync_v1", "dos_mbr_fix",
+        "mbr_boot_v2", "grub_stage_v1", "lilo_map_v1", "syslinux_v1", "uefi_var_v1",
+        "nvram_env_v1", "efivars_v1", "shim_lock_v1", "mok_key_fix", "secure_v3_fix",
+        "attest_v1", "tpm_pcr_v1", "rsa_pss_v1", "ecdsa_v2_fix", "chacha20_v1",
+        "poly1305_v1", "argon2i_v1", "argon2d_v1", "argon2id_v1", "scrypt_v1",
+        "pbkdf2_v2", "hmac_sha_v2", "mac_tag_fix", "iv_reuse_fix", "nonce_v2_fix",
+        "pad_oracle_v1", "beast_mit_v1", "poodle_fix_v1", "logjam_patch", "freak_fix_v1",
+        "heartbleed_v2", "shellshock_v2", "dirtycow_v2", "spectre_v3", "meltdown_v3",
+        "l1tf_v3", "mds_v3", "ridl_fix_v1", "fallout_fix", "cross_talk_v1"
     };
 
     long double currentBits = 100.0L;

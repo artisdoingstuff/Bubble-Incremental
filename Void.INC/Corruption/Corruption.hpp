@@ -34,7 +34,7 @@ inline void initKernelTree() {
     kernelTree.emplace_back("NULL_THREAD", "x2 Malbits.", 50000L);
     kernelTree.emplace_back("DATA_SCAVENGER", "Logic don't reset on Reinitialisation.", 1e6L);
     kernelTree.emplace_back("MAL_SYNERGY", "Malbit-scaled loop (+1% per Malbit @ 10B% Cap.", 5e12L);
-    kernelTree.emplace_back("INIT_OVERRIDE", "Start with 1B Bits.", 25000.0L);
+    kernelTree.emplace_back("INIT_OVERRIDE", "Start with 100M Bits.", 25000.0L);
 }
 
 inline void corrupt(sf::RenderWindow& window) {
@@ -48,7 +48,7 @@ inline void corrupt(sf::RenderWindow& window) {
 
 	positionTreeNodes(window.getSize());
 
-    bits = kernelTree[4].overwritten ? 1e9L : 0.0L;
+    bits = kernelTree[4].overwritten ? 1e8L : 0.0L;
     bytes = 0.0L;
     malbits = 0.0L;
 
@@ -68,7 +68,6 @@ inline long double getPendingMalbytes(long double bytes, long double malbits) {
 }
 
 inline void drawCorruptPopup(sf::RenderWindow& window, bool& startCorrupt, sf::Vector2f& centre) {
-    sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
     sf::Vector2f boxSize(600.f, 220.f);
 
     long double pending = getPendingMalbytes(bytes, malbits);
@@ -76,13 +75,16 @@ inline void drawCorruptPopup(sf::RenderWindow& window, bool& startCorrupt, sf::V
     auto triggerCorrupt = [&]() {
         startCorrupt = true;
         reinitialisation = false;
-		initialisation = false;
+		    initialisation = false;
+
         malbytes += pending;
         allMalbytes += pending;
         corrupt(window);
         timesCorrupted++;
+
         activeTab = Tab::NONE;
 		currentReinitStep = ReinitState::IDLE;
+
         showCorruptPopup = false;
         canClickCorrupt = true;
     };
@@ -92,12 +94,16 @@ inline void drawCorruptPopup(sf::RenderWindow& window, bool& startCorrupt, sf::V
         showCorruptPopup = false;
     };
 
-    drawTabBox(window, mousePos, boxSize,
-        "WARNING: Unknown File Publisher.\n"
+    std::string text = "WARNING: Unknown File Publisher.\n"
         "Unverified contents detected. Execution may result in\n"
         "EXTREME CONSEQUENCES. Terminal system integrity at risk.\n\n"
-        + format(bytes) + " Bytes will get corrupted into -" + format(getPendingMalbytes(bytes, malbits), true) + " Malbytes.\n\n"
-        "Proceed with operation? (Y/N) > ", triggerCorrupt, cancelCorrupt);
+        + format(bytes) + " Bytes will get corrupted into -" + format(pending, true) + " Malbytes.\n\n"
+        "Proceed with operation? (Y/N) > ";
+
+    drawTabBox(window, boxSize, "> void://root/not_sus.bat", text, [&](sf::Vector2f startPos) {
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Y)) { triggerCorrupt(); playSFX("button"); }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::N)) { cancelCorrupt(); playSFX("button"); }
+    }, [&](){ cancelCorrupt(); });
 }
 
 inline void to_json(json& j, const KernelNodes& kn) {

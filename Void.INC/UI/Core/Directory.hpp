@@ -1,11 +1,12 @@
 #pragma once
 
 #include "../../Misc/Globals/GIncludes.hpp"
+#include "../../Bits/Format.hpp"
 
 inline void positionTreeNodes(sf::Vector2u windowSize) {
     if (dirTree.size() < 9) return;
 
-    sf::Vector2f startPos(windowSize.x / 4.f, windowSize.y / 2.f + 60.f);  
+    sf::Vector2f startPos(windowSize.x / 4.f, windowSize.y / 2.f + 60.f);
     dirTree[0].pos = startPos; // 0
 
     dirTree[1].pos = dirTree[0].pos + sf::Vector2f(180.f, 0.f); // 1
@@ -154,7 +155,7 @@ inline void drawDirTreeUI(sf::RenderWindow& window) {
         if (idx == 31) return dirTree[30].patched; // Unlock C_3
         if (idx == 32) return dirTree[31].patched; // Unlock C_4
         return false;
-        };
+    };
 
     for (int i = 0; i < dirTree.size(); ++i) {
         std::string basic = dirTree[i].name + ".sys";

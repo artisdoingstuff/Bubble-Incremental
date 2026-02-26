@@ -6,67 +6,48 @@
 #include "../../UserData/Local/Options.hpp"
 
 inline void drawStartUI(sf::RenderWindow& window, sf::RenderStates& states, Star& star, float et, float dt, sf::Vector2f& sPos, sf::Vector2f& centre) {
-	sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+    sf::Vector2f mousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+    float h = window.getSize().y;
 
-	sf::Text t(jetBrainsMono, "Void.INC", 124);
-	t.setPosition({ 80, window.getSize().y * 0.05f });
-	t.setFillColor(sf::Color(243, 238, 225));
+    auto t  = [&](const std::string& str, int size, sf::Vector2f pos, sf::Color col = {243, 238, 225}) {
+        sf::Text t(jetBrainsMono, str, size);
+        t.setPosition(pos);
+        t.setFillColor(col);
+        if (!start) window.draw(t);
+        return t.getGlobalBounds().contains(mousePos);
+    };
 
-	sf::Text v(jetBrainsMono, voidVersion, 28);
-	v.setPosition({ 120, window.getSize().y * 0.15f + 20.f });
-	v.setFillColor(sf::Color(140, 140, 140));
+    t("Void.INC", 124, {80, h * 0.05f});
+    t(voidVersion, 28, {120, h * 0.15f + 20.f}, {140, 140, 140});
 
-	sf::Text e(jetBrainsMono, "Enter", 48);
-	e.setPosition({ 80, window.getSize().y * 0.5f });
-	bool pHover = e.getGlobalBounds().contains(mousePos);
-	e.setFillColor(pHover ? sf::Color(200, 200, 30) : sf::Color(243, 238, 225));
+    bool pHover = t("Enter", 48, {80, h * 0.5f}, sf::Color(243, 238, 225));
+    bool oHover = t("Options", 48, {80, h * 0.6f}, sf::Color(243, 238, 225));
+    bool qHover = t("Quit", 48, {80, h * 0.7f}, sf::Color(243, 238, 225));
 
-	sf::Text o(jetBrainsMono, "Options", 48);
-	o.setPosition({ 80, window.getSize().y * 0.6f });
-	bool oHover = o.getGlobalBounds().contains(mousePos);
-	o.setFillColor(oHover ? sf::Color(200, 200, 30) : sf::Color(243, 238, 225));
+    if (pHover) t("Enter", 48, {80, h * 0.5f}, {200, 200, 30});
+    if (oHover) t("Options", 48, {80, h * 0.6f}, {200, 200, 30});
+    if (qHover) t("Quit", 48, {80, h * 0.7f}, {200, 200, 30});
 
-	sf::Text q(jetBrainsMono, "Quit", 48);
-	q.setPosition({ 80, window.getSize().y * 0.7f });
-	bool qHover = q.getGlobalBounds().contains(mousePos);
-	q.setFillColor(qHover ? sf::Color(200, 200, 30) : sf::Color(243, 238, 225));
+    updateStar(star, sPos, et, 1.f, allBits);
+    window.draw(star.star, states);
 
-	updateStar(star, sPos, et, 1.f, allBits);
-	window.draw(star.star, states);
-	
-	if (renderEffects) {
-		updateStream(window, sPos, dt, 2);
-		for (auto& d : dataStream) {
-			window.draw(d.bit);
-		}
-	}
+    if (renderEffects) {
+        updateStream(window, sPos, dt, 2);
+        for (auto& d : dataStream) window.draw(d.bit);
+    }
 
-	if (!start) {
-		window.draw(t);
-		window.draw(v);
-		window.draw(e);
-		window.draw(o);
-		window.draw(q);
-	}
-
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && cooldown.getElapsedTime().asMilliseconds() > 200) {
-		if (pHover && canClickStart) {
-			start = true;
-			playSFX("button");
-		}
-		if (oHover && canClickStart) {
-			showOptions = true;
-			canClickStart = false;
-			canClickOptions = true;
-			playSFX("button");
-		}
-		if (showOptions) drawOptionsUI(window, showOptions, centre);
-		if (qHover && canClickStart) {
-			save(time(nullptr), bits, bytes, allBits, allClickedBits, allBytes, bitsPerSecond, hotfixMult, timesInitialised, malbits, malbytes, allMalbits, allMalbytes, timesCorrupted, currentCorruption, logicGateList, hotfixList, dirTree, kernelTree);
-			saveOptions(renderEffects, quickStart, muteAll, muteSFX, muteAmbience);
-			playSFX("button");
-			window.close();
-		}
-		cooldown.restart();
-	}
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && cooldown.getElapsedTime().asMilliseconds() > 200) {
+        if (canClickStart) {
+            if (pHover) { start = true; playSFX("button"); }
+            if (oHover) { showOptions = true; canClickStart = false; canClickOptions = true; playSFX("button"); }
+            if (qHover) {
+                save(time(nullptr), bits, bytes, allBits, allClickedBits, allBytes, bitsPerSecond, hotfixMult, timesInitialised, malbits, malbytes, allMalbits, allMalbytes, timesCorrupted, currentCorruption, logicGateList, hotfixList, dirTree, kernelTree);
+                saveOptions(renderEffects, quickStart, muteAll, muteSFX, muteAmbience);
+                playSFX("button");
+                window.close();
+            }
+        }
+        if (showOptions) drawOptionsUI(window, showOptions, centre);
+        cooldown.restart();
+    }
 }
