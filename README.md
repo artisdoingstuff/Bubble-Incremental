@@ -1,10 +1,10 @@
-# Void.INC
+# Void.INC | U-01-A
 
 > ### Subject: Welcome to **Void Incorporated**, _Applicant #928_.
 >
 > We hope you’ll enjoy your stay with us throughout the duration of your stay.
 >
-> Your job is simple: keep everything _stable_, profit our company by ridding _bits_ of data from the system, and if anything goes _wrong_ or if you need more _power_? _Re-initialise_ the program and start over.
+> Your job is simple: keep the **Star** _stable_, _monitor_ the **Star** as it continues to _consume_ and _harvest_ bits from the _void_, and if anything goes _wrong_? _Re-initialise_ and start over.
 >
 > There aren’t any consequences for your actions… _or at least that’s what we’ll tell you_. But let’s ignore the technicalities for now, shall we?
 
@@ -33,4 +33,21 @@
 > #### System Requirements
 > Void.INC recommends at least a toaster with a screen.
 > <br>
-> _<2MB of disk space & <50MB of memory._
+> _<6MB of disk space & <50MB of memory._
+
+<br>
+
+> #### Releases
+> | Phase 1 (1.0) | Phase 2 (1.1) |
+> |---|---|
+> |**[v1.0.0: 05.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.0-release)**| **[v1.1.0: 24.02](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.1.0-release)**|
+> |**[v1.0.1: 09.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.1-release)**|
+> |**[v1.0.2: 11.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.2-release)**|
+> |**[v1.0.3: 14.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.3-release)**|
+> |**[v1.0.4: 15.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.4-release)**|
+> |**[v1.0.5: 16.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.5-release)**|
+> |**[v1.0.6: 17.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.6-release)**|
+> |**[v1.0.7: 26.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.7-release)**|
+> |**[v1.0.8: 27.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.8-release)**|
+> |**[v1.0.9: 30.01](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.9-release)**|
+> |**[v1.0.10: 01.02](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.0.10-release)**|

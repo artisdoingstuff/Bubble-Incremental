@@ -75,7 +75,7 @@ inline void drawCorruptPopup(sf::RenderWindow& window, bool& startCorrupt, sf::V
     auto triggerCorrupt = [&]() {
         startCorrupt = true;
         reinitialisation = false;
-		initialisation = false;
+		    initialisation = false;
 
         malbytes += pending;
         allMalbytes += pending;
