@@ -2,7 +2,7 @@
 #include "GIncludes.hpp"
 
 // Global references
-inline std::string voidVersion = "v1.1.0-release"; // Version control for the game (Updater purposes)
+inline std::string voidVersion = "v1.1.1-release"; // Version control for the game (Updater purposes)
 
 inline sf::Texture screenSnapshot;
 inline bool snapshotTaken = false;
