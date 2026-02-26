@@ -25,9 +25,9 @@ struct Logic {
 };
 
 inline std::vector<Logic> logicGateList;
-inline float logicGateHeight = 70.f;
-inline float logicGateSpacing = 10.f;
-inline float uiWidth = 350.f;
+inline const float lgWidth = 350.f;
+inline const float lgHeight = 70.f;
+inline const float lgSpacing = 10.f;
 
 inline void initLogicGates() {
     // 1.0.0 Standard
@@ -85,13 +85,13 @@ inline void initLogicGates() {
 
 inline void updateLogicGateUI(sf::RenderWindow& window, long double allBits) {
     const float margin = 40.f;
-    float startX = window.getSize().x - uiWidth - margin;
+    float startX = window.getSize().x - lgWidth - margin;
     float startY = 105.f;
 
     int visibleCount = 0;
     for (size_t i = 0; i < logicGateList.size(); ++i) {
         if (logicGateList[i].ver > 0 || allBits >= logicGateList[i].baseCost) {
-            float yPos = startY + (static_cast<float>(visibleCount) * (logicGateHeight + logicGateSpacing));
+            float yPos = startY + (static_cast<float>(visibleCount) * (lgHeight + lgSpacing));
             logicGateList[i].rect.setPosition({ startX, yPos });
             visibleCount++;
         }

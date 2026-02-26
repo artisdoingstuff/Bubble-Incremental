@@ -7,81 +7,74 @@
 #include "../Misc/Globals/GVariables.hpp"
 
 inline void offline(time_t timestamp, long double& bits, long double& allBits, long double bitsPerSecond, long double hotfixMult) {
-	time_t elapsedTime = time(nullptr) - timestamp;
-    long double patch3_2Mult = 1.0L + (bytes * 0.002L);
-    long double patch7_2Mult = 1.0L + (bytes * 0.01L);
-    long double patchC_4Mult = 1.0L + (bytes * 0.1L);
+    time_t elapsedTime = time(nullptr) - timestamp;
+    if (elapsedTime <= 0) return;
 
-	if (elapsedTime > 0) {
-        long double eBPS = 0.L;
-        for (size_t i = 0; i < logicGateList.size(); ++i) {
-            long double indivMult = 1.0L;
-            if (i < 7) {
-                if (dirTree[21].patched) { // !!
-                    logicGateList[i].bps = 0.L;
-                }
+    long double eBPS = 0.L;
+    for (size_t i = 0; i < logicGateList.size(); ++i) {
+        if (i < 2 && dirTree[5].patched) continue;
+        if (i < 4 && dirTree[15].patched) continue;
+        if (i < 7 && dirTree[21].patched) continue;
 
-                else if (dirTree[6].patched) { // 4_2
-                    indivMult = 1.0L + (logicGateList[i].ver * 0.05L);
-                    if (indivMult > 50.0L) indivMult = 50.0L;
-                }
-            }
+        long double indivMult = 1.0L;
+        if (i < 7 && dirTree[6].patched) indivMult = std::min(1.0L + (logicGateList[i].ver * 0.05L), 50.0L);
+        if (i >= 6 && dirTree[28].patched) indivMult = std::min(1.0L + (logicGateList[i].ver * 0.2L), 100.0L);
 
-            else if (i >= 7 && i < 14) {
-                if (dirTree[28].patched) { // 6_1
-                    indivMult = 1.0L + (logicGateList[i].ver * 0.2L);
-                    if (indivMult > 100.0L) indivMult = 100.0L;
-                }
-            }
-            eBPS += (logicGateList[i].bps * logicGateList[i].ver) * indivMult;
-        }
+        eBPS += (logicGateList[i].bps * logicGateList[i].ver) * indivMult;
+    }
 
-        long double dirMult = 1.0L;
-	    long double malbitMult = 1.0L;
+    long double dirMult = 1.0L;
+    const std::vector<std::pair<int, long double>> staticPatches = {
+        {2, 3.0L},      // 2
+        {3, 5.5L},      // 3_1
+        {5, 12.0L},     // 4_1
+        {7, 50.0L},     // 5_1
+        {8, 100.0L},    // 5_2
+        {9, 4.0L},      // 3
+        {10, 8.0L},     // 4
+        {11, 35.0L},    // 5
+        {14, 60.0L},    // !
+        {15, 999.0L},   // @
+        {16, 250.0L},   // 6
+        {17, 450.0L},   // 7
+        {18, 600.0L},   // 7_1
+        {20, 3.5L},     // 2_1
+        {21, 6500.0L},  // !!
+        {22, 22500.0L}, // A
+        {24, 85000.0L}, // C
+        {26, 400.0L},   // 6_2
+        {27, 4.5L},     // 2_2
+        {29, 175000.0L},// C_1
+        {30, 950000.0L},// C_2
+        {31, 5500000.0L}// C_3
+    };
 
-        if (dirTree[2].patched) dirMult *= 3.0L; // 2
-        if (dirTree[3].patched) dirMult *= 5.5L; // 3_1
-        if (dirTree[5].patched) dirMult *= 12.0L; // 4_1
-        if (dirTree[7].patched) { // 5_1
-            dirMult *= 50.0L;
-        }
-		if (dirTree[8].patched) dirMult *= 100.0L; // 5_2
-        if (dirTree[9].patched) dirMult *= 4.0L; // 3
-        if (dirTree[10].patched) dirMult *= 8.0L; // 4
-        if (dirTree[11].patched) dirMult *= 35.0L; // 5
-        if (dirTree[14].patched) dirMult *= 60.0L; // !
-        if (dirTree[15].patched) dirMult *= 999.0L; // @
-        if (dirTree[16].patched) dirMult *= 250.0L; // 6
-        if (dirTree[17].patched) dirMult *= 450.0L; // 7
-        if (dirTree[18].patched) { // 7_1
-            dirMult *= 600.0L;
-        }
-        if (dirTree[20].patched) dirMult *= 3.5L; // 2_1
-        if (dirTree[21].patched) dirMult *= 6500.0L; // !!
-        if (dirTree[22].patched) dirMult *= 22500.0L; // A
-        if (dirTree[24].patched) dirMult *= 85000.0L; // C
-        if (dirTree[26].patched) dirMult *= 400.0L; // 6_2
-        if (dirTree[27].patched) dirMult *= 4.5L; // 2_2
-        if (dirTree[29].patched) dirMult *= 175000.0L; // C_1
-        if (dirTree[30].patched) dirMult *= 950000.0L; // C_2
-        if (dirTree[31].patched) dirMult *= 5500000.0L; // C_3
-        if (dirTree[32].patched) { // C_4
-            dirMult *= std::min(patchC_4Mult, 10000000.0L); patch7_2Mult = 1.0L;
-        }
+    for (const auto& [idx, mult] : staticPatches) {
+        if (dirTree[idx].patched) dirMult *= mult;
+    }
 
-        if (dirTree[1].patched && dirTree[1].disabled == 0) dirMult *= 1.6L; // 1
-        if (dirTree[12].patched && dirTree[12].disabled == 0) dirMult *= 1.5L; // 1_1
-        if (dirTree[19].patched && dirTree[19].disabled == 0) { // 7_2
-            dirMult *= std::min(patch7_2Mult, 3500.0L); patch3_2Mult = 1.0L;
-        }
-        if (dirTree[1].patched && dirTree[4].disabled == 0) dirMult *= std::min(patch3_2Mult, 100.0L); // 3_2
+    long double dynamicMult = 1.0L;
+    if (dirTree[32].patched) {
+        dynamicMult = std::min(1.0L + (bytes * 0.1L), 10000000.0L);
+    }
+    else if (dirTree[19].patched && !dirTree[19].disabled) {
+        dynamicMult = std::min(1.0L + (bytes * 0.01L), 3500.0L);
+    }
+    else if (dirTree[4].patched && !dirTree[4].disabled) {
+        dynamicMult = std::min(1.0L + (bytes * 0.002L), 100.0L);
+    }
 
-	    if (kernelTree[4].overwritten) malbitMult *= 2.0L;
-		
-		long double offlineBits = (elapsedTime * eBPS * hotfixMult * dirMult) * offlineMultiplier;
-	    long double offlineMalbits = ((std::pow(offlineBits / 1e30L, 0.5L)) * (1.f - offlineMultiplier)) * malbitMult;
+    if (dirTree[1].patched && !dirTree[1].disabled) dirMult *= 1.6L * 1.65L; // Base 1.6x + Avg 1.65x patch_1Mult boost
+    if (dirTree[12].patched && !dirTree[12].disabled) dirMult *= 1.5L;
+    if (kernelTree[1].overwritten) dirMult *= std::min(1.0L + (malbits * 0.01L), 100000000.0L);
 
-	    bits += offlineBits; allBits += offlineBits; accOfflineBits += offlineBits;
-	    if (offlineBits >= 1e30L) malbits += offlineMalbits; allMalbits += offlineMalbits; accOfflineMalbits += offlineMalbits;
-	}
+    long double offlineBits = (elapsedTime * eBPS * hotfixMult * dirMult * dynamicMult) * offlineMultiplier;
+
+    long double malbitMult = kernelTree[4].overwritten ? 2.0L : 1.0L;
+    long double offlineMalbits = (std::sqrt(offlineBits / 1e30L) * (1.f - offlineMultiplier)) * malbitMult;
+
+    bits += offlineBits; allBits += offlineBits; accOfflineBits += offlineBits;
+    if (offlineBits >= 1e30L) {
+        malbits += offlineMalbits; allMalbits += offlineMalbits; accOfflineMalbits += offlineMalbits;
+    }
 }

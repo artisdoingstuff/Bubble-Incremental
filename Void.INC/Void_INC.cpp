@@ -5,6 +5,7 @@
 
 #include "Bits/Format.hpp"
 #include "Bits/Offline.hpp"
+#include "Bits/Update.hpp"
 
 #include "Corruption/Corruption.hpp"
 
@@ -96,147 +97,10 @@ int main() {
 	offline(timeEnd, bits, allBits, bitsPerSecond, hotfixMult);
 	
 	while (window.isOpen()) {
-		if (dirTree[1].patched && patch_1Clock.getElapsedTime().asSeconds() >= 30.f && dirTree[1].disabled == 0) { // 1
-			patch_1Mult = 1.5f + static_cast<float>(rand()) / (RAND_MAX / (1.7f - 1.5f));
-			patch_1Clock.restart();
-		}
-
-		bitsToBytesRate = 1e-8L;
-		if (dirTree[0].patched) bitsToBytesRate = 1e-6L; // 0
-
-		bitMultiplier = 1.0L;
-		patch_3_2Mult = 1.0L;
-		patch_7_2Mult = 1.0L;
-		clickMultiplier = 1.0L;
-		bitsPerClick = 1.0L;
-		costMult = 1.0f;
-		byteMultiplier = 1.0f;
-
-		if (dirTree[2].patched) { // 2
-			bitMultiplier *= 3.0L; clickMultiplier *= 2.0L;
-		}
-		if (dirTree[3].patched) { // 3_1
-			bitMultiplier *= 5.5L; bitsToBytesRate = 3e-7L;
-		}
-		if (dirTree[4].patched && dirTree[4].disabled == 0) { // 3_2
-			long double patch3_2Mult = 1.0L + (bytes * 0.002L);
-			patch_3_2Mult = std::min(patch3_2Mult, 100.0L);
-		}
-		if (dirTree[5].patched) { // 4_1
-			bitMultiplier *= 12.0L; clickMultiplier *= 3.0L;
-			for (int i = 0; i < 2; ++i) {
-				logicGateList[i].bps = 0.L;
-			}
-		}
-		if (dirTree[6].patched) { // 4_2
-			bitsPerSecond = 0.L;
-			for (size_t i = 0; i < logicGateList.size(); ++i) {
-				long double indivMult = 1.0L;
-				if (i < 7) {
-					indivMult = 1.0L + (static_cast<long double>(logicGateList[i].ver) * 0.05L);
-					if (indivMult > 50.0L) indivMult = 50.0L;
-				}
-
-				bitsPerSecond += (logicGateList[i].bps * logicGateList[i].ver) * indivMult;
-			}
-		}
-		if (dirTree[7].patched) { // 5_1
-			bitMultiplier *= 50.0L; byteMultiplier *= 1.5f;
-			dirTree[1].disabled = 1; dirTree[12].disabled = 1; dirTree[13].disabled = 1;
-		}
-		if (dirTree[8].patched) { // 5_2
-			bitMultiplier *= 100.0L; clickMultiplier *= 5.0L; costMult *= 0.9f;
-		}
-		if (dirTree[9].patched) bitMultiplier *= 4.0L; // 3
-		if (dirTree[10].patched) { // 4
-			bitMultiplier *= 8.0L; clickMultiplier *= 2.0L;
-		}
-		if (dirTree[11].patched) { // 5
-			bitMultiplier *= 35.0L; costMult *= 0.95f;
-		}
-		if (dirTree[12].patched && dirTree[12].disabled == 0) bitMultiplier *= 1.5L; // 1_1
-		if (dirTree[13].patched && dirTree[13].disabled == 0) clickMultiplier *= 1.5L; // 1_2
-		if (dirTree[14].patched) bitMultiplier *= 60.0L; clickMultiplier *= 0.8L; byteMultiplier *= 1.75f; // !
-		if (dirTree[15].patched) { // @
-			bitMultiplier *= 999.0L; clickMultiplier *= 0.5L;
-			for (int i = 0; i < 4; ++i) {
-				logicGateList[i].bps = 0.L;
-			}
-		}
-		if (dirTree[16].patched) { // 6
-			bitMultiplier *= 250.0L; bitsToBytesRate = 5e-7L;
-		}
-		if (dirTree[17].patched) { // 7
-			bitMultiplier *= 450.0L; bitsPerClick += 9.0L;
-		}
-		if (dirTree[18].patched) { // 7_1
-			bitMultiplier *= 600.0L; clickMultiplier *= 0.4L;  dirTree[4].disabled = 1;
-		}
-		if (dirTree[19].patched && dirTree[19].disabled == 0) { // 7_2
-			long double patch7_2Mult = 1.0L + (bytes * 0.01L);
-			patch_7_2Mult = std::min(patch7_2Mult, 3500.0L);
-			patch_3_2Mult = 1.0L;
-		}
-		if (dirTree[20].patched) { // 2_1
-			bitMultiplier *= 3.5L;
-		}
-		if (dirTree[21].patched) { // !!
-			bitMultiplier *= 6500.0L;  bitsFromPatch = 5000.0L;
-			for (int i = 0; i < 7; ++i) {
-				logicGateList[i].bps = 0.L;
-			}
-		}
-		if (dirTree[22].patched) bitMultiplier *= 22500.0L; // A
-		if (dirTree[23].patched) costMult *= 0.85f; // B
-		if (dirTree[24].patched) bitMultiplier *= 85000.0L; // C
-		if (dirTree[25].patched) { // B_1
-			byteMultiplier *= 4.0L; clickMultiplier *= 0.1L; bitsPerClick -= 5.0L;
-		}
-		if (dirTree[26].patched) { // 6_2
-			bitMultiplier *= 400.0L; byteMultiplier *= 2.0L;
-		}
-		if (dirTree[27].patched) { // 2_2
-			bitMultiplier *= 4.5L;
-		}
-		if (dirTree[28].patched) { // 6_1
-			bitsPerSecond = 0.L;
-			for (size_t i = 6; i < logicGateList.size(); ++i) {
-				long double indivMult = 1.0L;
-				if (i < 14) {
-					indivMult = 1.0L + (static_cast<long double>(logicGateList[i].ver) * 0.2L);
-					if (indivMult > 100.0L) indivMult = 100.0L;
-				}
-
-				bitsPerSecond += (logicGateList[i].bps * logicGateList[i].ver) * indivMult;
-			}
-			byteMultiplier *= 0.8f;
-		}
-		if (dirTree[29].patched) { // C_1
-			bitMultiplier *= 175000.0L; clickMultiplier *= 1.1L;
-		}
-		if (dirTree[30].patched) { // C_2
-			bitMultiplier *= 950000.0L; byteMultiplier *= 2.0L;
-		}
-		if (dirTree[31].patched) { // C_3
-			bitMultiplier *= 5500000.0L; costMult *= 0.85f;
-		}
-		if (dirTree[32].patched) { // C_4
-			long double patchC_4Mult = 1.0L + (bytes * 0.1L);
-			patch_C_4Mult = std::min(patchC_4Mult, 10000000.0L);
-			patch_7_2Mult = 1.0L;
-			dirTree[19].disabled = 1;
-		}
-
-		if (kernelTree[1].overwritten) {
-			long double mal_synergyMult = 1.0L + (malbits * 0.01);
-			mal_synergyMult = std::min(mal_synergyMult, 100000000.0L);
-		}
-
-		long double realBitsPerSecond = (bitsPerSecond * hotfixMult * bitMultiplier * patch_1Mult) * patch_3_2Mult * patch_7_2Mult * patch_C_4Mult * mal_synergyMult + bitsFromPatch;
 		float deltaTime = deltaClock.restart().asSeconds();
 		float elapsedTime = elapsedClock.getElapsedTime().asSeconds();
 
-		bits += realBitsPerSecond * deltaTime; allBits += realBitsPerSecond * deltaTime;
+		updateBits(deltaTime);
 
 		starScale += (1.f - starScale) * 0.1f;
 		updateStar(star, centre, elapsedTime, starScale, allBits);
