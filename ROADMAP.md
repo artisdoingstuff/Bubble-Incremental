@@ -29,7 +29,7 @@
 
 [/] 1.1.1 - Codebase cleanup (send help) + Content Drop. (Released 26th of February, 2026 @ [Releases](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.1.1-release))
 
-[/] 1.1.2 - stats.bat and hotfixes.bat redesign.
+[/] 1.1.2 - stats.bat and hotfixes.bat redesign. (Released 3rd of March, 2026 @ [Releases](https://github.com/artdoesstuff/Void.INC/releases/tag/v1.1.2-release))
 
 [ ] 1.1.3 - Design freedom.
 
