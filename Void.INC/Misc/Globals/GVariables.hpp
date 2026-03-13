@@ -26,6 +26,7 @@ inline sf::Clock deltaClock;
 inline sf::Clock elapsedClock;
 inline sf::Clock cooldown;
 inline sf::Clock ambienceClock;
+inline sf::Clock sessionClock;
 
 enum class StartState {
     IDLE,
