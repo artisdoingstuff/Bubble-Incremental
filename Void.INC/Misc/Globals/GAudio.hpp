@@ -23,7 +23,7 @@ inline void initAudio() {
         {"menu", "Assets/Audio/Music/menu.ogg"},
         {"main", "Assets/Audio/Music/main.ogg"},
         {"directory", "Assets/Audio/Music/directory.ogg"},
-        // {"kernel", "Assets/Audio/Music/kernel.ogg"},
+        {"kernel", "Assets/Audio/Music/kernel.ogg"},
         // On a technicality, just for loading screens
         {"loading", "Assets/Audio/Ambience/white_noise.ogg"}
     };

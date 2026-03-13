@@ -51,7 +51,6 @@ int main() {
 	clickRect.setPosition(centre);
 	clickRect.setOutlineColor(sf::Color::Black);
 	clickRect.setOutlineThickness(5);
-	sf::Vector2f clickAreaSize = clickRect.getSize();
 
 	Star star;
 	star.star = sf::VertexArray(sf::PrimitiveType::LineStrip, 4000);
@@ -61,13 +60,24 @@ int main() {
 
 	sf::VertexArray lines(sf::PrimitiveType::Lines);
 	for (int i = 0; i < window.getSize().y; i += 4) {
-		lines.append(sf::Vertex{ sf::Vector2f(0.f, (float)i), sf::Color(255, 255, 255, 40) });
-		lines.append(sf::Vertex{ sf::Vector2f((float)window.getSize().x, (float)i), sf::Color(255, 255, 255, 40)});
+		lines.append(sf::Vertex{ sf::Vector2f(0.f, static_cast<float>(i)), sf::Color(255, 255, 255, 40) });
+		lines.append(sf::Vertex{ sf::Vector2f(static_cast<float>(window.getSize().x), static_cast<float>(i)), sf::Color(255, 255, 255, 40)});
 	}
+
+	sf::Text sessionText(jetBrainsMono, "", 14);
+	sessionText.setFillColor(sf::Color(100, 100, 100, 150));
 
 	sf::Text bitsText(jetBrainsMono);
 	bitsText.setCharacterSize(36);
 	bitsText.setFillColor(sf::Color(243,238,225));
+
+	sf::Text bitsTextRed(jetBrainsMono);
+	bitsTextRed.setCharacterSize(36);
+	bitsTextRed.setFillColor(sf::Color(255, 0, 0, 100));
+
+	sf::Text bitsTextCyan(jetBrainsMono);
+	bitsTextCyan.setCharacterSize(36);
+	bitsTextCyan.setFillColor(sf::Color(0, 255, 255, 100));
 
 	sf::Text bitsPerSecondText(jetBrainsMono);
 	bitsPerSecondText.setCharacterSize(20);
@@ -106,7 +116,8 @@ int main() {
 		updateStar(star, centre, elapsedTime, starScale, allBits);
 
 		bitsText.setString("-" + format(bits) + " Bits");
-		centreText(bitsText, { clickRect.getPosition().x, clickRect.getPosition().y + 400 });
+		sf::Vector2f bitPos(clickRect.getPosition().x, clickRect.getPosition().y + 400);
+		centreText(bitsText, bitPos);
 
 		bitsPerSecondText.setString("-" + format(realBitsPerSecond, true) + " Bits per Second");
 		centreText(bitsPerSecondText, { clickRect.getPosition().x, clickRect.getPosition().y + 440 });
@@ -122,12 +133,28 @@ int main() {
 		malbytesText.setString("-" + format(malbytes, true) + " Malbytes");
 		centreText(malbytesText, { clickRect.getPosition().x, clickRect.getPosition().y + 400 });
 
+		bool isCorrupted = std::any_of(kernelTree.begin(), kernelTree.end(), [](const auto& n) { return n.overwritten; });
+
 		sf::RenderStates states;
 		states.blendMode = sf::BlendAdd;
 
 		updateVolume();
 
 		window.clear(sf::Color::Black);
+
+		sf::Time sessionTime = sessionClock.getElapsedTime();
+		int seconds = static_cast<int>(sessionTime.asSeconds());
+		int hh = seconds / 3600;
+		int mm = (seconds % 3600) / 60;
+		int ss = seconds % 60;
+
+		char timerBuf[16];
+		sprintf(timerBuf, "[ %02d:%02d:%02d ]", hh, mm, ss);
+
+		sessionText.setString(timerBuf);
+
+		sessionText.setPosition({ window.getSize().x - 120.f, window.getSize().y - 30.f });
+		window.draw(sessionText);
 
 		if (showStart && !quickStart) {
 			playMusic("menu");
@@ -167,6 +194,14 @@ int main() {
 			}
 			if (!reinitialisation && !initialisation && !corrupting) {
 				playMusic("main");
+				if (isCorrupted && renderEffects) {
+					float offset = 2.0f + std::sin(elapsedTime * 10.f) * 2.0f;
+					if (std::rand() % 20 == 0) offset *= 3.0f;
+					centreText(bitsTextRed, bitPos - sf::Vector2f(offset, 0.f));
+					centreText(bitsTextCyan, bitPos + sf::Vector2f(offset, 0.f));
+					window.draw(bitsTextRed);
+					window.draw(bitsTextCyan);
+				}
 				window.draw(bitsText);
 				window.draw(bitsPerSecondText);
 				window.draw(malbitsText);
@@ -368,6 +403,7 @@ int main() {
 					if (loadingProgress >= 1.0f) {
 						loadingProgress = 1.0f;
 						currentCorruptStep = CorruptState::KERNEL;
+						playMusic("kernel");
 					}
 					break;
 
@@ -389,6 +425,20 @@ int main() {
 		if (showOptions) drawOptionsUI(window, showOptions, centre);
 
 		window.draw(lines);
+
+		if (isCorrupted && renderEffects && (std::rand() % 500 == 0)) {
+			sf::View glitchView = window.getDefaultView();
+
+			float intensity = 5.0f;
+			glitchView.move({ (std::rand() % 10 - 5.f) * intensity, (std::rand() % 4 - 2.f) * intensity });
+
+			sf::RectangleShape glitchOverlay(sf::Vector2f(window.getSize()));
+			glitchOverlay.setFillColor(sf::Color(255, 0, 0, 40));
+
+			window.setView(glitchView);
+			window.draw(glitchOverlay);
+		}
+		else window.setView(window.getDefaultView());
 
 		window.display();
 
